@@ -12,18 +12,29 @@ pwm = GPIO.PWM(port, 100)
 
 pwm.start(0)
 
+dc = 0
+done = False
+print("ramping up")
+while not done:
+    dc += 1
+    pwm.ChangeDutyCycle(dc)
+    if (dc == 100):
+        done = True
+    time.sleep(0.1)
 
-try:
-  print("started")
-  while True:
-    for dc in range(0, 100):
-      pwm.ChangeDutyCycle(dc)
-      time.sleep(0.02)
-    for dc in range(99, 0, -1):
-      pwm.ChangeDutyCycle(dc)
-      time.sleep(0.02)
-except KeyboardInterrupt:
-  print("stopped")
+print("holding steady")
+time.sleep(5)
 
+done = False
+print("ramping down")
+while not done:
+    dc -= 1
+    pwm.ChangeDutyCycle(dc)
+    if (dc == 0):
+        done = True
+
+    time.sleep(0.1)
+
+print("stopped")
 pwm.stop()
 GPIO.cleanup() 
