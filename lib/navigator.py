@@ -31,15 +31,17 @@ class Journey():
     def nextStage(self):
         print("from", self.section["name"])
         if "next" not in self.section:
-            points = self.section
-            if points["id"][0] == "p":
-                if self.direction == "forward":
-                    choice = points["param"] if "param" in points else self.selectPoints()
-                    print("choosing", choice)
+            if self.section["id"][0] == "p":
+                points = self.section
+                previousSection = self._find(self.history[-2][0])
+                approachingToDiverge = "param" not in previousSection["next"][self.direction]
+                if approachingToDiverge:
+                    choice = self.selectPoints()
+                    self.history.append(("points selection", choice))
                     self._at(self._find(points[choice]["id"]))
                 else:
-                    expectedPoints = "left" if points["left"]["id"] == self.history[-2] else "right"
-                    print("points expected to be", expectedPoints)
+                    expectedPoints = previousSection["next"][self.direction]["param"]
+                    self.history.append(("points condition", expectedPoints))
                     for s in self.layout["sections"]:
                         if "forward" in s["next"] and s["next"]["forward"]["id"] == points["id"]:
                             self._at(s)

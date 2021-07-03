@@ -92,7 +92,29 @@ def test_loop_with_siding_points_right():
     journey.nextStage()
     journey.nextStage()
     journey.nextStage()
-    assert journey.history == [("s01", "forward"), ("p01", "forward"), ("s01", "forward"), ("p01", "forward")]
+    assert journey.history == [
+        ("s01", "forward"),
+        ("p01", "forward"),
+        ("points selection", "right"),
+        ("s01", "forward"),
+        ("p01", "forward")]
+        
+def test_loop_with_siding_points_right_in_reverse():
+    journey = Journey(loopWithSiding)
+    journey.selectPoints = lambda: "right"
+    journey.nextStage()
+    journey.direction = "reverse"
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    assert journey.history == [
+        ("s01", "forward"),
+        ("p01", "forward"),
+        ("points condition", "right"),
+        ("s01", "reverse"),
+        ("p01", "reverse"),
+        ("points condition", "right"),
+        ("s01", "reverse")]
 
 def test_loop_with_siding_points_left():
     journey = Journey(loopWithSiding)
@@ -107,10 +129,13 @@ def test_loop_with_siding_points_left():
     assert journey.history == [
         ("s01", "forward"),
         ("p01", "forward"),
+        ("points selection", "left"),
         ("s02", "forward"),
         ("s02", "reverse"),
         ("p01", "reverse"),
+        ("points condition", "left"),
         ("s01", "reverse"),
         ("p01", "reverse"),
+        ("points condition", "right"),
         ("s01", "reverse")]
     
