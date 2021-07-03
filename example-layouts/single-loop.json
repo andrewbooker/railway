@@ -1,0 +1,18 @@
+{
+    "sections": [
+        { 
+            "id": "s01",
+            "name": "main loop",
+            "speed": "express",
+            "length": 10.6,
+            "next": {
+                "forward": { 
+                    "id": "s01"
+                },
+                "reverse": { 
+                    "id": "s01"
+                }
+            }
+        }
+    ]
+}
