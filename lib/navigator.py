@@ -22,11 +22,12 @@ class Journey():
     def _at(self, s):
         self.section = s
         self.history.append((s["id"], self.direction))
-        print("now on", s["name"])
+        print("now on", s["name"], self.direction)
 
     def changeDirection(self):
         self.direction = "forward" if self.direction == "reverse" else "reverse"
         self.history.append((self.section["id"], self.direction))
+        print("changing direction to", self.direction)
 
     def nextStage(self):
         print("from", self.section["name"])
@@ -37,13 +38,17 @@ class Journey():
                 approachingToDiverge = "param" not in previousSection["next"][self.direction]
                 if approachingToDiverge:
                     choice = self.selectPoints()
+                    print("heading", choice)
                     self.history.append(("points selection", choice))
                     self._at(self._find(points[choice]["id"]))
                 else:
                     expectedPoints = previousSection["next"][self.direction]["param"]
+                    print("expecting", expectedPoints)
+                    if "direction" in points[expectedPoints] and self.direction not in points[expectedPoints]["direction"]:
+                        self.changeDirection()
                     self.history.append(("points condition", expectedPoints))
                     for s in self.layout["sections"]:
-                        if "forward" in s["next"] and s["next"]["forward"]["id"] == points["id"]:
+                        if "forward" in s["next"] and "param" not in s["next"]["forward"] and s["next"]["forward"]["id"] == points["id"]:
                             self._at(s)
         else:
             options = self.section["next"]
@@ -51,4 +56,3 @@ class Journey():
                 self._at(self._find(options[self.direction]["id"]))
             else:
                 self.changeDirection()
-                print("changing direction to", self.direction)

@@ -47,8 +47,6 @@ loopWithSiding = """
     {
         "id": "s01",
         "name": "main loop",
-        "speed": "express",
-        "length": 10.6,
         "next": {
             "forward": {
                 "id": "p01"
@@ -62,8 +60,6 @@ loopWithSiding = """
     {
         "id": "s02",
         "name": "branch siding",
-        "speed": "crawl",
-        "length": 1.5,
         "next": {
             "reverse": {
                 "id": "p01",
@@ -139,3 +135,65 @@ def test_loop_with_siding_points_left():
         ("points condition", "right"),
         ("s01", "reverse")]
     
+returnLoop = """
+{
+    "sections": [
+        {
+            "id": "s01",
+            "name": "main branch",
+            "next": {
+                "forward": {
+                    "id": "p01"
+                }
+            }
+        },
+        {
+            "id": "r01",
+            "name": "return loop",
+            "next": {
+                "forward": {
+                    "id": "p01",
+                    "param": "right"
+                },
+                "reverse": {
+                    "id": "p01",
+                    "param": "left"
+                }
+            }
+        }
+    ],
+    "points": [
+        {
+            "id": "p01",
+            "name": "return loop points",
+            "left": {
+                "id": "r01"
+            },
+            "right": {
+                "id": "r01",
+                "direction": "reverse"
+            }
+        }
+    ]
+}
+"""
+
+def test_return_loop_with_siding_points_left():
+    journey = Journey(returnLoop)
+    journey.selectPoints = lambda: "left"
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    assert journey.history == [
+        ("s01", "forward"),
+        ("p01", "forward"),
+        ("points selection", "left"),
+        ("r01", "forward"),
+        ("p01", "forward"),
+        ("p01", "reverse"),
+        ("points condition", "right"),
+        ("s01", "reverse"),
+        ("s01", "forward")
+    ]
