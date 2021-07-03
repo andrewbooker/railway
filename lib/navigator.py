@@ -20,11 +20,12 @@ class Journey():
 
     def _at(self, s):
         self.section = s
-        self.history.append(s["id"])
+        self.history.append((s["id"], self.direction))
         print("now on", s["name"])
 
     def _changeDirection(self):
         self.direction = "forward" if self.direction == "reverse" else "reverse"
+        self.history.append((self.section["id"], self.direction))
 
     def nextStage(self):
         print("from", self.section["name"])
