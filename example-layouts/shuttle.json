@@ -1,0 +1,11 @@
+{
+    "sections": [
+        { 
+            "id": "s01",
+            "name": "shuttle track",
+            "speed": "slow",
+            "length": 10.6,
+            "next": {}
+        }
+    ]
+}
