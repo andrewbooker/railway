@@ -40,11 +40,13 @@ class Journey():
                     choice = self.selectPoints()
                     print("heading", choice)
                     self.history.append(("points selection", choice))
+                    if "direction" in points[choice] and self.direction != points[choice]["direction"]:
+                        self.changeDirection()
                     self._at(self._find(points[choice]["id"]))
                 else:
                     expectedPoints = previousSection["next"][self.direction]["param"]
                     print("expecting", expectedPoints)
-                    if "direction" in points[expectedPoints] and self.direction not in points[expectedPoints]["direction"]:
+                    if "direction" in points[expectedPoints] and self.direction != points[expectedPoints]["direction"]:
                         self.changeDirection()
                     self.history.append(("points condition", expectedPoints))
                     for s in self.layout["sections"]:

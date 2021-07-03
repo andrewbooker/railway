@@ -1,0 +1,44 @@
+{
+    "sections": [
+        {
+            "id": "s01",
+            "name": "main branch",
+            "speed": "slow",
+            "length": 9.9,
+            "next": {
+                "forward": {
+                    "id": "p01"
+                }
+            }
+        },
+        {
+            "id": "r01",
+            "name": "return loop",
+            "speed": "slow",
+            "length": 9.9,
+            "next": {
+                "forward": {
+                    "id": "p01",
+                    "param": "right"
+                },
+                "reverse": {
+                    "id": "p01",
+                    "param": "left"
+                }
+            }
+        }
+    ],
+    "points": [
+        {
+            "id": "p01",
+            "name": "return loop points",
+            "left": {
+                "id": "r01"
+            },
+            "right": {
+                "id": "r01",
+                "direction": "reverse"
+            }
+        }
+    ]
+}

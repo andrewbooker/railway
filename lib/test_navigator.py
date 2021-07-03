@@ -178,7 +178,7 @@ returnLoop = """
 }
 """
 
-def test_return_loop_with_siding_points_left():
+def test_return_loop_with_points_left():
     journey = Journey(returnLoop)
     journey.selectPoints = lambda: "left"
     journey.nextStage()
@@ -194,6 +194,26 @@ def test_return_loop_with_siding_points_left():
         ("p01", "forward"),
         ("p01", "reverse"),
         ("points condition", "right"),
+        ("s01", "reverse"),
+        ("s01", "forward")
+    ]
+
+def test_return_loop_with_points_right():
+    journey = Journey(returnLoop)
+    journey.selectPoints = lambda: "right"
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    assert journey.history == [
+        ("s01", "forward"),
+        ("p01", "forward"),
+        ("points selection", "right"),
+        ("p01", "reverse"),
+        ("r01", "reverse"),
+        ("p01", "reverse"),
+        ("points condition", "left"),
         ("s01", "reverse"),
         ("s01", "forward")
     ]
