@@ -36,11 +36,11 @@ class Journey():
         if "next" not in self.section:
             if self.section["id"][0] == "p":
                 if self.direction == "forward":
-                    choice = "%s_id" % self.section["param"] if "param" in self.section else ("left_id" if (randint(0, 1) > 0) else "right_id")
-                    print("choosing", choice.split("_")[0])
-                    self._at(self._find(self.section[choice]))
+                    choice = self.section["param"] if "param" in self.section else ("left" if (randint(0, 1) > 0) else "right")
+                    print("choosing", choice)
+                    self._at(self._find(self.section[choice]["id"]))
                 else:
-                    print("points expected to be", "left" if self.section["left_id"] == self.history[-2] else "right")
+                    print("points expected to be", "left" if self.section["left"]["id"] == self.history[-2] else "right")
                     for s in self.layout["sections"]:
                         if "forward" in s["next"] and s["next"]["forward"]["id"] == self.section["id"]:
                             self._at(s)

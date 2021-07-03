@@ -32,8 +32,12 @@
         {
             "id": "p01",
             "name": "branch siding points",
-            "left_id": "s02",
-            "right_id": "s01"
+            "left": {
+                "id": "s02"
+            },
+            "right": {
+                "id": "s01"
+            }
         }
     ]
 }
