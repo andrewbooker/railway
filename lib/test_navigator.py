@@ -306,4 +306,139 @@ def test_simple_fork_with_points_right():
         ("s01", "forward")
     ]
 
+triangleWithSidings = """
+{"sections":[
+    {
+        "id": "s01",
+        "name": "siding one",
+        "next": {
+            "reverse": {
+                "id": "p01"
+            }
+        }
+    },
+	{
+        "id": "s02",
+        "name": "curve 1-2",
+        "next": {
+			"forward": {
+				"id": "p02",
+				"param": "right"
+			},
+            "reverse": {
+                "id": "p01",
+				"param": "left"
+            }
+        }
+    },
+	{
+        "id": "s03",
+        "name": "siding two",
+        "next": {
+            "reverse": {
+                "id": "p02"
+            }
+        }
+    },
+	{
+        "id": "s04",
+        "name": "curve 2-3",
+        "next": {
+			"forward": {
+				"id": "p02",
+				"param": "left"
+			},
+            "reverse": {
+                "id": "p03",
+				"param": "right"
+            }
+        }
+    }
+	,
+	{
+        "id": "s05",
+        "name": "siding three",
+        "next": {
+            "forward": {
+                "id": "p03"
+            }
+        }
+    },
+	{
+        "id": "s06",
+        "name": "curve 3-1",
+        "next": {
+			"forward": {
+				"id": "p01",
+				"param": "right"
+			},
+            "reverse": {
+                "id": "p03",
+				"param": "left"
+            }
+        }
+    }
+],"points": [
+    {
+        "id": "p01",
+        "name": "apex one",
+        "left": {
+            "id": "s02"
+        },
+        "right": {
+            "id": "s06",
+			"direction": "reverse"
+        }
+    },
+	{
+        "id": "p02",
+        "name": "apex two",
+        "left": {
+            "id": "s04",
+			"direction": "reverse"
+        },
+        "right": {
+            "id": "s02",
+			"direction": "reverse"
+        }
+    },
+	{
+        "id": "p03",
+        "name": "apex three",
+        "left": {
+            "id": "s06"
+        },
+        "right": {
+            "id": "s04"
+        }
+    }
+]}
+"""
 
+def test_triangle_with_with_points_right():
+    journey = Journey(triangleWithSidings)
+    journey.selectPoints = lambda: "right"
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    assert journey.history == [
+        ("s01", "forward"),
+		("s01", "reverse"),
+        ("p01", "reverse"),
+		("points selection", "right"),
+		("s06", "reverse"),
+		("p03", "reverse"),
+		("points condition", "left"),
+		("s05", "reverse"),
+		("s05", "forward"),
+		("p03", "forward"),
+		("points selection", "right"),
+		("s04", "forward"),
+		("p02", "forward")
+	]
