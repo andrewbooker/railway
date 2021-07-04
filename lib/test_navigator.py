@@ -217,3 +217,93 @@ def test_return_loop_with_points_right():
         ("s01", "reverse"),
         ("s01", "forward")
     ]
+
+simpleFork = """
+{"sections":[
+    {
+        "id": "s01",
+        "name": "main branch",
+        "next": {
+            "forward": {
+                "id": "p01"
+            }
+        }
+    },
+    {
+        "id": "s02",
+        "name": "branch left",
+        "next": {
+            "reverse": {
+                "id": "p01",
+                "param": "left"
+            }
+        }
+    },
+    {
+        "id": "s03",
+        "name": "branch right",
+        "next": {
+            "reverse": {
+                "id": "p01",
+                "param": "right"
+            }
+        }
+    }
+],
+"points": [
+    {
+        "id": "p01",
+        "name": "branching points",
+        "left": {
+            "id": "s02"
+        },
+        "right": {
+            "id": "s03"
+        }
+    }
+]}
+"""
+
+def test_simple_fork_with_points_left():
+    journey = Journey(simpleFork)
+    journey.selectPoints = lambda: "left"
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    assert journey.history == [
+        ("s01", "forward"),
+        ("p01", "forward"),
+        ("points selection", "left"),
+        ("s02", "forward"),
+        ("s02", "reverse"),
+        ("p01", "reverse"),
+        ("points condition", "left"),
+        ("s01", "reverse"),
+        ("s01", "forward")
+    ]
+
+def test_simple_fork_with_points_right():
+    journey = Journey(simpleFork)
+    journey.selectPoints = lambda: "right"
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    assert journey.history == [
+        ("s01", "forward"),
+        ("p01", "forward"),
+        ("points selection", "right"),
+        ("s03", "forward"),
+        ("s03", "reverse"),
+        ("p01", "reverse"),
+        ("points condition", "right"),
+        ("s01", "reverse"),
+        ("s01", "forward")
+    ]
+
+
