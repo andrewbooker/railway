@@ -52,6 +52,8 @@ class Journey():
                     for s in self.layout["sections"]:
                         if "forward" in s["next"] and "param" not in s["next"]["forward"] and s["next"]["forward"]["id"] == points["id"]:
                             self._at(s)
+                        elif "reverse" in s["next"] and "param" not in s["next"]["reverse"] and s["next"]["reverse"]["id"] == points["id"]:
+                            self._at(s)
         else:
             options = self.section["next"]
             if self.direction in options:

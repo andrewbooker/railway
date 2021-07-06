@@ -1,4 +1,4 @@
-
+ 
 from navigator import Journey
 
 straightLine = "{\"sections\":[{\"id\":\"s1\",\"name\":\"shuttle\",\"next\":{}}]}"
@@ -304,6 +304,80 @@ def test_simple_fork_with_points_right():
         ("points condition", "right"),
         ("s01", "reverse"),
         ("s01", "forward")
+    ]
+
+simpleConvergingFork = """
+{"sections":[
+    {
+        "id": "s01",
+        "name": "branch right",
+        "next": {
+            "forward": {
+                "id": "p01",
+                "param": "right"
+            }
+        }
+    },
+    {
+        "id": "s02",
+        "name": "branch left",
+        "next": {
+            "forward": {
+                "id": "p01",
+                "param": "left"
+            }
+        }
+    },
+    {
+        "id": "s03",
+        "name": "main branch",
+        "next": {
+            "reverse": {
+                "id": "p01"
+            }
+        }
+    }
+],
+"points": [
+    {
+        "id": "p01",
+        "name": "branching points",
+        "left": {
+            "id": "s02",
+            "param": "reverse"
+        },
+        "right": {
+            "id": "s01",
+            "param": "reverse"
+        }
+    }
+]}
+"""
+
+def test_converging_fork_with_points_left():
+    journey = Journey(simpleConvergingFork)
+    journey.selectPoints = lambda: "left"
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    assert journey.history == [
+        ("s01", "forward"),
+        ("p01", "forward"),
+        ("points condition", "right"),
+        ("s03", "forward"),
+        ("s03", "reverse"),
+        ("p01", "reverse"),
+        ("points selection", "left"),
+        ("s02", "reverse"),
+        ("s02", "forward"),
+        ("p01", "forward"),
+        ("points condition", "left"),
+        ("s03", "forward")
     ]
 
 triangleWithSidings = """
