@@ -391,21 +391,21 @@ triangleWithSidings = """
             }
         }
     },
-	{
+    {
         "id": "s02",
         "name": "curve 1-2",
         "next": {
-			"forward": {
-				"id": "p02",
-				"param": "right"
-			},
+            "forward": {
+                "id": "p02",
+                "param": "right"
+            },
             "reverse": {
                 "id": "p01",
-				"param": "left"
+                "param": "left"
             }
         }
     },
-	{
+    {
         "id": "s03",
         "name": "siding two",
         "next": {
@@ -414,22 +414,22 @@ triangleWithSidings = """
             }
         }
     },
-	{
+    {
         "id": "s04",
         "name": "curve 2-3",
         "next": {
-			"forward": {
-				"id": "p02",
-				"param": "left"
-			},
+            "forward": {
+                "id": "p02",
+                "param": "left"
+            },
             "reverse": {
                 "id": "p03",
-				"param": "right"
+                "param": "right"
             }
         }
     }
-	,
-	{
+    ,
+    {
         "id": "s05",
         "name": "siding three",
         "next": {
@@ -438,17 +438,17 @@ triangleWithSidings = """
             }
         }
     },
-	{
+    {
         "id": "s06",
         "name": "curve 3-1",
         "next": {
-			"forward": {
-				"id": "p01",
-				"param": "right"
-			},
+            "forward": {
+                "id": "p01",
+                "param": "right"
+            },
             "reverse": {
                 "id": "p03",
-				"param": "left"
+                "param": "left"
             }
         }
     }
@@ -461,22 +461,22 @@ triangleWithSidings = """
         },
         "right": {
             "id": "s06",
-			"direction": "reverse"
+            "direction": "reverse"
         }
     },
-	{
+    {
         "id": "p02",
         "name": "apex two",
         "left": {
             "id": "s04",
-			"direction": "reverse"
+            "direction": "reverse"
         },
         "right": {
             "id": "s02",
-			"direction": "reverse"
+            "direction": "reverse"
         }
     },
-	{
+    {
         "id": "p03",
         "name": "apex three",
         "left": {
@@ -501,18 +501,34 @@ def test_triangle_with_with_points_right():
     journey.nextStage()
     journey.nextStage()
     journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
     assert journey.history == [
         ("s01", "forward"),
-		("s01", "reverse"),
+        ("s01", "reverse"),
         ("p01", "reverse"),
-		("points selection", "right"),
-		("s06", "reverse"),
-		("p03", "reverse"),
-		("points condition", "left"),
-		("s05", "reverse"),
-		("s05", "forward"),
-		("p03", "forward"),
-		("points selection", "right"),
-		("s04", "forward"),
-		("p02", "forward")
-	]
+        ("points selection", "right"),
+        ("s06", "reverse"),
+        ("p03", "reverse"),
+        ("points condition", "left"),
+        ("s05", "reverse"),
+        ("s05", "forward"),
+        ("p03", "forward"),
+        ("points selection", "right"),
+        ("s04", "forward"),
+        ("p02", "forward"),
+        ("points condition", "left"),
+        ("s03", "forward"),
+        ("s03", "reverse"),
+        ("p02", "reverse"),
+        ("points selection", "right"),
+        ("s02", "reverse"),
+        ("p01", "reverse"),
+        ("p01", "forward"),
+        ("points condition", "left"),
+        ("s01", "forward")
+    ]

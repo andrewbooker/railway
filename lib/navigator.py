@@ -24,6 +24,23 @@ class Journey():
         self.history.append((s["id"], self.direction))
         print("now on", s["name"], self.direction)
 
+    @staticmethod
+    def _check(section, pointsId, direction):
+        if direction not in section:
+            return None
+        sp = section[direction]
+        if "param" not in sp and sp["id"] == pointsId:
+            return section
+        return None
+
+    def _afterConvergence(self, atPointsId):
+        for s in self.layout["sections"]:
+            next = s["next"]
+            if Journey._check(next, atPointsId, "forward") is not None:
+                return (s, "forward")
+            if Journey._check(next, atPointsId, "reverse") is not None:
+                return (s, "reverse")
+
     def changeDirection(self):
         self.direction = "forward" if self.direction == "reverse" else "reverse"
         self.history.append((self.section["id"], self.direction))
@@ -46,14 +63,11 @@ class Journey():
                 else:
                     expectedPoints = previousSection["next"][self.direction]["param"]
                     print("expecting", expectedPoints)
-                    if "direction" in points[expectedPoints] and self.direction != points[expectedPoints]["direction"]:
+                    (nextSection, nextDirection) = self._afterConvergence(points["id"])
+                    if nextDirection == self.direction:
                         self.changeDirection()
                     self.history.append(("points condition", expectedPoints))
-                    for s in self.layout["sections"]:
-                        if "forward" in s["next"] and "param" not in s["next"]["forward"] and s["next"]["forward"]["id"] == points["id"]:
-                            self._at(s)
-                        elif "reverse" in s["next"] and "param" not in s["next"]["reverse"] and s["next"]["reverse"]["id"] == points["id"]:
-                            self._at(s)
+                    self._at(nextSection)
         else:
             options = self.section["next"]
             if self.direction in options:
