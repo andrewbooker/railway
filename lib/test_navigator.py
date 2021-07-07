@@ -373,11 +373,12 @@ def test_converging_fork_with_points_left():
         ("s03", "reverse"),
         ("p01", "reverse"),
         ("points selection", "left"),
-        ("s02", "reverse"),
+        ("p01", "forward"),
         ("s02", "forward"),
         ("p01", "forward"),
         ("points condition", "left"),
-        ("s03", "forward")
+        ("s03", "forward"),
+        ("s03", "reverse")
     ]
 
 triangleWithSidings = """
@@ -530,5 +531,49 @@ def test_triangle_with_with_points_right():
         ("p01", "reverse"),
         ("p01", "forward"),
         ("points condition", "left"),
+        ("s01", "forward")
+    ]
+
+def test_triangle_with_with_points_left():
+    journey = Journey(triangleWithSidings)
+    journey.selectPoints = lambda: "left"
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    journey.nextStage()
+    assert journey.history == [
+        ("s01", "forward"),
+        ("s01", "reverse"),
+        ("p01", "reverse"),
+        ("points selection", "left"),
+        ("p01", "forward"),
+        ("s02", "forward"),
+        ("p02", "forward"),
+        ("points condition", "right"),
+        ("s03", "forward"),
+        ("s03", "reverse"),
+        ("p02", "reverse"),
+        ("points selection", "left"),
+        ("s04", "reverse"),
+        ("p03", "reverse"),
+        ("points condition", "right"),
+        ("s05", "reverse"),
+        ("s05", "forward"),
+        ("p03", "forward"),
+        ("points selection", "left"),
+        ("s06", "forward"),
+        ("p01", "forward"),
+        ("points condition", "right"),
         ("s01", "forward")
     ]

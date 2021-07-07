@@ -52,12 +52,13 @@ class Journey():
             if self.section["id"][0] == "p":
                 points = self.section
                 previousSection = self._find(self.history[-2][0])
-                approachingToDiverge = "param" not in previousSection["next"][self.direction]
-                if approachingToDiverge:
+                approachingDivergence = "param" not in previousSection["next"][self.direction]
+                if approachingDivergence:
                     choice = self.selectPoints()
                     print("heading", choice)
                     self.history.append(("points selection", choice))
-                    if "direction" in points[choice] and self.direction != points[choice]["direction"]:
+                    nextDirection = points[choice]["direction"] if "direction" in points[choice] else "forward"
+                    if nextDirection != self.direction:
                         self.changeDirection()
                     self._at(self._find(points[choice]["id"]))
                 else:
