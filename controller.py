@@ -36,7 +36,9 @@ class PowerMonitor():
 import time
 import RPi.GPIO as GPIO
 
-port = 12
+portA = 12
+portB = 18
+port = portA
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(port, GPIO.OUT, initial=GPIO.LOW)
