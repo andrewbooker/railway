@@ -65,6 +65,14 @@ class Train():
             self._setTo(self.current + incr)
             time.sleep(secsPerIncr)
 
+class Direction():
+    def __init__(self, port):
+        self.port = port
+        GPIO.setup(self.port, GPIO.OUT, initial=GPIO.LOW)
+
+    def set(self, isForwards):
+        GPIO.output(self.port, 0 if isForwards else 1)
+
 portA = 12
 portB = 18
 
@@ -72,14 +80,18 @@ GPIO.setmode(GPIO.BCM)
 
 monitor = PowerMonitor()
 train = Train(portA, monitor)
-monitor.setMessage("ramping up")
+direction = Direction(23)
 
-train.rampTo(50, 1)
-monitor.setMessage("holding steady")
-#time.sleep(5)
-
-monitor.setMessage("ramping down")
-train.rampTo(0, 1)
+runsRemaining = 6
+isForwards = True
+while runsRemaining > 0:
+    monitor.setMessage("ramping up %s" % "forwards" if isForwards else "reverse")
+    train.rampTo(50, 1)
+    monitor.setMessage("ramping down")
+    train.rampTo(0, 1)
+    isForwards = not isForwards
+    direction.set(isForwards)
+    runsRemaining -= 1
 
 print("stopped")
 
