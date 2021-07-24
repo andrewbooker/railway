@@ -36,45 +36,52 @@ class PowerMonitor():
 import time
 import RPi.GPIO as GPIO
 
+class Train():
+    def __init__(self, port, monitor):
+        self.monitor = monitor
+        GPIO.setup(port, GPIO.OUT, initial=GPIO.LOW)
+        self.pwm = GPIO.PWM(port, 100)
+        self.pwm.start(0)
+        self.current = 0
+
+    def __del__(self):
+        self.pwm.stop()
+
+    def _setTo(self, dc):
+        self.pwm.ChangeDutyCycle(dc)
+        self.current = dc
+        self.monitor.setValue(dc)
+
+    def rampTo(self, dc, timeInterval):
+        if timeInterval == 0:
+            self._setTo(dc)
+            return
+
+        ddc = abs(dc - self.current)
+        secsPerIncr = 1.0 * timeInterval / ddc
+
+        while not self.current == dc:
+            incr = 1 if dc > self.current else -1
+            self._setTo(self.current + incr)
+            time.sleep(secsPerIncr)
+
 portA = 12
 portB = 18
-port = portA
 
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(port, GPIO.OUT, initial=GPIO.LOW)
-pwm = GPIO.PWM(port, 100)
-
 
 monitor = PowerMonitor()
-pwm.start(0)
-
-dc = 0
-done = False
+train = Train(portA, monitor)
 monitor.setMessage("ramping up")
-while not done:
-    dc += 1
-    pwm.ChangeDutyCycle(dc)
-    monitor.setValue(dc)
-    if (dc == 100):
-        done = True
-    time.sleep(0.1)
 
-
+train.rampTo(50, 1)
 monitor.setMessage("holding steady")
-monitor.setValue(dc)
-time.sleep(5)
+#time.sleep(5)
 
-done = False
 monitor.setMessage("ramping down")
-while not done:
-    dc -= 1
-    pwm.ChangeDutyCycle(dc)
-    monitor.setValue(dc)
-    if (dc == 0):
-        done = True
-
-    time.sleep(0.1)
+train.rampTo(0, 1)
 
 print("stopped")
-pwm.stop()
+
+del train
 GPIO.cleanup() 
