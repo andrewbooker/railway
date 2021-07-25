@@ -109,7 +109,7 @@ class Controller():
         self.monitor.setMessage("ramping up %s" % ("forwards" if self.isForwards else "reverse"))
         self.direction.set(self.isForwards)
         self.isRunning = True
-        self.speed.rampTo(30, lambda: self.monitor.setMessage("holding steady"))
+        self.speed.rampTo(35, lambda: self.monitor.setMessage("holding steady"))
 
     def _setStopped(self):
         self.isRunning = False
@@ -136,10 +136,13 @@ class Controller():
         if wasRunning:
             self._start()
 
-    def onPass(self, v):
-        self.monitor.setMessage("passed checkpoint")
-        if v and self.isForwards and not self.isStopping:
-            self._stop()
+    def onPass(self, v, pos):
+        self.monitor.setMessage("passed checkpoint %s" % pos)
+        if self.isStopping:
+            return
+
+        if v and ((pos in ["A"] and self.isForwards) or (pos in ["B"] and not self.isForwards)):
+            self._changeDirection()
 
     def onCmd(self, c):
         if c in [ord("s"), ord(" ")]:
@@ -152,8 +155,9 @@ class Controller():
             self._changeDirection()
 
 class Detector():
-    def __init__(self, port, callback):
+    def __init__(self, port, pos, callback):
         self.callback = callback
+        self.pos = pos
         self.port = port
         self.state = 0
         GPIO.setup(self.port, GPIO.IN)
@@ -162,7 +166,7 @@ class Detector():
         while not shouldStop.is_set():
             v = GPIO.input(self.port)
             if v != self.state:
-                self.callback(v)
+                self.callback(v, self.pos)
                 self.state = v
             time.sleep(0.05)
 
@@ -193,11 +197,13 @@ monitor = PowerMonitor()
 speed = Speed(portA, monitor)
 direction = Direction(23)
 controller = Controller(speed, direction, monitor)
-detector = Detector(14, controller.onPass)
+detectorA = Detector(14, "A", controller.onPass)
+detectorB = Detector(15, "B", controller.onPass)
 cmd = Cmd(controller.onCmd)
 threads = []
 threads.append(threading.Thread(target=speed.start, args=(shouldStop,), daemon=True))
-threads.append(threading.Thread(target=detector.start, args=(shouldStop,), daemon=True))
+threads.append(threading.Thread(target=detectorA.start, args=(shouldStop,), daemon=True))
+threads.append(threading.Thread(target=detectorB.start, args=(shouldStop,), daemon=True))
 threads.append(threading.Thread(target=cmd.start, args=(shouldStop,), daemon=True))
 
 [thread.start() for thread in threads]
