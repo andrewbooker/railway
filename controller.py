@@ -109,7 +109,7 @@ class Controller():
         self.monitor.setMessage("ramping up %s" % ("forwards" if self.isForwards else "reverse"))
         self.direction.set(self.isForwards)
         self.isRunning = True
-        self.speed.rampTo(35, lambda: self.monitor.setMessage("holding steady"))
+        self.speed.rampTo(40, lambda: self.monitor.setMessage("holding steady"))
 
     def _setStopped(self):
         self.isRunning = False
@@ -137,11 +137,11 @@ class Controller():
             self._start()
 
     def onPass(self, v, pos):
-        self.monitor.setMessage("passed checkpoint %s" % pos)
-        if self.isStopping:
+        if self.isStopping or not v:
             return
 
-        if v and ((pos in ["A"] and self.isForwards) or (pos in ["B"] and not self.isForwards)):
+        self.monitor.setMessage("passed checkpoint %s" % pos)
+        if (pos in ["A"] and self.isForwards) or (pos in ["B"] and not self.isForwards):
             self._changeDirection()
 
     def onCmd(self, c):
