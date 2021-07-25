@@ -103,6 +103,7 @@ class Controller():
         self.isRunning = False
         self.isStopping = False
         self.isForwards = True
+        self.commandsBlocked = False
         self.monitor.setMessage("set to %s" % ("forwards" if self.isForwards else "reverse"))
 
     def _start(self):
@@ -114,6 +115,7 @@ class Controller():
     def _setStopped(self):
         self.isRunning = False
         self.isStopping = False
+        self.commandsBlocked = False
         self.monitor.setMessage("stopped")
 
     def _stop(self):
@@ -142,9 +144,14 @@ class Controller():
 
         self.monitor.setMessage("passed checkpoint %s" % pos)
         if (pos in ["A"] and self.isForwards) or (pos in ["B"] and not self.isForwards):
+            self.commandsBlocked = True
             self._changeDirection()
 
     def onCmd(self, c):
+        if self.commandsBlocked:
+            self.monitor.setMessage("Command blocked after checkpoint")
+            return
+
         if c in [ord("s"), ord(" ")]:
             if not self.isRunning:
                 self._start()
@@ -180,7 +187,7 @@ class Cmd():
     def start(self, shouldStop):
         while not shouldStop.is_set():
             c = ord(readchar.readchar())
-            if c in [3, 27, 113]:
+            if c in [3, 27, 113]: #ctrl+C, esc or q
                 shouldStop.set()
             else:
                 self.callback(c)
