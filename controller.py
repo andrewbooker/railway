@@ -109,7 +109,7 @@ class Controller():
         self.monitor.setMessage("ramping up %s" % ("forwards" if self.isForwards else "reverse"))
         self.direction.set(self.isForwards)
         self.isRunning = True
-        self.speed.rampTo(50, lambda: self.monitor.setMessage("holding steady"))
+        self.speed.rampTo(30, lambda: self.monitor.setMessage("holding steady"))
 
     def _setStopped(self):
         self.isRunning = False
@@ -125,6 +125,22 @@ class Controller():
         while self.isRunning:
             time.sleep(0.05)
 
+    def _changeDirection(self):
+        wasRunning = self.isRunning
+        if self.isRunning and not self.isStopping:
+            self._stop()
+
+        self.isForwards = not self.isForwards
+        self.monitor.setMessage("changing to %s" % ("forwards" if self.isForwards else "reverse"))
+
+        if wasRunning:
+            self._start()
+
+    def onPass(self, v):
+        self.monitor.setMessage("passed checkpoint")
+        if v and self.isForwards and not self.isStopping:
+            self._stop()
+
     def onCmd(self, c):
         if c in [ord("s"), ord(" ")]:
             if not self.isRunning:
@@ -133,15 +149,22 @@ class Controller():
                 self._stop()
 
         if c in [ord("d")]:
-            wasRunning = self.isRunning
-            if self.isRunning and not self.isStopping:
-                self._stop()
+            self._changeDirection()
 
-            self.isForwards = not self.isForwards
-            self.monitor.setMessage("changing to %s" % ("forwards" if self.isForwards else "reverse"))
+class Detector():
+    def __init__(self, port, callback):
+        self.callback = callback
+        self.port = port
+        self.state = 0
+        GPIO.setup(self.port, GPIO.IN)
 
-            if wasRunning:
-                self._start()
+    def start(self, shouldStop):
+        while not shouldStop.is_set():
+            v = GPIO.input(self.port)
+            if v != self.state:
+                self.callback(v)
+                self.state = v
+            time.sleep(0.05)
 
 
 import readchar
@@ -170,9 +193,11 @@ monitor = PowerMonitor()
 speed = Speed(portA, monitor)
 direction = Direction(23)
 controller = Controller(speed, direction, monitor)
+detector = Detector(14, controller.onPass)
 cmd = Cmd(controller.onCmd)
 threads = []
 threads.append(threading.Thread(target=speed.start, args=(shouldStop,), daemon=True))
+threads.append(threading.Thread(target=detector.start, args=(shouldStop,), daemon=True))
 threads.append(threading.Thread(target=cmd.start, args=(shouldStop,), daemon=True))
 
 [thread.start() for thread in threads]
