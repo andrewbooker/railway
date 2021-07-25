@@ -152,14 +152,20 @@ class Controller():
             self.monitor.setMessage("Command blocked after checkpoint")
             return
 
-        if c in [ord("s"), ord(" ")]:
+        if c in ['s', ' ']:
             if not self.isRunning:
                 self._start()
             else:
                 self._stop()
 
-        if c in [ord("d")]:
+        if c == 'd' or (c == 'r' and self.isForwards) or (c == 'f' and not self.isForwards):
             self._changeDirection()
+
+        if c == '+':
+            self.speed.target += 1
+
+        if c == '-':
+            self.speed.target -= 1
 
 class Detector():
     def __init__(self, port, pos, callback):
@@ -186,8 +192,8 @@ class Cmd():
 
     def start(self, shouldStop):
         while not shouldStop.is_set():
-            c = ord(readchar.readchar())
-            if c in [3, 27, 113]: #ctrl+C, esc or q
+            c = readchar.readchar()
+            if ord(c) in [3, 27, 113]: #ctrl+C, esc or q
                 shouldStop.set()
             else:
                 self.callback(c)
