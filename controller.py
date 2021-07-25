@@ -82,13 +82,16 @@ monitor = PowerMonitor()
 train = Train(portA, monitor)
 direction = Direction(23)
 
-runsRemaining = 6
-isForwards = True
+runsRemaining = 1
+isForwards = False
+direction.set(isForwards)
 while runsRemaining > 0:
     monitor.setMessage("ramping up %s" % "forwards" if isForwards else "reverse")
-    train.rampTo(50, 1)
+    train.rampTo(60, 3)
+    monitor.setMessage("holding steady")
+    time.sleep(2)
     monitor.setMessage("ramping down")
-    train.rampTo(0, 1)
+    train.rampTo(0, 3)
     isForwards = not isForwards
     direction.set(isForwards)
     runsRemaining -= 1
