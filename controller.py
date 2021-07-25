@@ -2,6 +2,9 @@
 
 import sys
 import math
+import os
+os.system("clear")
+print("")
 
 
 class PowerMonitor():
@@ -95,7 +98,7 @@ class Controller():
         self.monitor.setMessage("ramping up %s" % ("forwards" if self.isForwards else "reverse"))
         self.direction.set(self.isForwards)
         self.isRunning = True
-        self.speed.rampTo(65, 3)
+        self.speed.rampTo(50, 3)
         self.monitor.setMessage("holding steady")
 
     def _stop(self):
