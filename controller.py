@@ -3,9 +3,9 @@
 import sys
 import math
 import os
+import threading
 os.system("clear")
 print("")
-
 
 class PowerMonitor():
     def __init__(self):
@@ -14,8 +14,12 @@ class PowerMonitor():
         self.msg = ""
         self.bar = 0
         self.firstValueWritten = False
+        self.lock = threading.Lock()
 
     def _render(self):
+        if self.lock.locked():
+            return
+        self.lock.acquire()
         fill = self.scale - self.bar
 
         if self.firstValueWritten:
@@ -31,6 +35,7 @@ class PowerMonitor():
             sys.stdout.write("\n\r")
 
         sys.stdout.flush()
+        self.lock.release()
 
     def setValue(self, value):
         self.bar = value
@@ -45,14 +50,16 @@ import time
 import RPi.GPIO as GPIO
 
 class Speed():
-    def __init__(self, port, monitor, shouldStop):
-        self.shouldStop = shouldStop
+    def __init__(self, port, monitor):
         self.monitor = monitor
         GPIO.setup(port, GPIO.OUT, initial=GPIO.LOW)
         self.pwm = GPIO.PWM(port, 100)
         self.pwm.start(0)
         self.current = 0
+        self.target = 0
+        self.secsPerIncr = 3.0 / 50
         self.monitor.setValue(0)
+        self.onDone = None
 
     def __del__(self):
         self.pwm.stop()
@@ -62,19 +69,22 @@ class Speed():
         self.current = dc
         self.monitor.setValue(dc)
 
-    def rampTo(self, dc, timeInterval):
-        if timeInterval == 0:
-            self._setTo(dc)
-            return
+    def rampTo(self, dc, onDone):
+        self.onDone = onDone
+        self.target = max(min(dc, 100), 0)
 
-        ddc = abs(dc - self.current)
-        secsPerIncr = 1.0 * timeInterval / ddc
+    def start(self, shouldStop):
+        while not shouldStop.is_set():
+            if self.target < self.current:
+                self._setTo(self.current - 1)
+            elif self.target > self.current:
+                self._setTo(self.current + 1)
+            elif self.onDone is not None:
+                self.onDone()
+                self.onDone = None
 
-        while not self.current == dc and not self.shouldStop.is_set():
-            incr = 1 if dc > self.current else -1
-            self._setTo(self.current + incr)
-            time.sleep(secsPerIncr)
-        if self.shouldStop.is_set():
+            time.sleep(self.secsPerIncr)
+        if shouldStop.is_set():
             self._setTo(0)
 
 class Direction():
@@ -91,6 +101,7 @@ class Controller():
         self.direction = direction
         self.monitor = monitor
         self.isRunning = False
+        self.isStopping = False
         self.isForwards = True
         self.monitor.setMessage("set to %s" % ("forwards" if self.isForwards else "reverse"))
 
@@ -98,15 +109,21 @@ class Controller():
         self.monitor.setMessage("ramping up %s" % ("forwards" if self.isForwards else "reverse"))
         self.direction.set(self.isForwards)
         self.isRunning = True
-        self.speed.rampTo(50, 3)
-        self.monitor.setMessage("holding steady")
+        self.speed.rampTo(50, lambda: self.monitor.setMessage("holding steady"))
+
+    def _setStopped(self):
+        self.isRunning = False
+        self.isStopping = False
+        self.monitor.setMessage("stopped")
 
     def _stop(self):
         if not self.isRunning:
             return
+        self.isStopping = True
         self.monitor.setMessage("ramping down")
-        self.speed.rampTo(0, 3)
-        self.isRunning = False
+        self.speed.rampTo(0, self._setStopped)
+        while self.isRunning:
+            time.sleep(0.05)
 
     def onCmd(self, c):
         if c in [ord("s"), ord(" ")]:
@@ -117,7 +134,7 @@ class Controller():
 
         if c in [ord("d")]:
             wasRunning = self.isRunning
-            if self.isRunning:
+            if self.isRunning and not self.isStopping:
                 self._stop()
 
             self.isForwards = not self.isForwards
@@ -141,7 +158,7 @@ class Cmd():
             else:
                 self.callback(c)
 
-import threading
+
 shouldStop = threading.Event()
 
 portA = 12
@@ -150,13 +167,16 @@ portB = 18
 GPIO.setmode(GPIO.BCM)
 
 monitor = PowerMonitor()
-speed = Speed(portA, monitor, shouldStop)
+speed = Speed(portA, monitor)
 direction = Direction(23)
 controller = Controller(speed, direction, monitor)
 cmd = Cmd(controller.onCmd)
-thread = threading.Thread(target=cmd.start, args=(shouldStop,), daemon=True)
-thread.start()
-thread.join()
+threads = []
+threads.append(threading.Thread(target=speed.start, args=(shouldStop,), daemon=True))
+threads.append(threading.Thread(target=cmd.start, args=(shouldStop,), daemon=True))
+
+[thread.start() for thread in threads]
+[thread.join() for thread in threads]
 
 del speed
 GPIO.cleanup() 
