@@ -4,40 +4,37 @@ import RPi.GPIO as GPIO
 import time
 import random
 
-
 class Points():
-    def __init__(self):
-        servoPin = 14
-        GPIO.setmode(GPIO.BCM)
+    def __init__(self, servoPin):
         GPIO.setup(servoPin, GPIO.OUT)
-        print("set up on pin", servoPin)
 
         self.p = GPIO.PWM(servoPin, 50)
-        self.min = 6
-        self.max = 9
-        self.val = 0
-        self.p.start(self.min)
+        self.r = 6
+        self.l = 9
+
+        self.val = self.r
+        self.p.start(self.r)
         
     def __del__(self):
         self.p.stop()
-        GPIO.cleanup()
-        print("stopped")
-        
+
     def _setTo(self, d, desc):
         if d == self.val:
-            print("already at", desc)
             return
         self.p.ChangeDutyCycle(d)
         self.val = d
-        print("set to", desc, self.val)
+        print("set to", desc)
         
     def left(self):
-        self._setTo(self.min, "left")
+        self._setTo(self.l, "left")
         
     def right(self):
-        self._setTo(self.max, "right")
+        self._setTo(self.r, "right")
 
-points = Points()
+
+GPIO.setmode(GPIO.BCM)
+points = Points(23)
+
 
 try:
     while True:
@@ -47,3 +44,4 @@ try:
 except KeyboardInterrupt:
   del points
 
+GPIO.cleanup()
