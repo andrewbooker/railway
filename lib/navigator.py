@@ -2,10 +2,12 @@ import json
 from random import randint
 
 class Journey():
-    def __init__(self, layoutStr):
+    def __init__(self, layoutStr, listener):
+        self.listener = listener
         self.layout = json.loads(layoutStr)
         self.direction = "forward"
         self.history = []
+        self.section = None
         self._at(self.layout["sections"][0])
         self.selectPoints = lambda: "left" if (randint(0, 1) > 0) else "right"
 
@@ -22,7 +24,7 @@ class Journey():
     def _at(self, s):
         self.section = s
         self.history.append((s["id"], self.direction))
-        print("now on", s["name"], self.direction)
+        self.listener.moveTo(s["name"])
 
     @staticmethod
     def _check(section, pointsId, direction):
@@ -44,10 +46,9 @@ class Journey():
     def changeDirection(self):
         self.direction = "forward" if self.direction == "reverse" else "reverse"
         self.history.append((self.section["id"], self.direction))
-        print("changing direction to", self.direction)
+        self.listener.changeDirection(self.direction)
 
     def nextStage(self):
-        print("from", self.section["name"])
         if "next" not in self.section:
             if self.section["id"][0] == "p":
                 points = self.section
@@ -55,7 +56,7 @@ class Journey():
                 approachingDivergence = "param" not in previousSection["next"][self.direction]
                 if approachingDivergence:
                     choice = self.selectPoints()
-                    print("heading", choice)
+                    self.listener.setPointsTo(choice)
                     self.history.append(("points selection", choice))
                     nextDirection = points[choice]["direction"] if "direction" in points[choice] else "forward"
                     if nextDirection != self.direction:
@@ -63,7 +64,7 @@ class Journey():
                     self._at(self._find(points[choice]["id"]))
                 else:
                     expectedPoints = previousSection["next"][self.direction]["param"]
-                    print("expecting", expectedPoints)
+                    self.listener.waitToSetPointsTo(expectedPoints)
                     (nextSection, nextDirection) = self._afterConvergence(points["id"])
                     if nextDirection == self.direction:
                         self.changeDirection()

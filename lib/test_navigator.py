@@ -1,19 +1,37 @@
  
 from navigator import Journey
 
+
+class InertListener():
+    def __init__(self):
+        pass
+
+    def changeDirection(self, to):
+        pass
+
+    def moveTo(self, sectionName):
+        pass
+
+    def setPointsTo(self, p):
+        pass
+
+    def waitToSetPointsTo(self, p):
+        pass
+
+listener = InertListener()
 straightLine = "{\"sections\":[{\"id\":\"s1\",\"name\":\"shuttle\",\"next\":{}}]}"
 
 def test_straight_line_track_at_start():
-    journey = Journey(straightLine)
+    journey = Journey(straightLine, listener)
     assert journey.history == [("s1", "forward")]
 
 def test_straight_line_track_after_one_move():
-    journey = Journey(straightLine)
+    journey = Journey(straightLine, listener)
     journey.nextStage()
     assert journey.history == [("s1", "forward"),("s1", "reverse")]
 
 def test_straight_line_track_after_multiple_moves():
-    journey = Journey(straightLine)
+    journey = Journey(straightLine, listener)
     journey.nextStage()
     journey.nextStage()
     journey.nextStage()
@@ -24,17 +42,17 @@ def test_straight_line_track_after_multiple_moves():
 loop = "{\"sections\":[{\"id\":\"s01\",\"name\":\"loop\",\"next\":{\"forward\":{\"id\":\"s01\"},\"reverse\":{\"id\":\"s01\"}}}]}"
 
 def test_loop_at_start():
-    journey = Journey(loop)
+    journey = Journey(loop, listener)
     assert journey.history == [("s01", "forward")]
 
 def test_loop_after_multiple_moves():
-    journey = Journey(loop)
+    journey = Journey(loop, listener)
     journey.nextStage()
     journey.nextStage()
     assert journey.history == [("s01", "forward"),("s01", "forward"),("s01", "forward")]
 
 def test_loop_after_change_of_direction():
-    journey = Journey(loop)
+    journey = Journey(loop, listener)
     journey.nextStage()
     journey.changeDirection()
     journey.nextStage()
@@ -83,7 +101,7 @@ loopWithSiding = """
 """
 
 def test_loop_with_siding_points_right():
-    journey = Journey(loopWithSiding)
+    journey = Journey(loopWithSiding, listener)
     journey.selectPoints = lambda: "right"
     journey.nextStage()
     journey.nextStage()
@@ -96,7 +114,7 @@ def test_loop_with_siding_points_right():
         ("p01", "forward")]
         
 def test_loop_with_siding_points_right_in_reverse():
-    journey = Journey(loopWithSiding)
+    journey = Journey(loopWithSiding, listener)
     journey.selectPoints = lambda: "right"
     journey.nextStage()
     journey.direction = "reverse"
@@ -113,7 +131,7 @@ def test_loop_with_siding_points_right_in_reverse():
         ("s01", "reverse")]
 
 def test_loop_with_siding_points_left():
-    journey = Journey(loopWithSiding)
+    journey = Journey(loopWithSiding, listener)
     journey.selectPoints = lambda: "left"
     journey.nextStage()
     journey.nextStage()
@@ -179,7 +197,7 @@ returnLoop = """
 """
 
 def test_return_loop_with_points_left():
-    journey = Journey(returnLoop)
+    journey = Journey(returnLoop, listener)
     journey.selectPoints = lambda: "left"
     journey.nextStage()
     journey.nextStage()
@@ -199,7 +217,7 @@ def test_return_loop_with_points_left():
     ]
 
 def test_return_loop_with_points_right():
-    journey = Journey(returnLoop)
+    journey = Journey(returnLoop, listener)
     journey.selectPoints = lambda: "right"
     journey.nextStage()
     journey.nextStage()
@@ -265,7 +283,7 @@ simpleFork = """
 """
 
 def test_simple_fork_with_points_left():
-    journey = Journey(simpleFork)
+    journey = Journey(simpleFork, listener)
     journey.selectPoints = lambda: "left"
     journey.nextStage()
     journey.nextStage()
@@ -286,7 +304,7 @@ def test_simple_fork_with_points_left():
     ]
 
 def test_simple_fork_with_points_right():
-    journey = Journey(simpleFork)
+    journey = Journey(simpleFork, listener)
     journey.selectPoints = lambda: "right"
     journey.nextStage()
     journey.nextStage()
@@ -355,7 +373,7 @@ simpleConvergingFork = """
 """
 
 def test_converging_fork_with_points_left():
-    journey = Journey(simpleConvergingFork)
+    journey = Journey(simpleConvergingFork, listener)
     journey.selectPoints = lambda: "left"
     journey.nextStage()
     journey.nextStage()
@@ -491,7 +509,7 @@ triangleWithSidings = """
 """
 
 def test_triangle_with_with_points_right():
-    journey = Journey(triangleWithSidings)
+    journey = Journey(triangleWithSidings, listener)
     journey.selectPoints = lambda: "right"
     journey.nextStage()
     journey.nextStage()
@@ -535,7 +553,7 @@ def test_triangle_with_with_points_right():
     ]
 
 def test_triangle_with_with_points_left():
-    journey = Journey(triangleWithSidings)
+    journey = Journey(triangleWithSidings, listener)
     journey.selectPoints = lambda: "left"
     journey.nextStage()
     journey.nextStage()
