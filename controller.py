@@ -95,8 +95,9 @@ class Direction():
     def set(self, isForwards):
         GPIO.output(self.port, 0 if isForwards else 1)
 
-class Controller():
+class MotionController():
     def __init__(self, speed, direction, monitor):
+        self.maxSpeed = 70
         self.speed = speed
         self.direction = direction
         self.monitor = monitor
@@ -110,7 +111,7 @@ class Controller():
         self.monitor.setMessage("ramping up %s" % ("forwards" if self.isForwards else "reverse"))
         self.direction.set(self.isForwards)
         self.isRunning = True
-        self.speed.rampTo(40, lambda: self.monitor.setMessage("holding steady"))
+        self.speed.rampTo(self.maxSpeed, lambda: self.monitor.setMessage("holding steady"))
 
     def _setStopped(self):
         self.isRunning = False
@@ -138,7 +139,9 @@ class Controller():
         if wasRunning:
             self._start()
 
+#remove this and have something layout-aware pass 's' or 'd' commands
     def onPass(self, v, pos):
+        return
         if self.isStopping or not v:
             return
 
@@ -167,6 +170,7 @@ class Controller():
         if c == '-':
             self.speed.target -= 1
 
+
 class Detector():
     def __init__(self, port, pos, callback):
         self.callback = callback
@@ -183,6 +187,34 @@ class Detector():
                 self.state = v
             time.sleep(0.05)
 
+class RoutingController():
+    def __init__(self, checkpoints, points, sections):
+        self.checkpoints = checkpoints
+        self.instructions = []
+
+    def _attemptNext(self):
+        if len(self.instructions) == 0:
+            return
+            
+        ins = self.instructions[0]
+        chk = ins.checkpoint()
+        if checkpoints[chk.name] != chk.state:
+            return
+        
+        if ins.points is not None:
+            points[ins.points.name].set[ins.points.select]
+        if ins.section is not None:
+            sections[ins.section.name].power(ins.section.direction)
+
+        self.instructions.pop(0)
+
+    def instruct(self, instruction):
+        self.instructions.append(instruction)
+         
+    def start(self, shouldStop):
+        while not shouldStop.is_set():
+            self._attemptNext()
+            time.sleep(0.4)
 
 import readchar
 
@@ -209,7 +241,7 @@ GPIO.setmode(GPIO.BCM)
 monitor = PowerMonitor()
 speed = Speed(portA, monitor)
 direction = Direction(23)
-controller = Controller(speed, direction, monitor)
+controller = MotionController(speed, direction, monitor)
 detectorA = Detector(14, "A", controller.onPass)
 detectorB = Detector(15, "B", controller.onPass)
 cmd = Cmd(controller.onCmd)
