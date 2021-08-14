@@ -96,7 +96,8 @@ class Direction():
         GPIO.output(self.port, 0 if isForwards else 1)
 
 class MotionController():
-    def __init__(self, speed, direction, monitor):
+    def __init__(self, speed, direction, monitor): 
+	# note the monitor is currently a train speed indicator, yet the direction notifications will be a section-specific sequence
         self.maxSpeed = 70
         self.speed = speed
         self.direction = direction
@@ -187,51 +188,54 @@ class Detector():
                 self.state = v
             time.sleep(0.05)
 
-class RoutingController():
-    def __init__(self, checkpoints, points, sections):
-        self.checkpoints = checkpoints
-        self.instructions = []
 
-    def _attemptNext(self):
-        if len(self.instructions) == 0:
-            return
-            
-        ins = self.instructions[0]
-        chk = ins.checkpoint()
-        if checkpoints[chk.name] != chk.state:
-            return
-        
-        if ins.points is not None:
-            points[ins.points.name].set[ins.points.select]
-        if ins.section is not None:
-            sections[ins.section.name].power(ins.section.direction)
+class Port():
+	def set(self, v):
+		pass
 
-        self.instructions.pop(0)
+class PwmPort():
+	def __init__(self, port):
+		GPIO.setup(port, GPIO.OUT, initial=GPIO.LOW)
+        self.pwm = GPIO.PWM(port, 100)
+        self.pwm.start(0)
+		
+	def __del__(self):
+		self.pwm.stop()
 
-    def instruct(self, instruction):
-        self.instructions.append(instruction)
-         
-    def start(self, shouldStop):
-        while not shouldStop.is_set():
-            self._attemptNext()
-            time.sleep(0.4)
+	def set(self, value):
+		self.pwm.ChangeDutyCycle(value)
 
-import readchar
+class ServoPort(): # should contain a pwm port
+	def __init__(self, port):
+		GPIO.setup(port, GPIO.OUT)
 
-class Cmd():
-    def __init__(self, callback):
-        self.callback = callback
+        self.p = GPIO.PWM(port, 50)
 
-    def start(self, shouldStop):
-        while not shouldStop.is_set():
-            c = readchar.readchar()
-            if ord(c) in [3, 27, 113]: #ctrl+C, esc or q
-                shouldStop.set()
-            else:
-                self.callback(c)
+	def __del__(self, port):
+		self.p.stop()
 
+	def setLeft(self):
+		pass
+	
+	def setRight(self):
+		pass
+	
+class Points():
+	def __init__(self, port):
+		self.port = port
 
-shouldStop = threading.Event()
+	def set(self, selection):
+		pass
+
+class Section():
+	def __init__(self, port):
+		self.port = port
+
+	def __del__(self):
+		delete self.port
+
+	def power(self, direction):
+		pass
 
 portA = 12
 portB = 18
@@ -244,15 +248,20 @@ direction = Direction(23)
 controller = MotionController(speed, direction, monitor)
 detectorA = Detector(14, "A", controller.onPass)
 detectorB = Detector(15, "B", controller.onPass)
-cmd = Cmd(controller.onCmd)
-threads = []
-threads.append(threading.Thread(target=speed.start, args=(shouldStop,), daemon=True))
-threads.append(threading.Thread(target=detectorA.start, args=(shouldStop,), daemon=True))
-threads.append(threading.Thread(target=detectorB.start, args=(shouldStop,), daemon=True))
-threads.append(threading.Thread(target=cmd.start, args=(shouldStop,), daemon=True))
 
+from lib.cmd import *
+cmd = Cmd(controller.onCmd)
+
+
+targets = [
+	speed,
+	detectorA,
+	detectorB,
+	cmd
+]
+threads = [threading.Thread(target=t.start, args=(shouldStop,), daemon=True) for t in targets]
 [thread.start() for thread in threads]
 [thread.join() for thread in threads]
 
 del speed
-GPIO.cleanup() 
+GPIO.cleanup()
