@@ -63,15 +63,15 @@ class Section():
 portA = 12
 portB = 18
 
-GPIO.setmode(GPIO.BCM)
+from lib.rpiPorts import PwmPort, Output, UsingRPi
+rPi = UsingRPi()
 
 from lib.monitor import PowerMonitor
 from lib.speed import MotionController, Speed
-from lib.ports import PwmPort, Output
 from lib.distribution import Direction
 
 monitor = PowerMonitor()
-speed = Speed(PwmPort(portA), monitor)
+speed = Speed(PwmPort(12), monitor)
 direction = Direction(Output(23))
 
 controller = MotionController(speed, direction, monitor)
@@ -92,4 +92,4 @@ threads = [threading.Thread(target=t.start, args=(shouldStop,), daemon=True) for
 [thread.join() for thread in threads]
 
 del speed
-GPIO.cleanup()
+del rPi # remove line above, handle all the cleanup here

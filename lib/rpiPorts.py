@@ -1,6 +1,13 @@
 
 import RPi.GPIO as GPIO
 
+class UsingRPi():
+    def __init__(self):
+        GPIO.setmode(GPIO.BCM)
+
+    def __del__(self):
+        GPIO.cleanup()
+
 class PwmPort():
     def __init__(self, port):
         GPIO.setup(port, GPIO.OUT, initial=GPIO.LOW)
