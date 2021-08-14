@@ -77,13 +77,10 @@ class MotionController():
         if c == '-':
             self.speed.target -= 1
 
-import RPi.GPIO as GPIO
 class Speed():
     def __init__(self, port, monitor):
         self.monitor = monitor
-        GPIO.setup(port, GPIO.OUT, initial=GPIO.LOW)
-        self.pwm = GPIO.PWM(port, 100)
-        self.pwm.start(0)
+        self.port = port
         self.current = 0
         self.target = 0
         self.secsPerIncr = 3.0 / 50
@@ -91,10 +88,10 @@ class Speed():
         self.onDone = None
 
     def __del__(self):
-        self.pwm.stop()
+        del self.port
 
     def _setTo(self, dc):
-        self.pwm.ChangeDutyCycle(dc)
+        self.port.set(dc)
         self.current = dc
         self.monitor.setValue(dc)
 
@@ -115,3 +112,16 @@ class Speed():
             time.sleep(self.secsPerIncr)
         if shouldStop.is_set():
             self._setTo(0)
+
+import RPi.GPIO as GPIO
+class PwmPort():
+    def __init__(self, port):
+        GPIO.setup(port, GPIO.OUT, initial=GPIO.LOW)
+        self.pwm = GPIO.PWM(port, 100)
+        self.pwm.start(0)
+
+    def __del__(self):
+        self.pwm.stop()
+
+    def set(self, value):
+        self.pwm.ChangeDutyCycle(value)

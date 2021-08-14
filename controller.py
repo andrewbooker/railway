@@ -81,17 +81,6 @@ class Port():
     def set(self, v):
         pass
 
-class PwmPort():
-    def __init__(self, port):
-        GPIO.setup(port, GPIO.OUT, initial=GPIO.LOW)
-        self.pwm = GPIO.PWM(port, 100)
-        self.pwm.start(0)
-
-    def __del__(self):
-        self.pwm.stop()
-
-    def set(self, value):
-        self.pwm.ChangeDutyCycle(value)
 
 class ServoPort(): # should contain a pwm port
     def __init__(self, port):
@@ -132,8 +121,8 @@ GPIO.setmode(GPIO.BCM)
 
 monitor = PowerMonitor()
 
-from lib.speed import MotionController, Speed
-speed = Speed(portA, monitor)
+from lib.speed import MotionController, Speed, PwmPort
+speed = Speed(PwmPort(portA), monitor)
 direction = Direction(23)
 
 
