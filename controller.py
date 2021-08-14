@@ -107,11 +107,11 @@ GPIO.setmode(GPIO.BCM)
 monitor = PowerMonitor()
 
 from lib.speed import MotionController, Speed
-from lib.ports import PwmPort
+from lib.ports import PwmPort, Output
 from lib.distribution import Direction
 
 speed = Speed(PwmPort(portA), monitor)
-direction = Direction(23)
+direction = Direction(Output(23))
 
 controller = MotionController(speed, direction, monitor)
 detectorA = Detector(14, "A", controller.onPass)

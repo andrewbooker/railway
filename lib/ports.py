@@ -12,3 +12,11 @@ class PwmPort():
 
     def set(self, value):
         self.pwm.ChangeDutyCycle(value)
+
+class Output():
+    def __init__(self, port):
+        self.port = port
+        GPIO.setup(self.port, GPIO.OUT, initial=GPIO.LOW)
+
+    def set(self, v):
+        GPIO.output(self.port, v)
