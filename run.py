@@ -1,15 +1,12 @@
 #!/usr/bin/env python
 
-from lib.cmd import *
 import sys
 import threading
 
 
-def say(what):
-    sys.stdout.write("%s\r\n" % what)
-
 class RoutingController():
-    def __init__(self, instructionProvider, layout):
+    def __init__(self, instructionProvider, layout, monitor):
+        self.monitor = monitor
         self.instructions = []
         self.currentInstruction = None
         self.layout = layout
@@ -31,7 +28,7 @@ class RoutingController():
         
         ctrl = sectionLayout["power"]
         if ctrl is not None:
-            say("attempting %s" % ins.describe()) # this will issue commands to the motion controller or change points
+            self.monitor.setMessage("attempting %s" % ins.describe()) # this will issue commands to the motion controller or change points
             # usually no ramping here. simply apply the A or B power in the direction 
             # only ramp down/up if entering/leaving a siding
             # ramps for manual stops or manual direction changes are handled in the MotionController commands
@@ -89,16 +86,19 @@ aStart = TimedSimulatingDetector(3)
 aEnd = TimedSimulatingDetector(2)
 
 
-from lib.monitor import PowerMonitor
+#from lib.monitor import PowerMonitor
+#from lib.rpiPorts import PwmPort, Output, UsingRPi
 from lib.speed import MotionController, Speed
-from lib.rpiPorts import PwmPort, Output, UsingRPi
 from lib.distribution import Direction
+from lib.stdump import PowerMonitor, PwmPort, Output
+from lib.cmd import Cmd, shouldStop
 
-ports = UsingRPi()
+#ports = UsingRPi()
 monitor = PowerMonitor()
 speed = Speed(PwmPort(12), monitor)
 direction = Direction(Output(23))
 controller = MotionController(speed, direction, monitor)
+cmd = Cmd(controller.onCmd)
 
 layout = {
     "A": {
@@ -113,17 +113,18 @@ layout = {
 print("starting")
 
 shuttle = ShuttleOnSectionA()
-routingCtrl = RoutingController(shuttle, layout)
+routingCtrl = RoutingController(shuttle, layout, monitor)
 
 threadables = [
-    Cmd(controller.onCmd),
-    routingCtrl
+    cmd,
+    routingCtrl,
+    speed
 ]
 threads = [threading.Thread(target=t.start, args=(shouldStop,), daemon=True) for t in threadables]
 [thread.start() for thread in threads]
 [thread.join() for thread in threads]
 
-del ports
+#del ports
 print("stopped")
 
 
