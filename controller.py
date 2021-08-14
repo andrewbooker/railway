@@ -97,7 +97,7 @@ class Direction():
 
 class MotionController():
     def __init__(self, speed, direction, monitor): 
-	# note the monitor is currently a train speed indicator, yet the direction notifications will be a section-specific sequence
+    # note the monitor is currently a train speed indicator, yet the direction notifications will be a section-specific sequence
         self.maxSpeed = 70
         self.speed = speed
         self.direction = direction
@@ -190,52 +190,52 @@ class Detector():
 
 
 class Port():
-	def set(self, v):
-		pass
+    def set(self, v):
+        pass
 
 class PwmPort():
-	def __init__(self, port):
-		GPIO.setup(port, GPIO.OUT, initial=GPIO.LOW)
+    def __init__(self, port):
+        GPIO.setup(port, GPIO.OUT, initial=GPIO.LOW)
         self.pwm = GPIO.PWM(port, 100)
         self.pwm.start(0)
-		
-	def __del__(self):
-		self.pwm.stop()
 
-	def set(self, value):
-		self.pwm.ChangeDutyCycle(value)
+    def __del__(self):
+        self.pwm.stop()
+
+    def set(self, value):
+        self.pwm.ChangeDutyCycle(value)
 
 class ServoPort(): # should contain a pwm port
-	def __init__(self, port):
-		GPIO.setup(port, GPIO.OUT)
+    def __init__(self, port):
+        GPIO.setup(port, GPIO.OUT)
 
         self.p = GPIO.PWM(port, 50)
 
-	def __del__(self, port):
-		self.p.stop()
+    def __del__(self, port):
+        self.p.stop()
 
-	def setLeft(self):
-		pass
-	
-	def setRight(self):
-		pass
-	
+    def setLeft(self):
+        pass
+
+    def setRight(self):
+        pass
+
 class Points():
-	def __init__(self, port):
-		self.port = port
+    def __init__(self, port):
+        self.port = port
 
-	def set(self, selection):
-		pass
+    def set(self, selection):
+        pass
 
 class Section():
-	def __init__(self, port):
-		self.port = port
+    def __init__(self, port):
+        self.port = port
 
-	def __del__(self):
-		delete self.port
+    def __del__(self):
+        del self.port
 
-	def power(self, direction):
-		pass
+    def power(self, direction):
+        pass
 
 portA = 12
 portB = 18
@@ -254,10 +254,10 @@ cmd = Cmd(controller.onCmd)
 
 
 targets = [
-	speed,
-	detectorA,
-	detectorB,
-	cmd
+    speed,
+    detectorA,
+    detectorB,
+    cmd
 ]
 threads = [threading.Thread(target=t.start, args=(shouldStop,), daemon=True) for t in targets]
 [thread.start() for thread in threads]
