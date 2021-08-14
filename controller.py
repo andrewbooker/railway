@@ -50,16 +50,6 @@ import time
 import RPi.GPIO as GPIO
 
 
-class Direction():
-    def __init__(self, port):
-        self.port = port
-        GPIO.setup(self.port, GPIO.OUT, initial=GPIO.LOW)
-
-    def set(self, isForwards):
-        GPIO.output(self.port, 0 if isForwards else 1)
-
-
-
 class Detector():
     def __init__(self, port, pos, callback):
         self.callback = callback
@@ -118,6 +108,8 @@ monitor = PowerMonitor()
 
 from lib.speed import MotionController, Speed
 from lib.ports import PwmPort
+from lib.distribution import Direction
+
 speed = Speed(PwmPort(portA), monitor)
 direction = Direction(23)
 
