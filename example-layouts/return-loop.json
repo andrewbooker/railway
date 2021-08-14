@@ -3,19 +3,29 @@
         {
             "id": "s01",
             "name": "main branch",
-            "speed": "slow",
-            "length": 9.9,
             "next": {
                 "forward": {
                     "id": "p01"
                 }
-            }
+            },
+			"direction": {
+				"bank": "RPi",
+				"port": 23
+			},
+			"detectors": [
+				{
+					"bank": "RPi",
+					"port": 14
+				}
+			]
         },
         {
             "id": "r01",
             "name": "return loop",
-            "speed": "slow",
-            "length": 9.9,
+			"direction": {
+				"bank": "RPi",
+				"port": 24
+			},
             "next": {
                 "forward": {
                     "id": "p01",
@@ -38,7 +48,11 @@
             "right": {
                 "id": "r01",
                 "direction": "reverse"
-            }
+            },
+			"detector": {
+				"bank": "RPi",
+				"port": 15
+			}
         }
     ]
 }
