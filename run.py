@@ -23,14 +23,19 @@ class RoutingController():
             return
 
         ins = self.instructions[0]
+        sectionLayout = self.layout[ins.name] # so far only have section instructions
         if self.currentInstruction is not None:                
-            sectionLayout = self.layout[ins.name] # so far only have section instructions
             until = sectionLayout["until"]
             if until is None or until[ins.direction] is None or until[ins.direction].state() == 0:
                 return
-            
-        print("attempting", ins.describe()) # this will issue commands to the motion controller or change points
-
+        
+        ctrl = sectionLayout["power"]
+        if ctrl is not None:
+            say("attempting %s" % ins.describe()) # this will issue commands to the motion controller or change points
+            # usually no ramping here. simply apply the A or B power in the direction 
+            # only ramp down/up if entering/leaving a siding
+            # ramps for manual stops or manual direction changes are handled in the MotionController commands
+        
         self.currentInstruction = ins
         self.instructions.pop(0)
 
@@ -44,12 +49,13 @@ class RoutingController():
 import time
 
 class SectionInstruction():
-    def __init__(self, name, dir):
+    def __init__(self, name, cmds):
         self.name = name
-        self.direction = dir
+        self.cmds = cmds
+        self.direction = "forwards" if "f" in cmds[0] else "reverse"
 
     def describe(self):
-        return "%s %s" % (self.name, self.direction)
+        return "%s %s" % (self.name, self.cmds)
 
 class ShuttleOnSectionA():
     def __init__(self):
@@ -58,9 +64,9 @@ class ShuttleOnSectionA():
     def next(self):
         self.isForwards = not self.isForwards
         if self.isForwards:
-            return SectionInstruction("A", "forwards")
+            return SectionInstruction("A", ["f", "s"])
         else:
-            return SectionInstruction("A", "reverse")
+            return SectionInstruction("A", ["r", "s"])
 
 class Detector():
     def state(self):
@@ -78,11 +84,25 @@ class TimedSimulatingDetector():
             return 1
         return 0
 
+
 aStart = TimedSimulatingDetector(3)
 aEnd = TimedSimulatingDetector(2)
 
+
+from lib.monitor import PowerMonitor
+from lib.speed import MotionController, Speed
+from lib.rpiPorts import PwmPort, Output, UsingRPi
+from lib.distribution import Direction
+
+ports = UsingRPi()
+monitor = PowerMonitor()
+speed = Speed(PwmPort(12), monitor)
+direction = Direction(Output(23))
+controller = MotionController(speed, direction, monitor)
+
 layout = {
     "A": {
+        "power": controller,
         "until": {
             "forwards": aStart,
             "reverse": aEnd
@@ -91,16 +111,19 @@ layout = {
 }
 
 print("starting")
+
 shuttle = ShuttleOnSectionA()
 routingCtrl = RoutingController(shuttle, layout)
 
 threadables = [
-    Cmd(say),
+    Cmd(controller.onCmd),
     routingCtrl
 ]
 threads = [threading.Thread(target=t.start, args=(shouldStop,), daemon=True) for t in threadables]
 [thread.start() for thread in threads]
 [thread.join() for thread in threads]
+
+del ports
 print("stopped")
 
 
