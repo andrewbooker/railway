@@ -10,15 +10,15 @@ def say(what):
 
 
 class RoutingController():
-    def __init__(self):
+    def __init__(self, instructionProvider):
         self.instructions = []
-        self.lock = threading.Lock()
+        self.instructionProvider = instructionProvider
         self.checkpoints = {}
         self.sections = {}
         self.points = {}
 
     def _attemptNext(self):
-        if self.lock.locked() or len(self.instructions) == 0:
+        if len(self.instructions) == 0:
             return
 
         ins = self.instructions[0]
@@ -26,35 +26,14 @@ class RoutingController():
 
         self.instructions.pop(0)
 
-    def instruct(self, instruction):
-        self.lock.acquire()
-        self.instructions.append(instruction)
-        self.lock.release()
-
-    def isReady(self):
-        return len(self.instructions) < 3
-
     def start(self, shouldStop):
         while not shouldStop.is_set():
+            if len(self.instructions) < 3:
+                self.instructions.append(self.instructionProvider.next())
             self._attemptNext()
             time.sleep(1.44321)
 
 import time
-class Instructor():
-    def __init__(self, routingCtrl):
-        self.ctrl = routingCtrl
-
-    def next(self):
-        pass
-
-    def start(self, shouldStop):
-        while not shouldStop.is_set():
-            if self.ctrl.isReady():
-                ins = self.next()
-                say(ins.describe())
-                self.ctrl.instruct(ins)
-            time.sleep(1.0)
-
 
 class SectionInstruction():
     def __init__(self, name, dir):
@@ -64,9 +43,8 @@ class SectionInstruction():
     def describe(self):
         return "%s %s" % (self.name, self.section)
 
-class ShuttleOnSectionA(Instructor):
-    def __init__(self, ctrl):
-        super().__init__(ctrl)
+class ShuttleOnSectionA():
+    def __init__(self):
         self.isForwards = False
 
     def next(self):
@@ -79,13 +57,12 @@ class ShuttleOnSectionA(Instructor):
 
 
 print("starting")
-routingCtrl = RoutingController()
-shuttle = ShuttleOnSectionA(routingCtrl)
+shuttle = ShuttleOnSectionA()
+routingCtrl = RoutingController(shuttle)
 
 threadables = [
     Cmd(say),
-    routingCtrl,
-    shuttle
+    routingCtrl
 ]
 threads = [threading.Thread(target=t.start, args=(shouldStop,), daemon=True) for t in threadables]
 [thread.start() for thread in threads]
