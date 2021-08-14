@@ -77,11 +77,6 @@ class Detector():
             time.sleep(0.05)
 
 
-class Port():
-    def set(self, v):
-        pass
-
-
 class ServoPort(): # should contain a pwm port
     def __init__(self, port):
         GPIO.setup(port, GPIO.OUT)
@@ -121,10 +116,10 @@ GPIO.setmode(GPIO.BCM)
 
 monitor = PowerMonitor()
 
-from lib.speed import MotionController, Speed, PwmPort
+from lib.speed import MotionController, Speed
+from lib.ports import PwmPort
 speed = Speed(PwmPort(portA), monitor)
 direction = Direction(23)
-
 
 controller = MotionController(speed, direction, monitor)
 detectorA = Detector(14, "A", controller.onPass)
