@@ -12,9 +12,9 @@ class RoutingController():
         self.layout = layout
         self.instructionProvider = instructionProvider
 
-    def _attemptNext(self):
-        if len(self.instructions) == 0:
-            return
+    def next(self):
+        if len(self.instructions) < 3:
+            self.instructions.append(self.instructionProvider.next())
 
         ins = self.instructions[0]
         section = self.layout[ins.name] # so far only have section instructions
@@ -32,14 +32,19 @@ class RoutingController():
         self.currentInstruction = ins
         self.instructions.pop(0)
 
-    def start(self, shouldStop):
-        while not shouldStop.is_set():
-            if len(self.instructions) < 3:
-                self.instructions.append(self.instructionProvider.next())
-            self._attemptNext()
-            time.sleep(1.44321)
 
 import time
+class ControlLoop():
+    def __init__(self, c, i):
+        self.c = c
+        self.i = i
+
+    def start(self, shouldStop):
+        while not shouldStop.is_set():
+            self.c.next()
+            time.sleep(self.i)
+
+
 
 class SectionInstruction():
     def __init__(self, name, cmds):
@@ -108,13 +113,15 @@ layout = {
 
 print("starting")
 
-shuttle = ShuttleOnSectionA()
-routingCtrl = RoutingController(shuttle, layout, monitor)
+instructionProvider = ShuttleOnSectionA()
+routingCtrl = RoutingController(instructionProvider, layout, monitor)
+controlLoop = ControlLoop(routingCtrl, 1.3422)
+
 
 threadables = [
     cmd,
-    routingCtrl,
-    speed
+    speed,
+    controlLoop
 ]
 threads = [threading.Thread(target=t.start, args=(shouldStop,), daemon=True) for t in threadables]
 [thread.start() for thread in threads]
