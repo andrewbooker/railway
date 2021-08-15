@@ -1,47 +1,21 @@
 #!/usr/bin/env python
 
-import RPi.GPIO as GPIO
+
+from lib.points import Points
 import time
 import random
 
-class Points():
-    def __init__(self, servoPin):
-        GPIO.setup(servoPin, GPIO.OUT)
+from lib.rpiPorts import UsingRPi
 
-        self.p = GPIO.PWM(servoPin, 50)
-        self.r = 6
-        self.l = 9
+rpi = UsingRPi()
 
-        self.val = self.r
-        self.p.start(self.r)
-        
-    def __del__(self):
-        self.p.stop()
-
-    def _setTo(self, d, desc):
-        if d == self.val:
-            return
-        self.p.ChangeDutyCycle(d)
-        self.val = d
-        print("set to", desc)
-        
-    def left(self):
-        self._setTo(self.l, "left")
-        
-    def right(self):
-        self._setTo(self.r, "right")
-
-
-GPIO.setmode(GPIO.BCM)
-points = Points(23)
-
-
+points = Points(24)
 try:
     while True:
         time.sleep(3)
         points.left() if random.random() > 0.5 else points.right()
 
 except KeyboardInterrupt:
-  del points
+    del points
+    del rpi
 
-GPIO.cleanup()
