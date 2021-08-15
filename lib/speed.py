@@ -73,12 +73,15 @@ class MotionController():
             self._changeDirection()
 
         if c == '+':
+            self.isRunning = True
             if self.speed.target < 100:
                 self.speed.target += 1
 
         if c == '-':
             if self.speed.target > 0:
                 self.speed.target -= 1
+            else:
+                self.isRunning = False
 
 class Speed():
     def __init__(self, port, monitor):
