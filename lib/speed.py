@@ -72,10 +72,12 @@ class MotionController():
             self._changeDirection()
 
         if c == '+':
-            self.speed.target += 1
+            if self.speed.target < 100:
+                self.speed.target += 1
 
         if c == '-':
-            self.speed.target -= 1
+            if self.speed.target > 0:
+                self.speed.target -= 1
 
 class Speed():
     def __init__(self, port, monitor):
