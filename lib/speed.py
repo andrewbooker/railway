@@ -2,21 +2,22 @@
 import time
 
 class MotionController():
-    def __init__(self, speed, direction, monitor, maxSpeed):
+    def __init__(self, speed, sectionDirections, monitor, maxSpeed, startingSection):
     # note the monitor is currently a train speed indicator, yet the direction notifications will be a section-specific sequence
         self.maxSpeed = maxSpeed
         self.speed = speed
-        self.direction = direction
+        self.directionOf = sectionDirections
         self.monitor = monitor
         self.isRunning = False
         self.isStopping = False
         self.isForwards = True
         self.commandsBlocked = False
         self.monitor.setMessage("set to %s" % ("forwards" if self.isForwards else "reverse"))
+        self.currentSection = startingSection
 
     def _start(self):
         self.monitor.setMessage("ramping up %s" % ("forwards" if self.isForwards else "reverse"))
-        self.direction.set(self.isForwards)
+        self.directionOf[self.currentSection].set(self.isForwards)
         self.isRunning = True
         self.speed.rampTo(self.maxSpeed, lambda: self.monitor.setMessage("holding steady"))
 

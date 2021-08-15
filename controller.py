@@ -74,7 +74,7 @@ monitor = PowerMonitor()
 speed = Speed(PwmPort(12), monitor)
 direction = Direction(Output(23))
 
-controller = MotionController(speed, direction, monitor, 70)
+controller = MotionController(speed, {"any": direction}, monitor, 70, "any")
 detectorA = Detector(14, "A", controller.onPass)
 detectorB = Detector(15, "B", controller.onPass)
 

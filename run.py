@@ -11,27 +11,23 @@ class RoutingController():
         self.currentInstruction = None
         self.layout = layout
         self.instructionProvider = instructionProvider
-        self.checkpoints = {}
-        self.sections = {}
-        self.points = {}
 
     def _attemptNext(self):
         if len(self.instructions) == 0:
             return
 
         ins = self.instructions[0]
-        sectionLayout = self.layout[ins.name] # so far only have section instructions
+        section = self.layout[ins.name] # so far only have section instructions
         if self.currentInstruction is not None:                
-            until = sectionLayout["until"]
+            until = section["until"]
             if until is None or until[ins.direction] is None or until[ins.direction].state() == 0:
                 return
         
-        ctrl = sectionLayout["power"]
-        if ctrl is not None:
-            self.monitor.setMessage("attempting %s" % ins.describe()) # this will issue commands to the motion controller or change points
-            # usually no ramping here. simply apply the A or B power in the direction 
-            # only ramp down/up if entering/leaving a siding
-            # ramps for manual stops or manual direction changes are handled in the MotionController commands
+        direction = section["direction"]
+        if direction is not None:
+            self.monitor.setMessage("attempting %s" % ins.describe())
+            isForwards = "f" in ins.cmds[0]
+            direction.set(isForwards)
         
         self.currentInstruction = ins
         self.instructions.pop(0)
@@ -96,13 +92,13 @@ from lib.cmd import Cmd, shouldStop
 #ports = UsingRPi()
 monitor = PowerMonitor()
 speed = Speed(PwmPort(12), monitor)
-direction = Direction(Output(23))
-controller = MotionController(speed, direction, monitor, 8)
+directionOf = {"A": Direction(Output(23))}
+controller = MotionController(speed, directionOf, monitor, 8, "A")
 cmd = Cmd(controller.onCmd)
 
 layout = {
     "A": {
-        "power": controller,
+        "direction": directionOf["A"],
         "until": {
             "forwards": aStart,
             "reverse": aEnd
