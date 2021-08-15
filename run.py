@@ -97,7 +97,7 @@ from lib.cmd import Cmd, shouldStop
 monitor = PowerMonitor()
 speed = Speed(PwmPort(12), monitor)
 direction = Direction(Output(23))
-controller = MotionController(speed, direction, monitor)
+controller = MotionController(speed, direction, monitor, 8)
 cmd = Cmd(controller.onCmd)
 
 layout = {

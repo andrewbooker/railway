@@ -2,9 +2,9 @@
 import time
 
 class MotionController():
-    def __init__(self, speed, direction, monitor):
+    def __init__(self, speed, direction, monitor, maxSpeed):
     # note the monitor is currently a train speed indicator, yet the direction notifications will be a section-specific sequence
-        self.maxSpeed = 70
+        self.maxSpeed = maxSpeed
         self.speed = speed
         self.direction = direction
         self.monitor = monitor
