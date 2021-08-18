@@ -18,20 +18,21 @@ class RoutingController():
 
         ins = self.instructions[0]
         section = self.layout[ins.name] # so far only have section instructions
-        if self.currentInstruction is not None:                
-            until = section["until"]
-            if until is None or until[ins.direction] is None or until[ins.direction].state() == 0:
-                return
+        if self.currentInstruction is not None:
+            if "until" in section:
+                until = section["until"]
+                if ins.direction not in until or until[ins.direction].state() == 0:
+                    return
+                else:
+                    self.instructions.pop(0)
         
-        direction = section["direction"]
-        if direction is not None:
+        if ins != self.currentInstruction:
             self.monitor.setMessage("attempting %s" % ins.describe())
+            direction = section["direction"]
             isForwards = "f" in ins.cmds[0]
             direction.set(isForwards)
         
         self.currentInstruction = ins
-        self.instructions.pop(0)
-
 
 import time
 class ControlLoop():
@@ -101,20 +102,24 @@ directionOf = {"A": Direction(Output(23))}
 controller = MotionController(speed, directionOf, monitor, 8, "A")
 cmd = Cmd(controller.onCmd)
 
-layout = {
+endToEnd = {
     "A": {
         "direction": directionOf["A"],
         "until": {
-            "forwards": aStart,
-            "reverse": aEnd
+            "forwards": aEnd,
+            "reverse": aStart
         }
     }
+}
+
+loop = {
+    "A": { "direction": directionOf["A"] }
 }
 
 print("starting")
 
 instructionProvider = ShuttleOnSectionA()
-routingCtrl = RoutingController(instructionProvider, layout, monitor)
+routingCtrl = RoutingController(instructionProvider, loop, monitor)
 controlLoop = ControlLoop(routingCtrl, 1.3422)
 
 
