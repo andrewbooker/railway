@@ -12,10 +12,10 @@ class InertListener():
     def moveTo(self, sectionName):
         pass
 
-    def setPointsTo(self, p):
+    def setPointsTo(self, s, p):
         pass
 
-    def waitToSetPointsTo(self, p):
+    def waitToSetPointsTo(self, s, p):
         pass
 
 listener = InertListener()

@@ -28,11 +28,11 @@ class Reporter():
         print("now at", sectionName, self.direction if self.direction is not None else "")
         self.loc = sectionName
 
-    def setPointsTo(self, p):
-        print("heading", p)
+    def setPointsTo(self, selection, points):
+        print("heading", selection)
 
-    def waitToSetPointsTo(self, p):
-        print("heading", p, "if clear")
+    def waitToSetPointsTo(self, selection, points):
+        print("heading", selection, "if clear")
 
 
 class AutoController():

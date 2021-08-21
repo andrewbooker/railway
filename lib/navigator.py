@@ -56,7 +56,7 @@ class Journey():
                 approachingDivergence = "param" not in previousSection["next"][self.direction]
                 if approachingDivergence:
                     choice = self.selectPoints()
-                    self.listener.setPointsTo(choice)
+                    self.listener.setPointsTo(choice, points)
                     self.history.append(("points selection", choice))
                     nextDirection = points[choice]["direction"] if "direction" in points[choice] else "forward"
                     if nextDirection != self.direction:
@@ -64,7 +64,7 @@ class Journey():
                     self._at(self._find(points[choice]["id"]))
                 else:
                     expectedPoints = previousSection["next"][self.direction]["param"]
-                    self.listener.waitToSetPointsTo(expectedPoints)
+                    self.listener.waitToSetPointsTo(expectedPoints, points)
                     (nextSection, nextDirection) = self._afterConvergence(points["id"])
                     if nextDirection == self.direction:
                         self.changeDirection()
