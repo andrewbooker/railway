@@ -8,16 +8,16 @@
 				"bank": "RPi",
 				"port": 23
 			},
-			"detectors": [
-				{
-					"bank": "RPi",
-					"port": 14
-				},
-				{
+			"until": {
+                "forward": {
+				    "bank": "RPi",
+				    "port": 14
+			    },
+                "reverse": {
 					"bank": "RPi",
 					"port": 15
 				}
-            ]   
+            }
 		}
     ]
 }
