@@ -87,6 +87,14 @@ class TimedSimulatingDetector():
 aStart = TimedSimulatingDetector(3)
 aEnd = TimedSimulatingDetector(2)
 
+import os
+parentDir = os.path.dirname(os.getcwd())
+if "railway" not in parentDir:
+    print("needs to run in sandbox")
+    exit()
+sys.path.append(parentDir)
+from lib.navigator import Journey
+
 
 #from lib.monitor import PowerMonitor
 #from lib.rpiPorts import PwmPort, Output, UsingRPi
