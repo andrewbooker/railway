@@ -4,22 +4,20 @@
             "id": "s01",
             "name": "shuttle track",
             "next": {},
-			"ports": {
-				"direction": {
+			"direction": {
+				"bank": "RPi",
+				"port": 23
+			},
+			"detectors": [
+				{
 					"bank": "RPi",
-					"port": 23
+					"port": 14
 				},
-				"detectors": [
-					{
-						"bank": "RPi",
-						"port": 14
-					},
-					{
-						"bank": "RPi",
-						"port": 15
-					}
-				]
-			}
-        }
+				{
+					"bank": "RPi",
+					"port": 15
+				}
+            ]   
+		}
     ]
 }

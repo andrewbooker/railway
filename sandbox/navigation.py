@@ -18,15 +18,19 @@ class Reporter():
         self.loc = None
         self.direction = None
 
+    def _set(self):
+        print("now at", self.loc["name"], self.direction if self.direction is not None else "assumed forwards", "on", self.loc["direction"]["bank"], self.loc["direction"]["port"])
+
     def changeDirection(self, to):
         self.direction = to
         print("changing direction to", to)
+        self._set()
 
-    def moveTo(self, sectionName):
+    def moveTo(self, section):
         if (self.loc is not None):
-            print("from", self.loc)
-        print("now at", sectionName, self.direction if self.direction is not None else "")
-        self.loc = sectionName
+            print("from", self.loc["name"])
+        self.loc = section
+        self._set()
 
     def setPointsTo(self, selection, points):
         print("heading", selection, points["selector"]["bank"], points["selector"]["port"])

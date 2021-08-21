@@ -12,7 +12,11 @@
                 "reverse": { 
                     "id": "s01"
                 }
-            }
+            },
+            "direction": {
+				"bank": "RPi",
+				"port": 23
+			}
         }
     ]
 }

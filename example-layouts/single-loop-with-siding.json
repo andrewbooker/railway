@@ -13,7 +13,11 @@
                     "id": "p01",
                     "param": "right"
                 }
-            }
+            },
+            "direction": {
+				"bank": "RPi",
+				"port": 23
+			}
         },
         {
             "id": "s02",
@@ -25,7 +29,11 @@
                     "id": "p01",
                     "param": "left"
                 }
-            }
+            },
+            "direction": {
+				"bank": "RPi",
+				"port": 25
+			}
         }
     ],
     "points": [
@@ -40,8 +48,12 @@
             },
             "selector": {
                 "bank": "RPi",
-                "port": 24
-            }
+                "port": 25
+            },
+            "direction": {
+				"bank": "RPi",
+				"port": 26
+			}
         }
     ]
 }

@@ -24,7 +24,7 @@ class Journey():
     def _at(self, s):
         self.section = s
         self.history.append((s["id"], self.direction))
-        self.listener.moveTo(s["name"])
+        self.listener.moveTo(s)
 
     @staticmethod
     def _check(section, pointsId, direction):
