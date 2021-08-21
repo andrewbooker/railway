@@ -28,22 +28,28 @@ class NavigationListener():
         self.currentDirection = "forward"
         self.currentSection = None
 
-    def setDetector(self):
+    @staticmethod
+    def portId(p):
+        return "%s_%s" % (p["bank"], p["port"])
+
+    def _set(self):
+        say("powering in", self.currentDirection, "using", NavigationListener.portId(self.currentSection["direction"]))
         if "until" in self.currentSection:
             u = self.currentSection["until"]
             if self.currentDirection in u:
                 d = u[self.currentDirection]
-                self.detectionListener.setNextDetector("%s_%s" % (d["bank"], d["port"]), 1)
+                self.detectionListener.setNextDetector(NavigationListener.portId(d), 1)
+
 
     def changeDirection(self, to):
         say("changing direction to", to)
         self.currentDirection = to
-        self.setDetector()
+        self._set()
 
     def moveTo(self, section):
         say("setting section to", section["name"])
         self.currentSection = section
-        self.setDetector()
+        self._set()
 
     def setPointsTo(self, s, p):
         #detectionListener.setNextDetector...
