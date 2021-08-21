@@ -23,15 +23,18 @@ straightLine = "{\"sections\":[{\"id\":\"s1\",\"name\":\"shuttle\",\"next\":{}}]
 
 def test_straight_line_track_at_start():
     journey = Journey(straightLine, listener)
+    journey.start()
     assert journey.history == [("s1", "forward")]
 
 def test_straight_line_track_after_one_move():
     journey = Journey(straightLine, listener)
+    journey.start()
     journey.nextStage()
     assert journey.history == [("s1", "forward"),("s1", "reverse")]
 
 def test_straight_line_track_after_multiple_moves():
     journey = Journey(straightLine, listener)
+    journey.start()
     journey.nextStage()
     journey.nextStage()
     journey.nextStage()
@@ -43,16 +46,19 @@ loop = "{\"sections\":[{\"id\":\"s01\",\"name\":\"loop\",\"next\":{\"forward\":{
 
 def test_loop_at_start():
     journey = Journey(loop, listener)
+    journey.start()
     assert journey.history == [("s01", "forward")]
 
 def test_loop_after_multiple_moves():
     journey = Journey(loop, listener)
+    journey.start()
     journey.nextStage()
     journey.nextStage()
     assert journey.history == [("s01", "forward"),("s01", "forward"),("s01", "forward")]
 
 def test_loop_after_change_of_direction():
     journey = Journey(loop, listener)
+    journey.start()
     journey.nextStage()
     journey.changeDirection()
     journey.nextStage()
@@ -102,6 +108,7 @@ loopWithSiding = """
 
 def test_loop_with_siding_points_right():
     journey = Journey(loopWithSiding, listener)
+    journey.start()
     journey.selectPoints = lambda: "right"
     journey.nextStage()
     journey.nextStage()
@@ -115,6 +122,7 @@ def test_loop_with_siding_points_right():
         
 def test_loop_with_siding_points_right_in_reverse():
     journey = Journey(loopWithSiding, listener)
+    journey.start()
     journey.selectPoints = lambda: "right"
     journey.nextStage()
     journey.direction = "reverse"
@@ -132,6 +140,7 @@ def test_loop_with_siding_points_right_in_reverse():
 
 def test_loop_with_siding_points_left():
     journey = Journey(loopWithSiding, listener)
+    journey.start()
     journey.selectPoints = lambda: "left"
     journey.nextStage()
     journey.nextStage()
@@ -199,6 +208,7 @@ returnLoop = """
 def test_return_loop_with_points_left():
     journey = Journey(returnLoop, listener)
     journey.selectPoints = lambda: "left"
+    journey.start()
     journey.nextStage()
     journey.nextStage()
     journey.nextStage()
@@ -219,6 +229,7 @@ def test_return_loop_with_points_left():
 def test_return_loop_with_points_right():
     journey = Journey(returnLoop, listener)
     journey.selectPoints = lambda: "right"
+    journey.start()
     journey.nextStage()
     journey.nextStage()
     journey.nextStage()
@@ -285,6 +296,7 @@ simpleFork = """
 def test_simple_fork_with_points_left():
     journey = Journey(simpleFork, listener)
     journey.selectPoints = lambda: "left"
+    journey.start()
     journey.nextStage()
     journey.nextStage()
     journey.nextStage()
@@ -306,6 +318,7 @@ def test_simple_fork_with_points_left():
 def test_simple_fork_with_points_right():
     journey = Journey(simpleFork, listener)
     journey.selectPoints = lambda: "right"
+    journey.start()
     journey.nextStage()
     journey.nextStage()
     journey.nextStage()
@@ -375,6 +388,7 @@ simpleConvergingFork = """
 def test_converging_fork_with_points_left():
     journey = Journey(simpleConvergingFork, listener)
     journey.selectPoints = lambda: "left"
+    journey.start()
     journey.nextStage()
     journey.nextStage()
     journey.nextStage()
@@ -511,6 +525,7 @@ triangleWithSidings = """
 def test_triangle_with_with_points_right():
     journey = Journey(triangleWithSidings, listener)
     journey.selectPoints = lambda: "right"
+    journey.start()
     journey.nextStage()
     journey.nextStage()
     journey.nextStage()
@@ -555,6 +570,7 @@ def test_triangle_with_with_points_right():
 def test_triangle_with_with_points_left():
     journey = Journey(triangleWithSidings, listener)
     journey.selectPoints = lambda: "left"
+    journey.start()
     journey.nextStage()
     journey.nextStage()
     journey.nextStage()

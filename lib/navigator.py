@@ -8,7 +8,6 @@ class Journey():
         self.direction = "forward"
         self.history = []
         self.section = None
-        self._at(self.layout["sections"][0])
         self.selectPoints = lambda: "left" if (randint(0, 1) > 0) else "right"
 
     def _find(self, id):
@@ -42,6 +41,9 @@ class Journey():
                 return (s, "forward")
             if Journey._check(next, atPointsId, "reverse") is not None:
                 return (s, "reverse")
+
+    def start(self):
+        self._at(self.layout["sections"][0])
 
     def changeDirection(self):
         self.direction = "forward" if self.direction == "reverse" else "reverse"
