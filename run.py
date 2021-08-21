@@ -23,8 +23,9 @@ def say(*what):
     sys.stdout.write("%s\r\n" % p)
 
 class NavigationListener():
-    def __init__(self, detectionListener):
+    def __init__(self, detectionListener, directionController):
         self.detectionListener = detectionListener
+        self.directionController = directionController
         self.currentDirection = "forward"
         self.currentSection = None
 
@@ -33,7 +34,7 @@ class NavigationListener():
         return "%s_%s" % (p["bank"], p["port"])
 
     def _set(self):
-        say("powering in", self.currentDirection, "using", NavigationListener.portId(self.currentSection["direction"]))
+        self.directionController.set(NavigationListener.portId(self.currentSection["direction"]), self.currentDirection)
         if "until" in self.currentSection:
             u = self.currentSection["until"]
             if self.currentDirection in u:
@@ -80,6 +81,10 @@ class TrafficListener():
         if self.detectors.stateOf(self.detector) == self.requiredState:
             self.callback()
 
+class DirectionRelays():
+    def set(self, portId, direction):
+        say("powering in", direction, "using", portId)
+
 class Detector():
     def __init__(self):
         self.state = 0
@@ -106,9 +111,10 @@ class KeyboardDetectors():
         self.detectors[c].state = 0 if self.detectors[c].state == 1 else 1
 
 
+directionRelays = DirectionRelays()
 detectors = KeyboardDetectors()
 traffic = TrafficListener(detectors)
-navigation = NavigationListener(traffic)
+navigation = NavigationListener(traffic, directionRelays)
 journey = Journey(layoutStr, navigation)
 traffic.setCallback(journey.nextStage)
 
