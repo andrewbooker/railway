@@ -37,6 +37,10 @@
             },
             "right": {
                 "id": "s01"
+            },
+            "selector": {
+                "bank": "RPi",
+                "port": 24
             }
         }
     ]

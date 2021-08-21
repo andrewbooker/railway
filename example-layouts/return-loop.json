@@ -49,6 +49,10 @@
                 "id": "r01",
                 "direction": "reverse"
             },
+            "selector": {
+                "bank": "RPi",
+                "port": 24
+            },
 			"detector": {
 				"bank": "RPi",
 				"port": 15
