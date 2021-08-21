@@ -17,7 +17,7 @@ class RoutingController():
             self.instructions.append(self.instructionProvider.next())
 
         ins = self.instructions[0]
-        section = self.layout[ins.name] # so far only have section instructions
+        section = self.layout["sections"][ins.name]
         if self.currentInstruction is not None:
             if "until" in section:
                 until = section["until"]
@@ -103,17 +103,19 @@ controller = MotionController(speed, directionOf, monitor, 8, "A")
 cmd = Cmd(controller.onCmd)
 
 endToEnd = {
-    "A": {
-        "direction": directionOf["A"],
-        "until": {
-            "forwards": aEnd,
-            "reverse": aStart
+    "sections": {
+        "A": {
+            "direction": directionOf["A"],
+            "until": {
+                "forwards": aEnd,
+                "reverse": aStart
+            }
         }
     }
 }
 
 loop = {
-    "A": { "direction": directionOf["A"] }
+    "sections": {"A": { "direction": directionOf["A"] } }
 }
 
 print("starting")
