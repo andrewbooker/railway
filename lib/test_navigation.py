@@ -10,7 +10,7 @@ def openLayout(fileName):
 class LocalDetectionListener():
     def __init__(self):
         self.callback = None
-        self.detector = None
+        self.portId = None
         self.value = None
 
     def clearCallback(self):
@@ -20,7 +20,7 @@ class LocalDetectionListener():
         self.callback = c
 
     def setNextDetector(self, d, v):
-        self.detector = d
+        self.portId = d
         self.value = v
 
 class LocalDirectionController():
@@ -41,14 +41,27 @@ detectionListener = LocalDetectionListener()
 directionController = LocalDirectionController()
 pointsController = LocalPointsController()
 
-listener = NavigationListener(detectionListener, directionController, pointsController)
+navigation = NavigationListener(detectionListener, directionController, pointsController)
 
 
-def test_shuttle_initial_state():
-    journey = Journey(openLayout("example-layouts/shuttle.json"), listener)
+def test_shuttle():
+    journey = Journey(openLayout("example-layouts/shuttle.json"), navigation)
+    navigation.setNextRequestor(journey.nextStage)
     journey.start()
 
     assert directionController.direction == "forward"
     assert directionController.portId == "RPi_23"
-    assert detectionListener.detector == "RPi_14"
+    assert detectionListener.portId == "RPi_14"
     assert detectionListener.value == 1
+    assert detectionListener.callback is not None
+
+    detectionListener.callback()
+
+    assert directionController.direction == "reverse"
+    assert directionController.portId == "RPi_23"
+    assert detectionListener.portId == "RPi_15"
+    assert detectionListener.value == 1
+    assert detectionListener.callback is not None
+
+    detectionListener.callback()
+    assert directionController.direction == "forward"
