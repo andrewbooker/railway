@@ -32,7 +32,13 @@
             },
             "direction": {
 				"bank": "RPi",
-				"port": 25
+				"port": 24
+			},
+            "until": {
+				"forward": {
+					"bank": "RPi",
+					"port": 14
+				}
 			}
         }
     ],
@@ -53,6 +59,10 @@
             "direction": {
 				"bank": "RPi",
 				"port": 26
+			},
+			"detector": {
+				"bank": "RPi",
+				"port": 15
 			}
         }
     ]
