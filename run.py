@@ -74,10 +74,7 @@ class NavigationListener():
 
     def setPointsTo(self, s, p):
         say("setting", p["name"], "to", s, "now")
-        # should wait until the train arrives before proceeding to the next section
-        # the following does nothing because the Journey immediately proceeds to the next stage
-        #self.detectionListener.setCallback(self.nextRequestor)
-        #self.detectionListener.setNextDetector(NavigationListener.portId(p["detector"]), 1)
+        self.detectionListener.waitFor(NavigationListener.portId(p["detector"]), 1)
 
     def waitToSetPointsTo(self, s, p):
         say("setting", p["name"], "to", s, "when ready")
@@ -86,7 +83,8 @@ class NavigationListener():
 
 
 class TrafficListener():
-    def __init__(self, detectors):
+    def __init__(self, detectors, shouldStop):
+        self.shouldStop = shouldStop
         self.detectors = detectors
         self.callback = None
         self.detector = None
@@ -102,6 +100,13 @@ class TrafficListener():
         self.detector = d
         self.requiredState = state
         say("waiting for", state, "on", d)
+
+    def waitFor(self, d, state):
+        self.detector = None
+        self.callback = None
+        say("blocking wait for", state, "on", d)
+        while self.detectors.stateOf(d) != state and not self.shouldStop.is_set():
+            time.sleep(0.05)
 
     def poll(self):
         if self.detector is None or self.callback is None:
@@ -149,16 +154,20 @@ class PointsController():
     def fromId(self, pId):
         return self.points[pId]
 
+
+from lib.cmd import Cmd, shouldStop
+
 pointsController = PointsController()
 directionRelays = DirectionRelays()
 detectors = KeyboardDetectors()
-traffic = TrafficListener(detectors)
+traffic = TrafficListener(detectors, shouldStop)
 navigation = NavigationListener(traffic, directionRelays, pointsController)
 journey = Journey(layoutStr, navigation)
 
 pointsController.fromLayout(journey.layout)
 navigation.setNextRequestor(journey.nextStage)
-#traffic.setCallback(journey.nextStage) #not for long. detectors should either stop the train (speed) or block points being changed
+
+print("starting")
 journey.start()
 
 class ControlLoop():
@@ -172,10 +181,6 @@ class ControlLoop():
             time.sleep(self.i)
 
 controlLoop = ControlLoop(traffic.poll, 1.0)
-
-from lib.cmd import Cmd, shouldStop
-
-print("starting")
 
 cmd = Cmd(detectors.onCmd)
 threadables = [
