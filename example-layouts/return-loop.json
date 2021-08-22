@@ -12,12 +12,12 @@
 				"bank": "RPi",
 				"port": 23
 			},
-			"detectors": [
-				{
+			"until": {
+				"reverse": {
 					"bank": "RPi",
 					"port": 14
 				}
-			]
+			}
         },
         {
             "id": "r01",

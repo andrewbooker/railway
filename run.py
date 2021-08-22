@@ -23,29 +23,49 @@ def say(*what):
     sys.stdout.write("%s\r\n" % p)
 
 class NavigationListener():
-    def __init__(self, detectionListener, directionController):
+    def __init__(self, detectionListener, directionController, pointsController):
         self.detectionListener = detectionListener
         self.directionController = directionController
+        self.pointsController = pointsController
         self.currentDirection = "forward"
         self.currentSection = None
+        self.nextRequestor = None
 
     @staticmethod
     def portId(p):
         return "%s_%s" % (p["bank"], p["port"])
 
     def _set(self):
+        self.detectionListener.clearCallback()
         self.directionController.set(NavigationListener.portId(self.currentSection["direction"]), self.currentDirection)
+
+        if self.currentSection["id"][0] == "p":
+            say("now at points", self.currentSection["name"])
+            self.nextRequestor()
+            return
+
         if "until" in self.currentSection:
             u = self.currentSection["until"]
             if self.currentDirection in u:
                 d = u[self.currentDirection]
+                self.detectionListener.setCallback(self.nextRequestor)
                 self.detectionListener.setNextDetector(NavigationListener.portId(d), 1)
 
+        if "next" in self.currentSection:
+            n = self.currentSection["next"]
+            if self.currentDirection in n and n[self.currentDirection]["id"][0] == "p":
+                points = pointsController.fromId(n[self.currentDirection]["id"])
+                say("next will be points", points["name"])
+                self.detectionListener.setCallback(self.nextRequestor)
+                self.detectionListener.setNextDetector(NavigationListener.portId(points["detector"]), 0)
+
+
+    def setNextRequestor(self, r):
+        self.nextRequestor = r
 
     def changeDirection(self, to):
         say("changing direction to", to)
         self.currentDirection = to
-        self._set()
 
     def moveTo(self, section):
         say("setting section to", section["name"])
@@ -53,11 +73,16 @@ class NavigationListener():
         self._set()
 
     def setPointsTo(self, s, p):
-        #detectionListener.setNextDetector...
-        say("setting points", p["name"], "to", s)
+        say("setting", p["name"], "to", s, "now")
+        # should wait until the train arrives before proceeding to the next section
+        # the following does nothing because the Journey immediately proceeds to the next stage
+        #self.detectionListener.setCallback(self.nextRequestor)
+        #self.detectionListener.setNextDetector(NavigationListener.portId(p["detector"]), 1)
 
     def waitToSetPointsTo(self, s, p):
-        say("setting points", p["name"], "to", s, "if ready")
+        say("setting", p["name"], "to", s, "when ready")
+        self.detectionListener.setCallback(self.nextRequestor)
+        self.detectionListener.setNextDetector(NavigationListener.portId(p["detector"]), 0)
 
 
 class TrafficListener():
@@ -69,6 +94,9 @@ class TrafficListener():
 
     def setCallback(self, c):
         self.callback = c
+
+    def clearCallback(self):
+        self.callback = None
 
     def setNextDetector(self, d, state):
         self.detector = d
@@ -83,7 +111,7 @@ class TrafficListener():
 
 class DirectionRelays():
     def set(self, portId, direction):
-        say("powering in", direction, "using", portId)
+        say(direction, "at", portId)
 
 class Detector():
     def __init__(self):
@@ -110,14 +138,28 @@ class KeyboardDetectors():
             self.detectors[c] = Detector()
         self.detectors[c].state = 0 if self.detectors[c].state == 1 else 1
 
+class PointsController():
+    def __init__(self):
+        self.points = {}
 
+    def fromLayout(self, layout):
+        for p in layout["points"]:
+            self.points[p["id"]] = p
+
+    def fromId(self, pId):
+        return self.points[pId]
+
+pointsController = PointsController()
 directionRelays = DirectionRelays()
 detectors = KeyboardDetectors()
 traffic = TrafficListener(detectors)
-navigation = NavigationListener(traffic, directionRelays)
+navigation = NavigationListener(traffic, directionRelays, pointsController)
 journey = Journey(layoutStr, navigation)
-traffic.setCallback(journey.nextStage)
 
+pointsController.fromLayout(journey.layout)
+navigation.setNextRequestor(journey.nextStage)
+#traffic.setCallback(journey.nextStage) #not for long. detectors should either stop the train (speed) or block points being changed
+journey.start()
 
 class ControlLoop():
     def __init__(self, c, i):
