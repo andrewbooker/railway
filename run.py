@@ -75,13 +75,13 @@ class NavigationListener():
         self._set()
 
     def setPointsTo(self, s, p):
-        say("setting", p["name"], "to", s, "now")
         self.detectionListener.waitFor(NavigationListener.portId(p["detector"]), 1)
+        self.pointsController.set(p["id"], s)
 
     def waitToSetPointsTo(self, s, p):
-        say("setting", p["name"], "to", s, "when ready")
         self.detectionListener.setCallback(self.nextRequestor)
         self.detectionListener.setNextDetector(NavigationListener.portId(p["detector"]), 0)
+        self.pointsController.set(p["id"], s)
 
 
 class TrafficListener():
@@ -158,6 +158,9 @@ class PointsController():
     def fromId(self, pId):
         return self.points[pId]
 
+    def set(self, pId, s):
+        p = self.points[pId]
+        say("setting", p["name"], "to", s, "on", NavigationListener.portId(p["selector"]))
 
 from lib.cmd import Cmd, shouldStop
 
