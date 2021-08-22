@@ -66,6 +66,8 @@ class NavigationListener():
     def changeDirection(self, to):
         say("changing direction to", to)
         self.currentDirection = to
+        if "until" in self.currentSection:
+            self._set()
 
     def moveTo(self, section):
         say("setting section to", section["name"])
@@ -148,6 +150,8 @@ class PointsController():
         self.points = {}
 
     def fromLayout(self, layout):
+        if not "points" in layout:
+            return
         for p in layout["points"]:
             self.points[p["id"]] = p
 
