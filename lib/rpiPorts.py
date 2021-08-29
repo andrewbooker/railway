@@ -17,6 +17,14 @@ class ServoPwmPort(PwmPort):
     def __init__(self, port, initVal):
         super().__init__(port, 50, initVal)
 
+class Input():
+    def __init__(self, port):
+        self.port = port
+        GPIO.setup(self.port, GPIO.IN)
+
+    def get(self):
+        return GPIO.input(self.port)
+
 class Output():
     def __init__(self, port):
         self.port = port
@@ -38,6 +46,9 @@ class UsingRPi():
     def _add(self, d):
         self.devices.append(d)
         return d
+
+    def input(self, port):
+        return self._add(Input(port))
 
     def output(self, port):
         return self._add(Output(port))

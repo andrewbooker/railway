@@ -6,10 +6,7 @@ import threading
 os.system("clear")
 print("")
 
-
 import time
-import RPi.GPIO as GPIO
-
 
 class Detector():
     def __init__(self, port, pos, callback):
@@ -17,11 +14,10 @@ class Detector():
         self.pos = pos
         self.port = port
         self.state = 0
-        GPIO.setup(self.port, GPIO.IN)
 
     def start(self, shouldStop):
         while not shouldStop.is_set():
-            v = GPIO.input(self.port)
+            v = self.port.get()
             if v != self.state:
                 self.callback(v, self.pos)
                 self.state = v
@@ -42,8 +38,8 @@ speed = Speed(rpi.pwmPort(12), monitor)
 direction = Direction(rpi.output(23))
 
 controller = MotionController(speed, {"any": direction}, monitor, 70, "any")
-detectorA = Detector(14, "A", controller.onPass)
-detectorB = Detector(15, "B", controller.onPass)
+detectorA = Detector(rpi.input(14), "A", controller.onPass)
+detectorB = Detector(rpi.input(15), "B", controller.onPass)
 
 from lib.cmd import *
 cmd = Cmd(controller.onCmd)
