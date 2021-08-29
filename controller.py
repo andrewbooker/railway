@@ -27,39 +27,6 @@ class Detector():
                 self.state = v
             time.sleep(0.05)
 
-
-class ServoPort(): # should contain a pwm port
-    def __init__(self, port):
-        GPIO.setup(port, GPIO.OUT)
-
-        self.p = GPIO.PWM(port, 50)
-
-    def __del__(self, port):
-        self.p.stop()
-
-    def setLeft(self):
-        pass
-
-    def setRight(self):
-        pass
-
-class Points():
-    def __init__(self, port):
-        self.port = port
-
-    def set(self, selection):
-        pass
-
-class Section():
-    def __init__(self, port):
-        self.port = port
-
-    def __del__(self):
-        del self.port
-
-    def power(self, direction):
-        pass
-
 portA = 12
 portB = 18
 
