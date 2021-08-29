@@ -6,23 +6,6 @@ import threading
 os.system("clear")
 print("")
 
-import time
-
-class Detector():
-    def __init__(self, port, pos, callback):
-        self.callback = callback
-        self.pos = pos
-        self.port = port
-        self.state = 0
-
-    def start(self, shouldStop):
-        while not shouldStop.is_set():
-            v = self.port.get()
-            if v != self.state:
-                self.callback(v, self.pos)
-                self.state = v
-            time.sleep(0.05)
-
 portA = 12
 portB = 18
 
@@ -32,6 +15,7 @@ rpi = UsingRPi()
 from lib.monitor import PowerMonitor
 from lib.speed import MotionController, Speed
 from lib.distribution import Direction
+from lib.detectors import Detector
 
 monitor = PowerMonitor()
 speed = Speed(rpi.pwmPort(12), monitor)
