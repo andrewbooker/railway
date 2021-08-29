@@ -1,23 +1,21 @@
-{
-    "sections": [
-        { 
-            "id": "s01",
-            "name": "shuttle track",
-            "next": {},
-			"direction": {
+[
+    { 
+        "id": "s01",
+        "name": "shuttle track",
+        "next": {},
+		"direction": {
+			"bank": "RPi",
+			"port": 23
+		},
+		"until": {
+            "forward": {
+			    "bank": "RPi",
+			    "port": 14
+		    },
+            "reverse": {
 				"bank": "RPi",
-				"port": 23
-			},
-			"until": {
-                "forward": {
-				    "bank": "RPi",
-				    "port": 14
-			    },
-                "reverse": {
-					"bank": "RPi",
-					"port": 15
-				}
-            }
-		}
-    ]
-}
+				"port": 15
+			}
+        }
+	}
+]

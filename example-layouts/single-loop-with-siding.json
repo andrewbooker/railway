@@ -1,69 +1,66 @@
-{
-    "sections": [
-        {
-            "id": "s01",
-            "name": "main loop",
-            "speed": "express",
-            "length": 10.6,
-            "next": {
-                "forward": {
-                    "id": "p01"
-                },
-                "reverse": {
-                    "id": "p01",
-                    "param": "right"
-                }
+[
+    {
+        "id": "s01",
+        "name": "main loop",
+        "speed": "express",
+        "length": 10.6,
+        "next": {
+            "forward": {
+                "id": "p01"
             },
-            "direction": {
-				"bank": "RPi",
-				"port": 23
-			}
+            "reverse": {
+                "id": "p01",
+                "param": "right"
+            }
         },
-        {
-            "id": "s02",
-            "name": "branch siding",
-            "speed": "crawl",
-            "length": 1.5,
-            "next": {
-                "reverse": {
-                    "id": "p01",
-                    "param": "left"
-                }
-            },
-            "direction": {
+        "direction": {
+			"bank": "RPi",
+			"port": 23
+		}
+    },
+    {
+        "id": "s02",
+        "name": "branch siding",
+        "speed": "crawl",
+        "length": 1.5,
+        "next": {
+            "reverse": {
+                "id": "p01",
+                "param": "left"
+            }
+        },
+        "direction": {
+			"bank": "RPi",
+			"port": 24
+		},
+        "until": {
+			"forward": {
 				"bank": "RPi",
-				"port": 24
-			},
-            "until": {
-				"forward": {
-					"bank": "RPi",
-					"port": 14
-				}
+				"port": 14
 			}
-        }
-    ],
-    "points": [
-        {
-            "id": "p01",
-            "name": "branch siding points",
-            "left": {
-                "id": "s02"
-            },
-            "right": {
-                "id": "s01"
-            },
-            "selector": {
-                "bank": "RPi",
-                "port": 25
-            },
-            "direction": {
-				"bank": "RPi",
-				"port": 26
-			},
-			"detector": {
-				"bank": "RPi",
-				"port": 15
-			}
-        }
-    ]
-}
+		}
+    },
+    {
+        "id": "p01",
+        "type": "points",
+        "name": "branch siding points",
+        "left": {
+            "id": "s02"
+        },
+        "right": {
+            "id": "s01"
+        },
+        "selector": {
+            "bank": "RPi",
+            "port": 25
+        },
+        "direction": {
+			"bank": "RPi",
+			"port": 26
+		},
+		"detector": {
+			"bank": "RPi",
+			"port": 15
+		}
+    }
+]

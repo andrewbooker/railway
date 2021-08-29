@@ -17,7 +17,7 @@ class NavigationListener():
         self.detectionListener.clearCallback()
         self.directionController.set(NavigationListener.portId(self.currentSection["direction"]), self.currentDirection)
 
-        if self.currentSection["id"][0] == "p":
+        if "type" in self.currentSection and self.currentSection["type"] == "points":
             self.nextRequestor()
             return
 

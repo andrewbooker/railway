@@ -11,11 +11,7 @@ class Journey():
         self.selectPoints = lambda: "left" if (randint(0, 1) > 0) else "right"
 
     def _find(self, id):
-        if "points" in self.layout:
-            for p in self.layout["points"]:
-                if p["id"] == id:
-                    return p
-        for s in self.layout["sections"]:
+        for s in self.layout:
             if s["id"] == id:
                 return s
         return None
@@ -35,7 +31,7 @@ class Journey():
         return None
 
     def _afterConvergence(self, atPointsId):
-        for s in self.layout["sections"]:
+        for s in self.layout:
             next = s["next"]
             if Journey._check(next, atPointsId, "forward") is not None:
                 return (s, "forward")
@@ -43,7 +39,7 @@ class Journey():
                 return (s, "reverse")
 
     def start(self):
-        self._at(self.layout["sections"][0])
+        self._at(self.layout[0])
 
     def changeDirection(self):
         self.direction = "forward" if self.direction == "reverse" else "reverse"
@@ -52,7 +48,7 @@ class Journey():
 
     def nextStage(self):
         if "next" not in self.section:
-            if self.section["id"][0] == "p":
+            if "type" in self.section and self.section["type"] == "points":
                 points = self.section
                 previousSection = self._find(self.history[-2][0])
                 approachingDivergence = "param" not in previousSection["next"][self.direction]

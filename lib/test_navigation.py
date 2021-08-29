@@ -42,10 +42,9 @@ class PointsController():
         self.points = {}
 
     def fromLayout(self, layout):
-        if not "points" in layout:
-            return
-        for p in layout["points"]:
-            self.points[p["id"]] = p
+        for p in layout:
+            if "type" in p and p["type"] == "points":
+                self.points[p["id"]] = p
 
     def fromId(self, pId):
         return self.points[pId]

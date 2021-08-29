@@ -19,7 +19,7 @@ class InertListener():
         pass
 
 listener = InertListener()
-straightLine = "{\"sections\":[{\"id\":\"s1\",\"name\":\"shuttle\",\"next\":{}}]}"
+straightLine = "[{\"id\":\"s1\",\"name\":\"shuttle\",\"next\":{}}]"
 
 def test_straight_line_track_at_start():
     journey = Journey(straightLine, listener)
@@ -42,7 +42,7 @@ def test_straight_line_track_after_multiple_moves():
     assert journey.history == [("s1", "forward"),("s1", "reverse"),("s1", "forward"),("s1", "reverse"),("s1", "forward")]
 
 
-loop = "{\"sections\":[{\"id\":\"s01\",\"name\":\"loop\",\"next\":{\"forward\":{\"id\":\"s01\"},\"reverse\":{\"id\":\"s01\"}}}]}"
+loop = "[{\"id\":\"s01\",\"name\":\"loop\",\"next\":{\"forward\":{\"id\":\"s01\"},\"reverse\":{\"id\":\"s01\"}}}]"
 
 def test_loop_at_start():
     journey = Journey(loop, listener)
@@ -67,7 +67,7 @@ def test_loop_after_change_of_direction():
 
 
 loopWithSiding = """
-{"sections":[
+[
     {
         "id": "s01",
         "name": "main loop",
@@ -90,11 +90,10 @@ loopWithSiding = """
                 "param": "left"
             }
         }
-    }
-],
-"points": [
+    },
     {
         "id": "p01",
+        "type": "points",
         "name": "branch siding points",
         "left": {
             "id": "s02"
@@ -103,7 +102,7 @@ loopWithSiding = """
             "id": "s01"
         }
     }
-]}
+]
 """
 
 def test_loop_with_siding_points_right():
@@ -163,46 +162,43 @@ def test_loop_with_siding_points_left():
         ("s01", "reverse")]
     
 returnLoop = """
-{
-    "sections": [
-        {
-            "id": "s01",
-            "name": "main branch",
-            "next": {
-                "forward": {
-                    "id": "p01"
-                }
-            }
-        },
-        {
-            "id": "r01",
-            "name": "return loop",
-            "next": {
-                "forward": {
-                    "id": "p01",
-                    "param": "right"
-                },
-                "reverse": {
-                    "id": "p01",
-                    "param": "left"
-                }
+[
+    {
+        "id": "s01",
+        "name": "main branch",
+        "next": {
+            "forward": {
+                "id": "p01"
             }
         }
-    ],
-    "points": [
-        {
-            "id": "p01",
-            "name": "return loop points",
-            "left": {
-                "id": "r01"
+    },
+    {
+        "id": "r01",
+        "name": "return loop",
+        "next": {
+            "forward": {
+                "id": "p01",
+                "param": "right"
             },
-            "right": {
-                "id": "r01",
-                "direction": "reverse"
+            "reverse": {
+                "id": "p01",
+                "param": "left"
             }
         }
-    ]
-}
+    },
+    {
+        "id": "p01",
+        "type": "points",
+        "name": "return loop points",
+        "left": {
+            "id": "r01"
+        },
+        "right": {
+            "id": "r01",
+            "direction": "reverse"
+        }
+    }
+]
 """
 
 def test_return_loop_with_points_left():
@@ -248,7 +244,7 @@ def test_return_loop_with_points_right():
     ]
 
 simpleFork = """
-{"sections":[
+[
     {
         "id": "s01",
         "name": "main branch",
@@ -277,11 +273,10 @@ simpleFork = """
                 "param": "right"
             }
         }
-    }
-],
-"points": [
+    },
     {
         "id": "p01",
+        "type": "points",
         "name": "branching points",
         "left": {
             "id": "s02"
@@ -290,7 +285,7 @@ simpleFork = """
             "id": "s03"
         }
     }
-]}
+]
 """
 
 def test_simple_fork_with_points_left():
@@ -338,7 +333,7 @@ def test_simple_fork_with_points_right():
     ]
 
 simpleConvergingFork = """
-{"sections":[
+[
     {
         "id": "s01",
         "name": "branch right",
@@ -367,11 +362,10 @@ simpleConvergingFork = """
                 "id": "p01"
             }
         }
-    }
-],
-"points": [
+    },
     {
         "id": "p01",
+        "type": "points",
         "name": "branching points",
         "left": {
             "id": "s02",
@@ -382,7 +376,7 @@ simpleConvergingFork = """
             "param": "reverse"
         }
     }
-]}
+]
 """
 
 def test_converging_fork_with_points_left():
@@ -414,7 +408,7 @@ def test_converging_fork_with_points_left():
     ]
 
 triangleWithSidings = """
-{"sections":[
+[
     {
         "id": "s01",
         "name": "siding one",
@@ -460,8 +454,7 @@ triangleWithSidings = """
                 "param": "right"
             }
         }
-    }
-    ,
+    },
     {
         "id": "s05",
         "name": "siding three",
@@ -484,10 +477,10 @@ triangleWithSidings = """
                 "param": "left"
             }
         }
-    }
-],"points": [
+    },
     {
         "id": "p01",
+        "type": "points",    
         "name": "apex one",
         "left": {
             "id": "s02"
@@ -499,6 +492,7 @@ triangleWithSidings = """
     },
     {
         "id": "p02",
+        "type": "points",
         "name": "apex two",
         "left": {
             "id": "s04",
@@ -511,6 +505,7 @@ triangleWithSidings = """
     },
     {
         "id": "p03",
+        "type": "points",
         "name": "apex three",
         "left": {
             "id": "s06"
@@ -519,7 +514,7 @@ triangleWithSidings = """
             "id": "s04"
         }
     }
-]}
+]
 """
 
 def test_triangle_with_with_points_right():

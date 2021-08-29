@@ -1,66 +1,63 @@
-{
-    "sections": [
-        {
-            "id": "s01",
-            "name": "main branch",
-            "next": {
-                "forward": {
-                    "id": "p01"
-                }
-            },
-			"direction": {
-				"bank": "RPi",
-				"port": 23
-			},
-			"until": {
-				"reverse": {
-					"bank": "RPi",
-					"port": 14
-				}
-			}
+[
+    {
+        "id": "s01",
+        "name": "main branch",
+        "next": {
+            "forward": {
+                "id": "p01"
+            }
         },
-        {
-            "id": "r01",
-            "name": "return loop",
-			"direction": {
+		"direction": {
+			"bank": "RPi",
+			"port": 23
+		},
+		"until": {
+			"reverse": {
 				"bank": "RPi",
-				"port": 24
-			},
-            "next": {
-                "forward": {
-                    "id": "p01",
-                    "param": "right"
-                },
-                "reverse": {
-                    "id": "p01",
-                    "param": "left"
-                }
+				"port": 14
+			}
+		}
+    },
+    {
+        "id": "r01",
+        "name": "return loop",
+		"direction": {
+			"bank": "RPi",
+			"port": 24
+		},
+        "next": {
+            "forward": {
+                "id": "p01",
+                "param": "right"
+            },
+            "reverse": {
+                "id": "p01",
+                "param": "left"
             }
         }
-    ],
-    "points": [
-        {
-            "id": "p01",
-            "name": "return loop points",
-            "left": {
-                "id": "r01"
-            },
-            "right": {
-                "id": "r01",
-                "direction": "reverse"
-            },
-            "selector": {
-                "bank": "RPi",
-                "port": 25
-            },
-			"detector": {
-				"bank": "RPi",
-				"port": 15
-			},
-            "direction": {
-				"bank": "RPi",
-				"port": 26
-			}
-        }
-    ]
-}
+    },
+    {
+        "id": "p01",
+        "name": "return loop points",
+        "type": "points",
+        "left": {
+            "id": "r01"
+        },
+        "right": {
+            "id": "r01",
+            "direction": "reverse"
+        },
+        "selector": {
+            "bank": "RPi",
+            "port": 25
+        },
+		"detector": {
+			"bank": "RPi",
+			"port": 15
+		},
+        "direction": {
+			"bank": "RPi",
+			"port": 26
+		}
+    }
+]
