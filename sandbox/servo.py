@@ -14,14 +14,12 @@ import time
 import random
 
 rpi = UsingRPi()
-servoPort = ServoPwmPort(15, Points.LEFT)
-points = Points(servoPort)
+points = Points(rpi.servoPwmPort(15, Points.LEFT))
 try:
     while True:
         time.sleep(3)
         points.left() if random.random() > 0.5 else points.right()
 
 except KeyboardInterrupt:
-    del servoPort
     del rpi
 
