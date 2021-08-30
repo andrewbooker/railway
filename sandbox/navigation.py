@@ -70,6 +70,7 @@ with open(sys.argv[1], "r") as layoutSpec:
 
 reporter = Reporter()
 journey = Journey(layoutStr, reporter)
+journey.start()
 
 shouldStop = threading.Event()
 while not shouldStop.is_set():
