@@ -73,11 +73,12 @@ loopWithSiding = """
         "name": "main loop",
         "next": {
             "forward": {
-                "id": "p01"
+                "id": "p01",
+                "params": []
             },
             "reverse": {
                 "id": "p01",
-                "param": "right"
+                "params": ["right"]
             }
         }
     },
@@ -87,7 +88,7 @@ loopWithSiding = """
         "next": {
             "reverse": {
                 "id": "p01",
-                "param": "left"
+                "params": ["left"]
             }
         }
     },
@@ -168,7 +169,8 @@ returnLoop = """
         "name": "main branch",
         "next": {
             "forward": {
-                "id": "p01"
+                "id": "p01",
+                "params": []
             }
         }
     },
@@ -178,11 +180,11 @@ returnLoop = """
         "next": {
             "forward": {
                 "id": "p01",
-                "param": "right"
+                "params": ["right"]
             },
             "reverse": {
                 "id": "p01",
-                "param": "left"
+                "params": ["left"]
             }
         }
     },
@@ -250,7 +252,8 @@ simpleFork = """
         "name": "main branch",
         "next": {
             "forward": {
-                "id": "p01"
+                "id": "p01",
+                "params": []
             }
         }
     },
@@ -260,7 +263,7 @@ simpleFork = """
         "next": {
             "reverse": {
                 "id": "p01",
-                "param": "left"
+                "params": ["left"]
             }
         }
     },
@@ -270,7 +273,7 @@ simpleFork = """
         "next": {
             "reverse": {
                 "id": "p01",
-                "param": "right"
+                "params": ["right"]
             }
         }
     },
@@ -340,7 +343,7 @@ simpleConvergingFork = """
         "next": {
             "forward": {
                 "id": "p01",
-                "param": "right"
+                "params": ["right"]
             }
         }
     },
@@ -350,7 +353,7 @@ simpleConvergingFork = """
         "next": {
             "forward": {
                 "id": "p01",
-                "param": "left"
+                "params": ["left"]
             }
         }
     },
@@ -359,7 +362,8 @@ simpleConvergingFork = """
         "name": "main branch",
         "next": {
             "reverse": {
-                "id": "p01"
+                "id": "p01",
+                "params": []
             }
         }
     },
@@ -414,7 +418,8 @@ triangleWithSidings = """
         "name": "siding one",
         "next": {
             "reverse": {
-                "id": "p01"
+                "id": "p01",
+                "params": []
             }
         }
     },
@@ -424,11 +429,11 @@ triangleWithSidings = """
         "next": {
             "forward": {
                 "id": "p02",
-                "param": "right"
+                "params": ["right"]
             },
             "reverse": {
                 "id": "p01",
-                "param": "left"
+                "params": ["left"]
             }
         }
     },
@@ -437,7 +442,8 @@ triangleWithSidings = """
         "name": "siding two",
         "next": {
             "reverse": {
-                "id": "p02"
+                "id": "p02",
+                "params": []
             }
         }
     },
@@ -447,11 +453,11 @@ triangleWithSidings = """
         "next": {
             "forward": {
                 "id": "p02",
-                "param": "left"
+                "params": ["left"]
             },
             "reverse": {
                 "id": "p03",
-                "param": "right"
+                "params": ["right"]
             }
         }
     },
@@ -460,7 +466,8 @@ triangleWithSidings = """
         "name": "siding three",
         "next": {
             "forward": {
-                "id": "p03"
+                "id": "p03",
+                "params": []
             }
         }
     },
@@ -470,11 +477,11 @@ triangleWithSidings = """
         "next": {
             "forward": {
                 "id": "p01",
-                "param": "right"
+                "params": ["right"]
             },
             "reverse": {
                 "id": "p03",
-                "param": "left"
+                "params": ["left"]
             }
         }
     },

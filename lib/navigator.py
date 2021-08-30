@@ -26,7 +26,7 @@ class Journey():
         if direction not in section:
             return None
         sp = section[direction]
-        if "param" not in sp and sp["id"] == pointsId:
+        if len(sp["params"]) == 0 and sp["id"] == pointsId:
             return section
         return None
 
@@ -51,7 +51,7 @@ class Journey():
             if "type" in self.section and self.section["type"] == "points":
                 points = self.section
                 previousSection = self._find(self.history[-2][0])
-                approachingDivergence = "param" not in previousSection["next"][self.direction]
+                approachingDivergence = len(previousSection["next"][self.direction]["params"]) == 0
                 if approachingDivergence:
                     choice = self.selectPoints()
                     self.listener.setPointsTo(choice, points)
@@ -61,7 +61,7 @@ class Journey():
                         self.changeDirection()
                     self._at(self._find(points[choice]["id"]))
                 else:
-                    expectedPoints = previousSection["next"][self.direction]["param"]
+                    expectedPoints = previousSection["next"][self.direction]["params"][0]
                     self.listener.waitToSetPointsTo(expectedPoints, points)
                     (nextSection, nextDirection) = self._afterConvergence(points["id"])
                     if nextDirection == self.direction:

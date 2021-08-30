@@ -4,7 +4,8 @@
         "name": "main branch",
         "next": {
             "forward": {
-                "id": "p01"
+                "id": "p01",
+                "params": []
             }
         },
 		"direction": {
@@ -28,11 +29,11 @@
         "next": {
             "forward": {
                 "id": "p01",
-                "param": "right"
+                "params": ["right"]
             },
             "reverse": {
                 "id": "p01",
-                "param": "left"
+                "params": ["left"]
             }
         }
     },
