@@ -19,7 +19,11 @@ class Reporter():
         self.direction = None
 
     def _set(self):
-        print("now at", self.loc["name"], self.direction if self.direction is not None else "assumed forwards", "on", self.loc["direction"]["bank"], self.loc["direction"]["port"])
+        direction = self.direction if self.direction is not None else "assumed forwards"
+        if "direction" in self.loc:
+            print("now at", self.loc["name"], direction, "on", self.loc["direction"]["bank"], self.loc["direction"]["port"])
+        else:
+            print("now at", self.loc["name"], direction, "on points")
 
     def changeDirection(self, to):
         self.direction = to
