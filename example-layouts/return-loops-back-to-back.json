@@ -1,0 +1,81 @@
+[
+    {
+        "id": "r01",
+        "name": "loop one",
+		"direction": {
+			"bank": "RPi",
+			"port": 23
+		},
+        "next": {
+            "forward": {
+                "id": "p01",
+                "params": ["outgoing", "right"]
+            },
+            "reverse": {
+                "id": "p01",
+                "params": ["outgoing", "left"]
+            }
+        }
+    },
+    {
+        "id": "r02",
+        "name": "loop two",
+		"direction": {
+			"bank": "RPi",
+			"port": 24
+		},
+        "next": {
+            "forward": {
+                "id": "p02",
+                "params": ["incoming", "right"]
+            },
+            "reverse": {
+                "id": "p01",
+                "params": ["incoming", "left"]
+            }
+        }
+    },
+    {
+        "id": "p01",
+        "name": "loop joining points",
+        "direction": {
+			"bank": "RPi",
+			"port": 26
+		},
+        "type": "points",
+        "outgoing": {
+            "left": {
+                "id": "r01"
+            },
+            "right": {
+                "id": "r01",
+                "direction": "reverse"
+            },
+            "selector": {
+                "bank": "RPi",
+                "port": 25
+            },
+		    "detector": {
+			    "bank": "RPi",
+			    "port": 15
+		    }
+        },
+        "incoming": {
+            "left": {
+                "id": "r02",
+                "direction": "reverse"
+            },
+            "right": {
+                "id": "r02"
+            },
+            "selector": {
+                "bank": "RPi",
+                "port": 27
+            },
+			"detector": {
+				"bank": "RPi",
+				"port": 16
+			}
+        }
+    }
+]

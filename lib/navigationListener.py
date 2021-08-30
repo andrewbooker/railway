@@ -15,13 +15,11 @@ class NavigationListener():
 
     def _set(self):
         self.detectionListener.clearCallback()
+        self.directionController.set(NavigationListener.portId(self.currentSection["direction"]), self.currentDirection)
 
         if "type" in self.currentSection and self.currentSection["type"] == "points":
-            self.directionController.set(NavigationListener.portId(self.currentSection["outgoing"]["direction"]), self.currentDirection)
             self.nextRequestor()
             return
-        else:
-            self.directionController.set(NavigationListener.portId(self.currentSection["direction"]), self.currentDirection)
 
         if "until" in self.currentSection:
             u = self.currentSection["until"]

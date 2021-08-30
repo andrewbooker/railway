@@ -45,6 +45,10 @@
         "id": "p01",
         "type": "points",
         "name": "branch siding points",
+        "direction": {
+		    "bank": "RPi",
+		    "port": 26
+	    },
         "outgoing": {
             "left": {
                 "id": "s02"
@@ -56,10 +60,6 @@
                 "bank": "RPi",
                 "port": 25
             },
-            "direction": {
-			    "bank": "RPi",
-			    "port": 26
-		    },
 		    "detector": {
 			    "bank": "RPi",
 			    "port": 15

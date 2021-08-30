@@ -41,6 +41,10 @@
         "id": "p01",
         "name": "return loop points",
         "type": "points",
+        "direction": {
+		    "bank": "RPi",
+		    "port": 26
+	    },
         "outgoing": {
             "left": {
                 "id": "r01"
@@ -56,10 +60,6 @@
 		    "detector": {
 			    "bank": "RPi",
 			    "port": 15
-		    },
-            "direction": {
-			    "bank": "RPi",
-			    "port": 26
 		    }
         }
     }

@@ -90,6 +90,11 @@ def run_around_tests():
     detectionListener.clear()
     directionController.clear()
     pointsController.clear()
+
+    navigation.currentDirection = "forward"
+    navigation.currentSection = None
+    navigation.nextRequestor = None
+
     yield
 
 def test_shuttle():
@@ -288,3 +293,22 @@ def test_single_loop_with_siding_points_left():
         assert detectionListener.portId == "RPi_15"
         assert detectionListener.value == 0
         assert detectionListener.callback is not None
+
+def test_return_loops_back_to_back_points_left():
+    layout = openLayout("example-layouts/return-loops-back-to-back.json")
+    journey = Journey(layout, navigation)
+    pointsController.fromLayout(journey.layout)
+    journey.selectPoints = lambda: "left"
+    navigation.setNextRequestor(journey.nextStage)
+    journey.start()
+
+    assert pointsController.port == None
+    assert pointsController.bank == None
+    assert pointsController.selection == None
+
+    assert navigation.currentSection["name"] == "loop one"
+    assert directionController.portId == "RPi_23"
+    assert directionController.direction == "forward"
+    assert detectionListener.portId == "RPi_15"
+    assert detectionListener.value == 0
+    assert detectionListener.callback is not None
