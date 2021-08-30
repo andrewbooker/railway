@@ -68,11 +68,14 @@ class LocalPointsController(PointsController):
         self.points = {}
         self.port = None
         self.bank = None
+        self.stage = None
         self.selection = None
 
     def set(self, pId, stage, s):
-        self.port = self.points[pId][stage]["selector"]["port"]
-        self.bank = self.points[pId][stage]["selector"]["bank"]
+        selector = self.points[pId][stage]["selector"]
+        self.port = selector["port"]
+        self.bank = selector["bank"]
+        self.stage = stage
         self.selection = s
 
 
@@ -134,6 +137,7 @@ def test_return_loop_points_left():
     assert pointsController.port == 25
     assert pointsController.bank == "RPi"
     assert pointsController.selection == "left"
+    assert pointsController.stage == "outgoing"
     assert navigation.currentSection["name"] == "return loop"
     assert directionController.direction == "forward"
     assert directionController.portId == "RPi_24"
@@ -143,6 +147,7 @@ def test_return_loop_points_left():
 
     detectionListener.callback()
     assert pointsController.selection == "right"
+    assert pointsController.stage == "outgoing"
     assert navigation.currentSection["name"] == "main branch"
     assert directionController.portId == "RPi_23"
     assert directionController.direction == "reverse"
@@ -175,6 +180,7 @@ def test_return_loop_points_right():
     assert pointsController.port == 25
     assert pointsController.bank == "RPi"
     assert pointsController.selection == "right"
+    assert pointsController.stage == "outgoing"
     assert navigation.currentSection["name"] == "return loop"
     assert directionController.direction == "reverse"
     assert directionController.portId == "RPi_24"
@@ -184,6 +190,7 @@ def test_return_loop_points_right():
 
     detectionListener.callback()
     assert pointsController.selection == "left"
+    assert pointsController.stage == "outgoing"
     assert navigation.currentSection["name"] == "main branch"
     assert directionController.portId == "RPi_23"
     assert directionController.direction == "reverse"
@@ -226,6 +233,7 @@ def test_single_loop_with_siding_points_right():
         assert pointsController.port == 25
         assert pointsController.bank == "RPi"
         assert pointsController.selection == "right"
+        assert pointsController.stage == "outgoing"
         assert navigation.currentSection["name"] == "main loop"
         assert directionController.direction == "forward"
         assert directionController.portId == "RPi_23"
@@ -253,6 +261,7 @@ def test_single_loop_with_siding_points_left():
     assert pointsController.port == 25
     assert pointsController.bank == "RPi"
     assert pointsController.selection == "left"
+    assert pointsController.stage == "outgoing"
     assert navigation.currentSection["name"] == "branch siding"
     assert directionController.direction == "forward"
     assert directionController.portId == "RPi_24"
@@ -272,6 +281,7 @@ def test_single_loop_with_siding_points_left():
     for i in range(3): # go round the loop in reverse indefinitely
         detectionListener.callback()
         assert pointsController.selection == "left" if i == 0 else "right"
+        assert pointsController.stage == "outgoing"
         assert navigation.currentSection["name"] == "main loop"
         assert directionController.direction == "reverse"
         assert directionController.portId == "RPi_23"
