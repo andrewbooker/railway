@@ -1,6 +1,7 @@
 
 from navigator import Journey
 from navigationListener import NavigationListener
+import pytest
 
 def openLayout(fileName):
     with open(fileName, "r") as layoutSpec:
@@ -9,6 +10,9 @@ def openLayout(fileName):
 
 class LocalDetectionListener():
     def __init__(self):
+        self.clear()
+
+    def clear(self):
         self.callback = None
         self.portId = None
         self.value = None
@@ -29,6 +33,9 @@ class LocalDetectionListener():
 
 class LocalDirectionController():
     def __init__(self):
+        self.clear()
+
+    def clear(self):
         self.portId = None
         self.direction = None
 
@@ -55,6 +62,10 @@ class PointsController():
 class LocalPointsController(PointsController):
     def __init__(self):
         super().__init__()
+        self.clear()
+
+    def clear(self):
+        self.points = {}
         self.port = None
         self.bank = None
         self.selection = None
@@ -71,6 +82,12 @@ pointsController = LocalPointsController()
 
 navigation = NavigationListener(detectionListener, directionController, pointsController)
 
+@pytest.fixture(autouse=True)
+def run_around_tests():
+    detectionListener.clear()
+    directionController.clear()
+    pointsController.clear()
+    yield
 
 def test_shuttle():
     journey = Journey(openLayout("example-layouts/shuttle.json"), navigation)
@@ -135,3 +152,76 @@ def test_return_loop_points_left():
     detectionListener.callback()
     assert directionController.direction == "forward"
 
+
+def test_single_loop_with_siding_points_right():
+    layout = openLayout("example-layouts/single-loop-with-siding.json")
+    journey = Journey(layout, navigation)
+    pointsController.fromLayout(journey.layout)
+    journey.selectPoints = lambda: "right"
+    navigation.setNextRequestor(journey.nextStage)
+    journey.start()
+
+    assert navigation.currentSection["name"] == "main loop"
+    assert directionController.portId == "RPi_23"
+    assert directionController.direction == "forward"
+    assert detectionListener.portId == "RPi_15"
+    assert detectionListener.value == 0
+    assert detectionListener.callback is not None
+
+    for _ in range(3): # go round the loop in reverse indefinitely
+        detectionListener.callback()
+        assert pointsController.port == 25
+        assert pointsController.bank == "RPi"
+        assert pointsController.selection == "right"
+        assert navigation.currentSection["name"] == "main loop"
+        assert directionController.direction == "forward"
+        assert directionController.portId == "RPi_23"
+        assert detectionListener.portId == "RPi_15"
+        assert detectionListener.value == 0
+        assert detectionListener.callback is not None
+
+
+def test_single_loop_with_siding_points_left():
+    layout = openLayout("example-layouts/single-loop-with-siding.json")
+    journey = Journey(layout, navigation)
+    pointsController.fromLayout(journey.layout)
+    journey.selectPoints = lambda: "left"
+    navigation.setNextRequestor(journey.nextStage)
+    journey.start()
+
+    assert navigation.currentSection["name"] == "main loop"
+    assert directionController.direction == "forward"
+    assert directionController.portId == "RPi_23"
+    assert detectionListener.portId == "RPi_15"
+    assert detectionListener.value == 0
+    assert detectionListener.callback is not None
+
+    detectionListener.callback()
+    assert pointsController.port == 25
+    assert pointsController.bank == "RPi"
+    assert pointsController.selection == "left"
+    assert navigation.currentSection["name"] == "branch siding"
+    assert directionController.direction == "forward"
+    assert directionController.portId == "RPi_24"
+    assert detectionListener.portId == "RPi_14"
+    assert detectionListener.value == 1
+    assert detectionListener.callback is not None
+
+    detectionListener.callback()
+    assert navigation.currentSection["name"] == "branch siding"
+    assert directionController.direction == "reverse"
+    assert directionController.portId == "RPi_24"
+    assert detectionListener.portId == "RPi_15"
+    assert detectionListener.value == 0
+    assert detectionListener.callback is not None
+    assert pointsController.selection == "left"
+
+    for i in range(3): # go round the loop in reverse indefinitely
+        detectionListener.callback()
+        assert pointsController.selection == "left" if i == 0 else "right"
+        assert navigation.currentSection["name"] == "main loop"
+        assert directionController.direction == "reverse"
+        assert directionController.portId == "RPi_23"
+        assert detectionListener.portId == "RPi_15"
+        assert detectionListener.value == 0
+        assert detectionListener.callback is not None

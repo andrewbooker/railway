@@ -6,11 +6,12 @@
         "length": 10.6,
         "next": {
             "forward": {
-                "id": "p01"
+                "id": "p01",
+                "params": []
             },
             "reverse": {
                 "id": "p01",
-                "param": "right"
+                "params": ["right"]
             }
         },
         "direction": {
@@ -26,7 +27,7 @@
         "next": {
             "reverse": {
                 "id": "p01",
-                "param": "left"
+                "params": ["left"]
             }
         },
         "direction": {
