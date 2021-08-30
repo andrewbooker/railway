@@ -152,6 +152,18 @@ def test_return_loop_points_left():
     detectionListener.callback()
     assert directionController.direction == "forward"
 
+def test_single_loop():
+    layout = openLayout("example-layouts/single-loop.json")
+    journey = Journey(layout, navigation)
+    journey.start()
+
+    assert navigation.currentSection["name"] == "main loop"
+    assert directionController.portId == "RPi_29"
+    assert directionController.direction == "forward"
+    assert detectionListener.callback == None
+    assert pointsController.port == None
+    assert pointsController.bank == None
+    assert pointsController.selection == None
 
 def test_single_loop_with_siding_points_right():
     layout = openLayout("example-layouts/single-loop-with-siding.json")
