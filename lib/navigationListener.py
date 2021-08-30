@@ -15,11 +15,13 @@ class NavigationListener():
 
     def _set(self):
         self.detectionListener.clearCallback()
-        self.directionController.set(NavigationListener.portId(self.currentSection["direction"]), self.currentDirection)
 
         if "type" in self.currentSection and self.currentSection["type"] == "points":
+            self.directionController.set(NavigationListener.portId(self.currentSection["outgoing"]["direction"]), self.currentDirection)
             self.nextRequestor()
             return
+        else:
+            self.directionController.set(NavigationListener.portId(self.currentSection["direction"]), self.currentDirection)
 
         if "until" in self.currentSection:
             u = self.currentSection["until"]
@@ -32,8 +34,9 @@ class NavigationListener():
             n = self.currentSection["next"]
             if self.currentDirection in n and n[self.currentDirection]["id"][0] == "p":
                 points = self.pointsController.fromId(n[self.currentDirection]["id"])
+                stage = n[self.currentDirection]["params"][0]
                 self.detectionListener.setCallback(self.nextRequestor)
-                self.detectionListener.setNextDetector(NavigationListener.portId(points["detector"]), 0)
+                self.detectionListener.setNextDetector(NavigationListener.portId(points[stage]["detector"]), 0)
 
 
     def setNextRequestor(self, r):
@@ -48,11 +51,11 @@ class NavigationListener():
         self.currentSection = section
         self._set()
 
-    def setPointsTo(self, s, p):
-        self.detectionListener.waitFor(NavigationListener.portId(p["detector"]), 1)
-        self.pointsController.set(p["id"], s)
+    def setPointsTo(self, s, stage, p):
+        self.detectionListener.waitFor(NavigationListener.portId(p[stage]["detector"]), 1)
+        self.pointsController.set(p["id"], stage, s)
 
-    def waitToSetPointsTo(self, s, p):
+    def waitToSetPointsTo(self, s, stage, p):
         self.detectionListener.setCallback(self.nextRequestor)
-        self.detectionListener.setNextDetector(NavigationListener.portId(p["detector"]), 0)
-        self.pointsController.set(p["id"], s)
+        self.detectionListener.setNextDetector(NavigationListener.portId(p[stage]["detector"]), 0)
+        self.pointsController.set(p["id"], stage, s)

@@ -32,11 +32,11 @@ class Reporter():
         self.loc = section
         self._set()
 
-    def setPointsTo(self, selection, points):
-        print("heading", selection, points["selector"]["bank"], points["selector"]["port"])
+    def setPointsTo(self, selection, stage, points):
+        print("heading", stage, selection, points[stage]["selector"]["bank"], points[stage]["selector"]["port"])
 
-    def waitToSetPointsTo(self, selection, points):
-        print("heading", selection, "if clear", points["selector"]["bank"], points["selector"]["port"])
+    def waitToSetPointsTo(self, selection, stage, points):
+        print("heading", stage, selection, "if clear", points[stage]["selector"]["bank"], points[stage]["selector"]["port"])
 
 
 class AutoController():

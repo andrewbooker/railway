@@ -99,9 +99,9 @@ class PointsController():
     def fromId(self, pId):
         return self.points[pId]
 
-    def set(self, pId, s):
+    def set(self, pId, stage, s):
         p = self.points[pId]
-        say("setting", p["name"], "to", s, "on", NavigationListener.portId(p["selector"]))
+        say("setting", p["name"], stage, "to", s, "on", NavigationListener.portId(p[stage]["selector"]))
 
 from lib.cmd import Cmd, shouldStop
 

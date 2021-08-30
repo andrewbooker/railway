@@ -5,7 +5,7 @@
         "next": {
             "forward": {
                 "id": "p01",
-                "params": []
+                "params": ["outgoing"]
             }
         },
 		"direction": {
@@ -29,11 +29,11 @@
         "next": {
             "forward": {
                 "id": "p01",
-                "params": ["right"]
+                "params": ["outgoing", "right"]
             },
             "reverse": {
                 "id": "p01",
-                "params": ["left"]
+                "params": ["outgoing", "left"]
             }
         }
     },
@@ -41,24 +41,26 @@
         "id": "p01",
         "name": "return loop points",
         "type": "points",
-        "left": {
-            "id": "r01"
-        },
-        "right": {
-            "id": "r01",
-            "direction": "reverse"
-        },
-        "selector": {
-            "bank": "RPi",
-            "port": 25
-        },
-		"detector": {
-			"bank": "RPi",
-			"port": 15
-		},
-        "direction": {
-			"bank": "RPi",
-			"port": 26
-		}
+        "outgoing": {
+            "left": {
+                "id": "r01"
+            },
+            "right": {
+                "id": "r01",
+                "direction": "reverse"
+            },
+            "selector": {
+                "bank": "RPi",
+                "port": 25
+            },
+		    "detector": {
+			    "bank": "RPi",
+			    "port": 15
+		    },
+            "direction": {
+			    "bank": "RPi",
+			    "port": 26
+		    }
+        }
     }
 ]

@@ -12,10 +12,10 @@ class InertListener():
     def moveTo(self, sectionName):
         pass
 
-    def setPointsTo(self, s, p):
+    def setPointsTo(self, s, st, p):
         pass
 
-    def waitToSetPointsTo(self, s, p):
+    def waitToSetPointsTo(self, s, st, p):
         pass
 
 listener = InertListener()
@@ -78,7 +78,7 @@ loopWithSiding = """
             },
             "reverse": {
                 "id": "p01",
-                "params": ["right"]
+                "params": ["outgoing", "right"]
             }
         }
     },
@@ -88,7 +88,7 @@ loopWithSiding = """
         "next": {
             "reverse": {
                 "id": "p01",
-                "params": ["left"]
+                "params": ["outgoing", "left"]
             }
         }
     },
@@ -96,11 +96,13 @@ loopWithSiding = """
         "id": "p01",
         "type": "points",
         "name": "branch siding points",
-        "left": {
-            "id": "s02"
-        },
-        "right": {
-            "id": "s01"
+        "outgoing": {
+            "left": {
+                "id": "s02"
+            },
+            "right": {
+                "id": "s01"
+            }
         }
     }
 ]
@@ -116,7 +118,7 @@ def test_loop_with_siding_points_right():
     assert journey.history == [
         ("s01", "forward"),
         ("p01", "forward"),
-        ("points selection", "right"),
+        ("outgoing points selection", "right"),
         ("s01", "forward"),
         ("p01", "forward")]
         
@@ -132,10 +134,10 @@ def test_loop_with_siding_points_right_in_reverse():
     assert journey.history == [
         ("s01", "forward"),
         ("p01", "forward"),
-        ("points condition", "right"),
+        ("outgoing points condition", "right"),
         ("s01", "reverse"),
         ("p01", "reverse"),
-        ("points condition", "right"),
+        ("outgoing points condition", "right"),
         ("s01", "reverse")]
 
 def test_loop_with_siding_points_left():
@@ -152,14 +154,14 @@ def test_loop_with_siding_points_left():
     assert journey.history == [
         ("s01", "forward"),
         ("p01", "forward"),
-        ("points selection", "left"),
+        ("outgoing points selection", "left"),
         ("s02", "forward"),
         ("s02", "reverse"),
         ("p01", "reverse"),
-        ("points condition", "left"),
+        ("outgoing points condition", "left"),
         ("s01", "reverse"),
         ("p01", "reverse"),
-        ("points condition", "right"),
+        ("outgoing points condition", "right"),
         ("s01", "reverse")]
     
 returnLoop = """
@@ -180,11 +182,11 @@ returnLoop = """
         "next": {
             "forward": {
                 "id": "p01",
-                "params": ["right"]
+                "params": ["outgoing", "right"]
             },
             "reverse": {
                 "id": "p01",
-                "params": ["left"]
+                "params": ["outgoing", "left"]
             }
         }
     },
@@ -192,12 +194,14 @@ returnLoop = """
         "id": "p01",
         "type": "points",
         "name": "return loop points",
-        "left": {
-            "id": "r01"
-        },
-        "right": {
-            "id": "r01",
-            "direction": "reverse"
+        "outgoing": {
+            "left": {
+                "id": "r01"
+            },
+            "right": {
+                "id": "r01",
+                "direction": "reverse"
+            }
         }
     }
 ]
@@ -215,11 +219,11 @@ def test_return_loop_with_points_left():
     assert journey.history == [
         ("s01", "forward"),
         ("p01", "forward"),
-        ("points selection", "left"),
+        ("outgoing points selection", "left"),
         ("r01", "forward"),
         ("p01", "forward"),
         ("p01", "reverse"),
-        ("points condition", "right"),
+        ("outgoing points condition", "right"),
         ("s01", "reverse"),
         ("s01", "forward")
     ]
@@ -236,11 +240,11 @@ def test_return_loop_with_points_right():
     assert journey.history == [
         ("s01", "forward"),
         ("p01", "forward"),
-        ("points selection", "right"),
+        ("outgoing points selection", "right"),
         ("p01", "reverse"),
         ("r01", "reverse"),
         ("p01", "reverse"),
-        ("points condition", "left"),
+        ("outgoing points condition", "left"),
         ("s01", "reverse"),
         ("s01", "forward")
     ]
@@ -263,7 +267,7 @@ simpleFork = """
         "next": {
             "reverse": {
                 "id": "p01",
-                "params": ["left"]
+                "params": ["outgoing", "left"]
             }
         }
     },
@@ -273,7 +277,7 @@ simpleFork = """
         "next": {
             "reverse": {
                 "id": "p01",
-                "params": ["right"]
+                "params": ["outgoing", "right"]
             }
         }
     },
@@ -281,11 +285,13 @@ simpleFork = """
         "id": "p01",
         "type": "points",
         "name": "branching points",
-        "left": {
-            "id": "s02"
-        },
-        "right": {
-            "id": "s03"
+        "outgoing": {
+            "left": {
+                "id": "s02"
+            },
+            "right": {
+                "id": "s03"
+            }
         }
     }
 ]
@@ -304,11 +310,11 @@ def test_simple_fork_with_points_left():
     assert journey.history == [
         ("s01", "forward"),
         ("p01", "forward"),
-        ("points selection", "left"),
+        ("outgoing points selection", "left"),
         ("s02", "forward"),
         ("s02", "reverse"),
         ("p01", "reverse"),
-        ("points condition", "left"),
+        ("outgoing points condition", "left"),
         ("s01", "reverse"),
         ("s01", "forward")
     ]
@@ -326,11 +332,11 @@ def test_simple_fork_with_points_right():
     assert journey.history == [
         ("s01", "forward"),
         ("p01", "forward"),
-        ("points selection", "right"),
+        ("outgoing points selection", "right"),
         ("s03", "forward"),
         ("s03", "reverse"),
         ("p01", "reverse"),
-        ("points condition", "right"),
+        ("outgoing points condition", "right"),
         ("s01", "reverse"),
         ("s01", "forward")
     ]
@@ -343,7 +349,7 @@ simpleConvergingFork = """
         "next": {
             "forward": {
                 "id": "p01",
-                "params": ["right"]
+                "params": ["outgoing", "right"]
             }
         }
     },
@@ -353,7 +359,7 @@ simpleConvergingFork = """
         "next": {
             "forward": {
                 "id": "p01",
-                "params": ["left"]
+                "params": ["outgoing", "left"]
             }
         }
     },
@@ -371,11 +377,13 @@ simpleConvergingFork = """
         "id": "p01",
         "type": "points",
         "name": "branching points",
-        "left": {
-            "id": "s02"
-        },
-        "right": {
-            "id": "s01"
+        "outgoing": {
+            "left": {
+                "id": "s02"
+            },
+            "right": {
+                "id": "s01"
+            }
         }
     }
 ]
@@ -396,15 +404,15 @@ def test_converging_fork_with_points_left():
     assert journey.history == [
         ("s01", "forward"),
         ("p01", "forward"),
-        ("points condition", "right"),
+        ("outgoing points condition", "right"),
         ("s03", "forward"),
         ("s03", "reverse"),
         ("p01", "reverse"),
-        ("points selection", "left"),
+        ("outgoing points selection", "left"),
         ("p01", "forward"),
         ("s02", "forward"),
         ("p01", "forward"),
-        ("points condition", "left"),
+        ("outgoing points condition", "left"),
         ("s03", "forward"),
         ("s03", "reverse")
     ]
@@ -427,11 +435,11 @@ triangleWithSidings = """
         "next": {
             "forward": {
                 "id": "p02",
-                "params": ["right"]
+                "params": ["outgoing", "right"]
             },
             "reverse": {
                 "id": "p01",
-                "params": ["left"]
+                "params": ["outgoing", "left"]
             }
         }
     },
@@ -451,11 +459,11 @@ triangleWithSidings = """
         "next": {
             "forward": {
                 "id": "p02",
-                "params": ["left"]
+                "params": ["outgoing", "left"]
             },
             "reverse": {
                 "id": "p03",
-                "params": ["right"]
+                "params": ["outgoing", "right"]
             }
         }
     },
@@ -475,11 +483,11 @@ triangleWithSidings = """
         "next": {
             "forward": {
                 "id": "p01",
-                "params": ["right"]
+                "params": ["outgoing", "right"]
             },
             "reverse": {
                 "id": "p03",
-                "params": ["left"]
+                "params": ["outgoing", "left"]
             }
         }
     },
@@ -487,36 +495,42 @@ triangleWithSidings = """
         "id": "p01",
         "type": "points",    
         "name": "apex one",
-        "left": {
-            "id": "s02"
-        },
-        "right": {
-            "id": "s06",
-            "direction": "reverse"
+        "outgoing": {
+            "left": {
+                "id": "s02"
+            },
+            "right": {
+                "id": "s06",
+                "direction": "reverse"
+            }
         }
     },
     {
         "id": "p02",
         "type": "points",
         "name": "apex two",
-        "left": {
-            "id": "s04",
-            "direction": "reverse"
-        },
-        "right": {
-            "id": "s02",
-            "direction": "reverse"
+        "outgoing": {
+            "left": {
+                "id": "s04",
+                "direction": "reverse"
+            },
+            "right": {
+                "id": "s02",
+                "direction": "reverse"
+            }
         }
     },
     {
         "id": "p03",
         "type": "points",
         "name": "apex three",
-        "left": {
-            "id": "s06"
-        },
-        "right": {
-            "id": "s04"
+        "outgoing": {
+            "left": {
+                "id": "s06"
+            },
+            "right": {
+                "id": "s04"
+            }
         }
     }
 ]
@@ -545,25 +559,25 @@ def test_triangle_with_with_points_right():
         ("s01", "forward"),
         ("s01", "reverse"),
         ("p01", "reverse"),
-        ("points selection", "right"),
+        ("outgoing points selection", "right"),
         ("s06", "reverse"),
         ("p03", "reverse"),
-        ("points condition", "left"),
+        ("outgoing points condition", "left"),
         ("s05", "reverse"),
         ("s05", "forward"),
         ("p03", "forward"),
-        ("points selection", "right"),
+        ("outgoing points selection", "right"),
         ("s04", "forward"),
         ("p02", "forward"),
-        ("points condition", "left"),
+        ("outgoing points condition", "left"),
         ("s03", "forward"),
         ("s03", "reverse"),
         ("p02", "reverse"),
-        ("points selection", "right"),
+        ("outgoing points selection", "right"),
         ("s02", "reverse"),
         ("p01", "reverse"),
         ("p01", "forward"),
-        ("points condition", "left"),
+        ("outgoing points condition", "left"),
         ("s01", "forward")
     ]
 
@@ -590,24 +604,24 @@ def test_triangle_with_with_points_left():
         ("s01", "forward"),
         ("s01", "reverse"),
         ("p01", "reverse"),
-        ("points selection", "left"),
+        ("outgoing points selection", "left"),
         ("p01", "forward"),
         ("s02", "forward"),
         ("p02", "forward"),
-        ("points condition", "right"),
+        ("outgoing points condition", "right"),
         ("s03", "forward"),
         ("s03", "reverse"),
         ("p02", "reverse"),
-        ("points selection", "left"),
+        ("outgoing points selection", "left"),
         ("s04", "reverse"),
         ("p03", "reverse"),
-        ("points condition", "right"),
+        ("outgoing points condition", "right"),
         ("s05", "reverse"),
         ("s05", "forward"),
         ("p03", "forward"),
-        ("points selection", "left"),
+        ("outgoing points selection", "left"),
         ("s06", "forward"),
         ("p01", "forward"),
-        ("points condition", "right"),
+        ("outgoing points condition", "right"),
         ("s01", "forward")
     ]

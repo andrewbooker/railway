@@ -26,13 +26,13 @@ class Journey():
         if direction not in section:
             return None
         sp = section[direction]
-        if len(sp["params"]) == 0 and sp["id"] == pointsId:
+        if len(sp["params"]) < 2 and sp["id"] == pointsId:
             return section
         return None
 
     def _afterConvergence(self, atPointsId):
         for s in self.layout:
-            next = s["next"]
+            next = s["next"] # note this works only if regular sections with "next" elements are all specified before the points
             if Journey._check(next, atPointsId, "forward") is not None:
                 return (s, "forward")
             if Journey._check(next, atPointsId, "reverse") is not None:
@@ -51,22 +51,24 @@ class Journey():
             if "type" in self.section and self.section["type"] == "points":
                 points = self.section
                 previousSection = self._find(self.history[-2][0])
-                approachingDivergence = len(previousSection["next"][self.direction]["params"]) == 0
+                approachingDivergence = len(previousSection["next"][self.direction]["params"]) < 2
                 if approachingDivergence:
+                    stage = "outgoing"
                     choice = self.selectPoints()
-                    self.listener.setPointsTo(choice, points)
-                    self.history.append(("points selection", choice))
-                    nextDirection = points[choice]["direction"] if "direction" in points[choice] else "forward"
+                    self.listener.setPointsTo(choice, stage, points)
+                    self.history.append(("%s points selection" % stage, choice))
+                    nextDirection = points[stage][choice]["direction"] if "direction" in points[stage][choice] else "forward"
                     if nextDirection != self.direction:
                         self.changeDirection()
-                    self._at(self._find(points[choice]["id"]))
+                    self._at(self._find(points[stage][choice]["id"]))
                 else:
-                    expectedPoints = previousSection["next"][self.direction]["params"][0]
-                    self.listener.waitToSetPointsTo(expectedPoints, points)
+                    stage = previousSection["next"][self.direction]["params"][0]
+                    expectedPoints = previousSection["next"][self.direction]["params"][1]
+                    self.listener.waitToSetPointsTo(expectedPoints, stage, points)
                     (nextSection, nextDirection) = self._afterConvergence(points["id"])
                     if nextDirection == self.direction:
                         self.changeDirection()
-                    self.history.append(("points condition", expectedPoints))
+                    self.history.append(("%s points condition" % stage, expectedPoints))
                     self._at(nextSection)
         else:
             options = self.section["next"]

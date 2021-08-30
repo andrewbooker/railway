@@ -56,7 +56,7 @@ class PointsController():
     def fromId(self, pId):
         return self.points[pId]
 
-    def set(self, pId, s):
+    def set(self, pId, stage, s):
         pass
 
 class LocalPointsController(PointsController):
@@ -70,9 +70,9 @@ class LocalPointsController(PointsController):
         self.bank = None
         self.selection = None
 
-    def set(self, pId, s):
-        self.port = self.points[pId]["selector"]["port"]
-        self.bank = self.points[pId]["selector"]["bank"]
+    def set(self, pId, stage, s):
+        self.port = self.points[pId][stage]["selector"]["port"]
+        self.bank = self.points[pId][stage]["selector"]["bank"]
         self.selection = s
 
 
