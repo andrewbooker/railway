@@ -372,12 +372,10 @@ simpleConvergingFork = """
         "type": "points",
         "name": "branching points",
         "left": {
-            "id": "s02",
-            "param": "reverse"
+            "id": "s02"
         },
         "right": {
-            "id": "s01",
-            "param": "reverse"
+            "id": "s01"
         }
     }
 ]
