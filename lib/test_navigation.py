@@ -306,18 +306,23 @@ def test_return_loops_back_to_back_points_left():
     assert pointsController.bank == None
     assert pointsController.selection == None
 
-    assert navigation.currentSection["name"] == "loop one"
-    assert directionController.portId == "RPi_23"
-    assert directionController.direction == "forward"
-    assert detectionListener.portId == "RPi_15"
-    assert detectionListener.value == 0
-    assert detectionListener.callback is not None
+    for _ in range(3):
+        assert navigation.currentSection["name"] == "loop one"
+        assert directionController.portId == "RPi_23"
+        assert directionController.direction == "forward"
+        assert detectionListener.portId == "RPi_15"
+        assert detectionListener.value == 0
+        assert detectionListener.callback is not None
 
-    detectionListener.callback() #nothing on the outgoing points, proceed to incoming
-    assert pointsController.port == 27
-    assert pointsController.bank == "RPi"
-    assert pointsController.selection == "left"
-    assert detectionListener.portId == "RPi_16"
-    assert detectionListener.value == 0
+        detectionListener.callback() #nothing on the outgoing points, proceed via incoming to next section
+        assert navigation.currentSection["name"] == "loop two"
+        assert directionController.portId == "RPi_24"
+        assert directionController.direction == "reverse"
+        assert pointsController.port == 27
+        assert pointsController.bank == "RPi"
+        assert pointsController.selection == "left"
+        assert detectionListener.portId == "RPi_16"
+        assert detectionListener.value == 0
 
-    detectionListener.callback() #nothing on the incoming points, proceed
+        detectionListener.callback() #nothing on the incoming points, proceed via outgoing back to start
+
