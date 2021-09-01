@@ -25,15 +25,11 @@ class Reporter():
         else:
             print("now at", self.loc["name"], direction, "on points")
 
-    def changeDirection(self, to):
-        self.direction = to
-        print("changing direction to", to)
-        self._set()
-
-    def moveTo(self, section):
+    def connect(self, section, direction):
         if (self.loc is not None):
             print("from", self.loc["name"])
         self.loc = section
+        self.direction = direction
         self._set()
 
     def setPointsTo(self, selection, stage, points):

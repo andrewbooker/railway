@@ -6,10 +6,7 @@ class InertListener():
     def __init__(self):
         pass
 
-    def changeDirection(self, to):
-        pass
-
-    def moveTo(self, sectionName):
+    def connect(self, section, direction):
         pass
 
     def setPointsTo(self, s, st, p):

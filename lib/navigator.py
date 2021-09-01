@@ -19,7 +19,7 @@ class Journey():
     def _at(self, s):
         self.section = s
         self.history.append((s["id"], self.direction))
-        self.listener.moveTo(s)
+        self.listener.connect(s, self.direction)
 
     @staticmethod
     def _check(section, pointsId, direction):
@@ -49,7 +49,7 @@ class Journey():
     def changeDirection(self):
         self.direction = "forward" if self.direction == "reverse" else "reverse"
         self.history.append((self.section["id"], self.direction))
-        self.listener.changeDirection(self.direction)
+        self.listener.connect(self.section, self.direction)
 
     def nextStage(self):
         if "next" not in self.section:

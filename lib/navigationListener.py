@@ -40,14 +40,12 @@ class NavigationListener():
     def setNextRequestor(self, r):
         self.nextRequestor = r
 
-    def changeDirection(self, to):
-        self.currentDirection = to
-        if "until" in self.currentSection:
-            self._set()
-
-    def moveTo(self, section):
+    def connect(self, section, direction):
+        self.currentDirection = direction
+        shouldSet = section != self.currentSection or "until" in self.currentSection
         self.currentSection = section
-        self._set()
+        if shouldSet:
+            self._set()
 
     def setPointsTo(self, s, stage, p):
         self.detectionListener.waitFor(NavigationListener.portId(p[stage]["detector"]), 1)
