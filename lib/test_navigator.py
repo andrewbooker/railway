@@ -66,8 +66,12 @@ def test_loop_after_change_of_direction():
     journey.changeDirection()
     journey.nextStage()
     journey.nextStage()
-    assert listener.history == [("s01", "forward"),("s01", "forward"),("s01", "reverse"),("s01", "reverse"),("s01", "reverse")]
-
+    assert listener.history == [
+        ("s01", "forward"),
+        ("s01", "forward"),
+        ("s01", "reverse"),
+        ("s01", "reverse")
+    ]
 
 loopWithSiding = """
 [
@@ -209,6 +213,26 @@ returnLoop = """
     }
 ]
 """
+
+def test_return_loop_with_points_left_initial():
+    journey = Journey(returnLoop, listener)
+    journey.selectPoints = lambda: "left"
+    journey.start()
+    assert listener.history == [
+        ("s01", "forward")
+    ]
+    journey.nextStage()
+    assert listener.history == [
+        ("s01", "forward"),
+        ("p01", "forward")
+    ]
+    journey.nextStage()
+    assert listener.history == [
+        ("s01", "forward"),
+        ("p01", "forward"),
+        ("outgoing points selection", "left"),
+        ("r01", "forward")
+    ]
 
 def test_return_loop_with_points_left():
     journey = Journey(returnLoop, listener)

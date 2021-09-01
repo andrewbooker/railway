@@ -56,15 +56,15 @@ class Journey():
 
     def changeDirection(self):
         self.direction = "forward" if self.direction == "reverse" else "reverse"
-        self.listener.connect(self.section, self.direction)
 
     def nextStage(self):
         if "next" in self.section:
-            options = self.section["next"]
-            if self.direction in options:
-                self._at(self._find(options[self.direction]["id"]))
+            next = self.section["next"]
+            if self.direction in next:
+                self._at(self._find(next[self.direction]["id"]))
             else:
                 self.changeDirection()
+                self.listener.connect(self.section, self.direction)
         elif "type" in self.section and self.section["type"] == "points":
             points = self.section
             previousSection = self._find(self.history[-2])
@@ -81,4 +81,5 @@ class Journey():
                 else:
                     if nextDirection == self.direction:
                         self.changeDirection()
+                        self.listener.connect(self.section, self.direction)
                     self._at(nextSection)
