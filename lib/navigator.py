@@ -48,7 +48,7 @@ class Journey():
         self.listener.setPointsTo(choice, stage, points)
         nextDirection = points[stage][choice]["direction"] if "direction" in points[stage][choice] else "forward"
         if nextDirection != self.direction:
-            self.changeDirection()
+            self.direction = nextDirection
         self._at(self._find(points[stage][choice]["id"]))
 
     def start(self):
