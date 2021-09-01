@@ -10,10 +10,10 @@ class InertListener():
         self.history.append((section["id"], direction))
 
     def setPointsTo(self, s, st, p):
-        pass
+        self.history.append(("%s points selection" % st, s))
 
     def waitToSetPointsTo(self, s, st, p):
-        pass
+        self.history.append(("%s points condition" % st, s))
 
 listener = InertListener()
 
@@ -118,7 +118,7 @@ def test_loop_with_siding_points_right():
     journey.nextStage()
     journey.nextStage()
     journey.nextStage()
-    assert journey.history == [
+    assert listener.history == [
         ("s01", "forward"),
         ("p01", "forward"),
         ("outgoing points selection", "right"),
@@ -134,7 +134,7 @@ def test_loop_with_siding_points_right_in_reverse():
     journey.nextStage()
     journey.nextStage()
     journey.nextStage()
-    assert journey.history == [
+    assert listener.history == [
         ("s01", "forward"),
         ("p01", "forward"),
         ("outgoing points condition", "right"),
@@ -154,7 +154,7 @@ def test_loop_with_siding_points_left():
     journey.nextStage()
     journey.nextStage()
     journey.nextStage()
-    assert journey.history == [
+    assert listener.history == [
         ("s01", "forward"),
         ("p01", "forward"),
         ("outgoing points selection", "left"),
@@ -219,14 +219,14 @@ def test_return_loop_with_points_left():
     journey.nextStage()
     journey.nextStage()
     journey.nextStage()
-    assert journey.history == [
+    assert listener.history == [
         ("s01", "forward"),
         ("p01", "forward"),
         ("outgoing points selection", "left"),
         ("r01", "forward"),
         ("p01", "forward"),
-        ("p01", "reverse"),
         ("outgoing points condition", "right"),
+        ("p01", "reverse"),
         ("s01", "reverse"),
         ("s01", "forward")
     ]
@@ -240,7 +240,7 @@ def test_return_loop_with_points_right():
     journey.nextStage()
     journey.nextStage()
     journey.nextStage()
-    assert journey.history == [
+    assert listener.history == [
         ("s01", "forward"),
         ("p01", "forward"),
         ("outgoing points selection", "right"),
@@ -310,7 +310,7 @@ def test_simple_fork_with_points_left():
     journey.nextStage()
     journey.nextStage()
     journey.nextStage()
-    assert journey.history == [
+    assert listener.history == [
         ("s01", "forward"),
         ("p01", "forward"),
         ("outgoing points selection", "left"),
@@ -332,7 +332,7 @@ def test_simple_fork_with_points_right():
     journey.nextStage()
     journey.nextStage()
     journey.nextStage()
-    assert journey.history == [
+    assert listener.history == [
         ("s01", "forward"),
         ("p01", "forward"),
         ("outgoing points selection", "right"),
@@ -404,7 +404,7 @@ def test_converging_fork_with_points_left():
     journey.nextStage()
     journey.nextStage()
     journey.nextStage()
-    assert journey.history == [
+    assert listener.history == [
         ("s01", "forward"),
         ("p01", "forward"),
         ("outgoing points condition", "right"),
@@ -558,7 +558,7 @@ def test_triangle_with_with_points_right():
     journey.nextStage()
     journey.nextStage()
     journey.nextStage()
-    assert journey.history == [
+    assert listener.history == [
         ("s01", "forward"),
         ("s01", "reverse"),
         ("p01", "reverse"),
@@ -579,8 +579,8 @@ def test_triangle_with_with_points_right():
         ("outgoing points selection", "right"),
         ("s02", "reverse"),
         ("p01", "reverse"),
-        ("p01", "forward"),
         ("outgoing points condition", "left"),
+        ("p01", "forward"),
         ("s01", "forward")
     ]
 
@@ -603,7 +603,7 @@ def test_triangle_with_with_points_left():
     journey.nextStage()
     journey.nextStage()
     journey.nextStage()
-    assert journey.history == [
+    assert listener.history == [
         ("s01", "forward"),
         ("s01", "reverse"),
         ("p01", "reverse"),
