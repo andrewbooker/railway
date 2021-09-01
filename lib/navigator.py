@@ -18,7 +18,7 @@ class Journey():
 
     def _at(self, s):
         self.section = s
-        self.history.append((s["id"], self.direction))
+        self.history.append(s["id"])
         self.listener.connect(s, self.direction)
 
     @staticmethod
@@ -48,20 +48,18 @@ class Journey():
 
     def changeDirection(self):
         self.direction = "forward" if self.direction == "reverse" else "reverse"
-        self.history.append((self.section["id"], self.direction))
         self.listener.connect(self.section, self.direction)
 
     def nextStage(self):
         if "next" not in self.section:
             if "type" in self.section and self.section["type"] == "points":
                 points = self.section
-                previousSection = self._find(self.history[-2][0])
+                previousSection = self._find(self.history[-2])
                 approachingDivergence = len(previousSection["next"][self.direction]["params"]) < 2
                 stage = previousSection["next"][self.direction]["params"][0] if len(previousSection["next"][self.direction]["params"]) > 0 else "outgoing"
                 if approachingDivergence:
                     choice = self.selectPoints()
                     self.listener.setPointsTo(choice, stage, points)
-                    self.history.append(("%s points selection" % stage, choice))
                     nextDirection = points[stage][choice]["direction"] if "direction" in points[stage][choice] else "forward"
                     if nextDirection != self.direction:
                         self.changeDirection()
@@ -74,7 +72,6 @@ class Journey():
                         #copied from above, changed stage to nextPointsStage:
                         choice = self.selectPoints()
                         self.listener.setPointsTo(choice, nextPointsStage, points)
-                        self.history.append(("%s points selection" % nextPointsStage, choice))
                         nextDirection = points[nextPointsStage][choice]["direction"] if "direction" in points[nextPointsStage][choice] else "forward"
                         if nextDirection != self.direction:
                             self.changeDirection()
@@ -82,7 +79,6 @@ class Journey():
                     else:
                         if nextDirection == self.direction:
                             self.changeDirection()
-                        self.history.append(("%s points condition" % stage, expectedPoints))
                         self._at(nextSection)
 
         else:
