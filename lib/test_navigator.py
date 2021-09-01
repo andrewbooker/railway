@@ -1,13 +1,13 @@
- 
-from navigator import Journey
 
+from navigator import Journey
+import pytest
 
 class InertListener():
     def __init__(self):
-        pass
+        self.history = []
 
     def connect(self, section, direction):
-        pass
+        self.history.append((section["id"], direction))
 
     def setPointsTo(self, s, st, p):
         pass
@@ -16,18 +16,24 @@ class InertListener():
         pass
 
 listener = InertListener()
+
+@pytest.fixture(autouse=True)
+def run_around_tests():
+    listener.history = []
+    yield
+
 straightLine = "[{\"id\":\"s1\",\"name\":\"shuttle\",\"next\":{}}]"
 
 def test_straight_line_track_at_start():
     journey = Journey(straightLine, listener)
     journey.start()
-    assert journey.history == [("s1", "forward")]
+    assert listener.history == [("s1", "forward")]
 
 def test_straight_line_track_after_one_move():
     journey = Journey(straightLine, listener)
     journey.start()
     journey.nextStage()
-    assert journey.history == [("s1", "forward"),("s1", "reverse")]
+    assert listener.history == [("s1", "forward"),("s1", "reverse")]
 
 def test_straight_line_track_after_multiple_moves():
     journey = Journey(straightLine, listener)
@@ -36,7 +42,7 @@ def test_straight_line_track_after_multiple_moves():
     journey.nextStage()
     journey.nextStage()
     journey.nextStage()
-    assert journey.history == [("s1", "forward"),("s1", "reverse"),("s1", "forward"),("s1", "reverse"),("s1", "forward")]
+    assert listener.history == [("s1", "forward"),("s1", "reverse"),("s1", "forward"),("s1", "reverse"),("s1", "forward")]
 
 
 loop = "[{\"id\":\"s01\",\"name\":\"loop\",\"next\":{\"forward\":{\"id\":\"s01\"},\"reverse\":{\"id\":\"s01\"}}}]"
@@ -44,14 +50,14 @@ loop = "[{\"id\":\"s01\",\"name\":\"loop\",\"next\":{\"forward\":{\"id\":\"s01\"
 def test_loop_at_start():
     journey = Journey(loop, listener)
     journey.start()
-    assert journey.history == [("s01", "forward")]
+    assert listener.history == [("s01", "forward")]
 
 def test_loop_after_multiple_moves():
     journey = Journey(loop, listener)
     journey.start()
     journey.nextStage()
     journey.nextStage()
-    assert journey.history == [("s01", "forward"),("s01", "forward"),("s01", "forward")]
+    assert listener.history == [("s01", "forward"),("s01", "forward"),("s01", "forward")]
 
 def test_loop_after_change_of_direction():
     journey = Journey(loop, listener)
@@ -60,7 +66,7 @@ def test_loop_after_change_of_direction():
     journey.changeDirection()
     journey.nextStage()
     journey.nextStage()
-    assert journey.history == [("s01", "forward"),("s01", "forward"),("s01", "reverse"),("s01", "reverse"),("s01", "reverse")]
+    assert listener.history == [("s01", "forward"),("s01", "forward"),("s01", "reverse"),("s01", "reverse"),("s01", "reverse")]
 
 
 loopWithSiding = """
