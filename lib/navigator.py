@@ -51,7 +51,7 @@ class Journey():
             self.direction = nextDirection
         self._at(self._find(points[stage][choice]["id"]))
 
-    def _atPoints(self, spec):
+    def _traversePoints(self, spec):
         points = self.section
         approachingDivergence = len(spec["params"]) < 2
         stage = spec["params"][0] if len(spec["params"]) > 0 else "outgoing"
@@ -65,8 +65,10 @@ class Journey():
                 self._approachDivergence(points, nextPointsStage)
             else:
                 if nextDirection == self.direction:
+                    #travel in the correct direction down the points
                     self.changeDirection()
                     self.listener.connect(self.section, self.direction)
+                # proceed to next section
                 self._at(nextSection)
 
     def start(self):
@@ -79,11 +81,12 @@ class Journey():
         if "next" in self.section:
             next = self.section["next"]
             if self.direction in next:
-                self._at(self._find(next[self.direction]["id"]))
+                nextSection = self._find(next[self.direction]["id"])
+                self._at(nextSection)
             else:
+                #end of the line
                 self.changeDirection()
                 self.listener.connect(self.section, self.direction)
         elif "type" in self.section and self.section["type"] == "points":
             previousSection = self._find(self.history[-2])
-            spec = previousSection["next"][self.direction]
-            self._atPoints(spec)
+            self._traversePoints(previousSection["next"][self.direction])
