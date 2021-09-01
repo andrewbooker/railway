@@ -59,27 +59,26 @@ class Journey():
         self.listener.connect(self.section, self.direction)
 
     def nextStage(self):
-        if "next" not in self.section:
-            if "type" in self.section and self.section["type"] == "points":
-                points = self.section
-                previousSection = self._find(self.history[-2])
-                approachingDivergence = len(previousSection["next"][self.direction]["params"]) < 2
-                stage = previousSection["next"][self.direction]["params"][0] if len(previousSection["next"][self.direction]["params"]) > 0 else "outgoing"
-                if approachingDivergence:
-                    self._approachDivergence(points, stage)
-                else:
-                    expectedPoints = previousSection["next"][self.direction]["params"][1]
-                    self.listener.waitToSetPointsTo(expectedPoints, stage, points)
-                    (nextSection, nextDirection, nextPointsStage) = self._afterConvergence(points["id"], stage)
-                    if nextPointsStage is not None:
-                        self._approachDivergence(points, nextPointsStage)
-                    else:
-                        if nextDirection == self.direction:
-                            self.changeDirection()
-                        self._at(nextSection)
-        else:
+        if "next" in self.section:
             options = self.section["next"]
             if self.direction in options:
                 self._at(self._find(options[self.direction]["id"]))
             else:
                 self.changeDirection()
+        elif "type" in self.section and self.section["type"] == "points":
+            points = self.section
+            previousSection = self._find(self.history[-2])
+            approachingDivergence = len(previousSection["next"][self.direction]["params"]) < 2
+            stage = previousSection["next"][self.direction]["params"][0] if len(previousSection["next"][self.direction]["params"]) > 0 else "outgoing"
+            if approachingDivergence:
+                self._approachDivergence(points, stage)
+            else:
+                expectedPoints = previousSection["next"][self.direction]["params"][1]
+                self.listener.waitToSetPointsTo(expectedPoints, stage, points)
+                (nextSection, nextDirection, nextPointsStage) = self._afterConvergence(points["id"], stage)
+                if nextPointsStage is not None:
+                    self._approachDivergence(points, nextPointsStage)
+                else:
+                    if nextDirection == self.direction:
+                        self.changeDirection()
+                    self._at(nextSection)
