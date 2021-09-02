@@ -323,6 +323,7 @@ def test_single_loop_with_siding_points_left():
             assert directionController.last3 == [("RPi_23", "reverse"), ("RPi_26", "reverse"), ("RPi_23", "reverse")]
 
 def test_return_loops_back_to_back_points_left():
+    # note this is broken, loop one operates in the wrong direction
     layout = openLayout("example-layouts/return-loops-back-to-back.json")
     journey = Journey(layout, navigation)
     pointsController.fromLayout(journey.layout)
@@ -362,3 +363,60 @@ def test_return_loops_back_to_back_points_left():
 
         detectionListener.callback() #nothing on the incoming points, proceed via outgoing back to start
 
+def test_return_loops_back_to_back_points_right():
+    # note this is broken, loop one operates in the wrong direction
+    layout = openLayout("example-layouts/return-loops-back-to-back.json")
+    journey = Journey(layout, navigation)
+    pointsController.fromLayout(journey.layout)
+    journey.selectPoints = lambda: "right"
+    navigation.setNextRequestor(journey.nextStage)
+    journey.start()
+
+    assert pointsController.port == None
+    assert pointsController.bank == None
+    assert pointsController.selection == None
+
+    assert navigation.currentSection["name"] == "loop one"
+    assert directionController.portId == "RPi_23"
+    assert directionController.direction == "forward"
+    assert detectionListener.portId == "RPi_15"
+    assert detectionListener.value == 0
+    assert detectionListener.callback is not None
+    assert directionController.last3 == [("RPi_23", "forward")]
+    assert pointsController.last2 == []
+
+    detectionListener.callback() #nothing on the outgoing points, proceed via incoming to next section
+    assert navigation.currentSection["name"] == "loop two"
+    assert directionController.portId == "RPi_24"
+    assert directionController.direction == "forward"
+    assert pointsController.port == 27
+    assert pointsController.bank == "RPi"
+    assert pointsController.selection == "right"
+    assert detectionListener.portId == "RPi_16"
+    assert detectionListener.value == 0
+    assert directionController.last3 == [("RPi_23", "forward"), ("RPi_26", "forward"), ("RPi_24", "forward")]
+    assert pointsController.last2 == [("outgoing", "right", 25), ("incoming", "right", 27)]
+
+    detectionListener.callback() #nothing on the incoming points, proceed via outgoing back to start
+    assert navigation.currentSection["name"] == "loop one"
+    assert directionController.portId == "RPi_23"
+    assert directionController.direction == "reverse"
+    assert detectionListener.portId == "RPi_15"
+    assert detectionListener.value == 0
+    assert detectionListener.callback is not None
+    assert directionController.last3 == [("RPi_24", "forward"), ("RPi_26", "forward"), ("RPi_23", "reverse")]
+    assert pointsController.last2 == [("incoming", "right", 27), ("outgoing", "right", 25)]
+    assert detectionListener.portId == "RPi_15"
+    assert detectionListener.value == 0
+
+    detectionListener.callback() #nothing on the outgoing points, proceed via incoming to next section
+    assert navigation.currentSection["name"] == "loop two"
+    assert directionController.portId == "RPi_24"
+    assert directionController.direction == "forward"
+    assert pointsController.port == 27
+    assert pointsController.bank == "RPi"
+    assert pointsController.selection == "right"
+    assert detectionListener.portId == "RPi_16"
+    assert detectionListener.value == 0
+    assert directionController.last3 == [("RPi_23", "reverse"), ("RPi_26", "reverse"), ("RPi_24", "forward")]
+    assert pointsController.last2 == [("outgoing", "left", 25), ("incoming", "right", 27)]
