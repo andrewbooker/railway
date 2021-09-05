@@ -647,3 +647,130 @@ def test_triangle_with_with_points_left():
         ("p01", "forward"),
         ("s01", "forward")
     ]
+
+backToBackReturnLoops = """
+[
+    {
+        "id": "r01",
+        "name": "loop one",
+        "next": {
+            "forward": {
+                "id": "p01",
+                "params": ["outgoing", "right"]
+            },
+            "reverse": {
+                "id": "p01",
+                "params": ["outgoing", "left"]
+            }
+        }
+    },
+    {
+        "id": "r02",
+        "name": "loop two",
+        "next": {
+            "forward": {
+                "id": "p01",
+                "params": ["incoming", "right"]
+            },
+            "reverse": {
+                "id": "p01",
+                "params": ["incoming", "left"]
+            }
+        }
+    },
+    {
+        "id": "p01",
+        "name": "loop joining points",
+        "type": "points",
+        "outgoing": {
+            "left": {
+                "id": "r01"
+            },
+            "right": {
+                "id": "r01",
+                "direction": "reverse"
+            }
+        },
+        "incoming": {
+            "left": {
+                "id": "r02"
+            },
+            "right": {
+                "id": "r02",
+                "direction": "reverse"
+            }
+        }
+    }
+]
+"""
+def test_back_to_back_return_loops_with_with_points_left():
+    journey = Journey(backToBackReturnLoops, listener)
+    journey.selectPoints = lambda: "left"
+    journey.start()
+    assert listener.history == [
+        ("r01", "forward")
+    ]
+    journey.nextStage()
+    assert listener.history == [
+        ("r01", "forward"),
+        ("outgoing points condition", "right"),
+        ("p01", "reverse"),
+        ("incoming points selection", "left"),
+        ("r02", "forward")
+    ]
+    journey.nextStage()
+    assert listener.history == [
+        ("r01", "forward"),
+        ("outgoing points condition", "right"),
+        ("p01", "reverse"),
+        ("incoming points selection", "left"),
+        ("r02", "forward"),
+        ("incoming points condition", "right"),
+        ("p01", "forward"),
+        ("outgoing points selection", "left"),
+        ("r01", "forward")
+    ]
+
+def test_back_to_back_return_loops_with_with_points_right():
+    journey = Journey(backToBackReturnLoops, listener)
+    journey.selectPoints = lambda: "right"
+    journey.start()
+    assert listener.history == [
+        ("r01", "forward")
+    ]
+    journey.nextStage()
+    assert listener.history == [
+        ("r01", "forward"),
+        ("outgoing points condition", "right"),
+        ("p01", "reverse"),
+        ("incoming points selection", "right"),
+        ("r02", "reverse")
+    ]
+    journey.nextStage()
+    assert listener.history == [
+        ("r01", "forward"),
+        ("outgoing points condition", "right"),
+        ("p01", "reverse"),
+        ("incoming points selection", "right"),
+        ("r02", "reverse"),
+        ("incoming points condition", "left"),
+        ("p01", "forward"),
+        ("outgoing points selection", "right"),
+        ("r01", "reverse")
+    ]
+    journey.nextStage()
+    assert listener.history == [
+        ("r01", "forward"),
+        ("outgoing points condition", "right"),
+        ("p01", "reverse"),
+        ("incoming points selection", "right"),
+        ("r02", "reverse"),
+        ("incoming points condition", "left"),
+        ("p01", "forward"),
+        ("outgoing points selection", "right"),
+        ("r01", "reverse"),
+        ("outgoing points condition", "left"),
+        ("p01", "reverse"),
+        ("incoming points selection", "right"),
+        ("r02", "reverse")
+    ]

@@ -55,18 +55,21 @@ class Journey():
         approachingDivergence = len(spec["params"]) < 2
         stage = spec["params"][0] if len(spec["params"]) > 0 else "outgoing"
         if approachingDivergence:
+            #self.direction = "forward" if stage == "outgoing" else "reverse" # not yet required by tests
             self._approachDivergence(points, stage)
         else:
+            self.direction = "reverse" if stage == "outgoing" else "forward"
             expectedPoints = spec["params"][1]
             self.listener.waitToSetPointsTo(expectedPoints, stage, points)
             (nextSection, nextDirection, nextPointsStage) = self._afterConvergence(points["id"], stage)
             if nextPointsStage is not None:
+                self.listener.connect(points, self.direction)
                 self._approachDivergence(points, nextPointsStage)
             else:
                 if nextDirection == self.direction:
                     #travel in the correct direction back into the points
                     self.changeDirection()
-                self.listener.connect(self.section, self.direction)
+                self.listener.connect(points, self.direction)
                 # proceed to next section
                 self._at(nextSection)
 

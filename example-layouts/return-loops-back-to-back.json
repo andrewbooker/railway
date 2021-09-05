@@ -62,11 +62,11 @@
         },
         "incoming": {
             "left": {
-                "id": "r02",
-                "direction": "reverse"
+                "id": "r02"
             },
             "right": {
-                "id": "r02"
+                "id": "r02",
+                "direction": "reverse"
             },
             "selector": {
                 "bank": "RPi",

@@ -48,7 +48,7 @@ class NavigationListener():
             self._set()
 
     def setPointsTo(self, s, stage, p):
-        self.detectionListener.waitFor(NavigationListener.portId(p[stage]["detector"]), 1)
+        self.detectionListener.waitFor(NavigationListener.portId(p[stage]["detector"]), 0)
         self.pointsController.set(p["id"], stage, s)
 
     def waitToSetPointsTo(self, s, stage, p):
