@@ -137,14 +137,14 @@ def test_loop_with_siding_points_right_in_reverse():
     journey.direction = "reverse"
     journey.nextStage()
     journey.nextStage()
-    journey.nextStage()
     assert listener.history == [
         ("s01", "forward"),
         ("p01", "forward"),
         ("outgoing points condition", "right"),
-        ("s01", "reverse"),
         ("p01", "reverse"),
+        ("s01", "reverse"),
         ("outgoing points condition", "right"),
+        ("p01", "reverse"),
         ("s01", "reverse")]
 
 def test_loop_with_siding_points_left():
@@ -156,19 +156,17 @@ def test_loop_with_siding_points_left():
     journey.nextStage()
     journey.nextStage()
     journey.nextStage()
-    journey.nextStage()
-    journey.nextStage()
     assert listener.history == [
         ("s01", "forward"),
         ("p01", "forward"),
         ("outgoing points selection", "left"),
         ("s02", "forward"),
         ("s02", "reverse"),
-        ("p01", "reverse"),
         ("outgoing points condition", "left"),
-        ("s01", "reverse"),
         ("p01", "reverse"),
+        ("s01", "reverse"),
         ("outgoing points condition", "right"),
+        ("p01", "reverse"),
         ("s01", "reverse")]
     
 returnLoop = """
@@ -233,6 +231,16 @@ def test_return_loop_with_points_left_initial():
         ("outgoing points selection", "left"),
         ("r01", "forward")
     ]
+    journey.nextStage()
+    assert listener.history == [
+        ("s01", "forward"),
+        ("p01", "forward"),
+        ("outgoing points selection", "left"),
+        ("r01", "forward"),
+        ("outgoing points condition", "right"),
+        ("p01", "reverse"),
+        ("s01", "reverse")
+    ]
 
 def test_return_loop_with_points_left():
     journey = Journey(returnLoop, listener)
@@ -248,11 +256,11 @@ def test_return_loop_with_points_left():
         ("p01", "forward"),
         ("outgoing points selection", "left"),
         ("r01", "forward"),
-        ("p01", "forward"), # should not be here
         ("outgoing points condition", "right"),
         ("p01", "reverse"),
         ("s01", "reverse"),
-        ("s01", "forward")
+        ("s01", "forward"),
+        ("p01", "forward")
     ]
 
 def test_return_loop_with_points_right():
@@ -269,10 +277,11 @@ def test_return_loop_with_points_right():
         ("p01", "forward"),
         ("outgoing points selection", "right"),
         ("r01", "reverse"),
-        ("p01", "reverse"),
         ("outgoing points condition", "left"),
+        ("p01", "reverse"),
         ("s01", "reverse"),
-        ("s01", "forward")
+        ("s01", "forward"),
+        ("p01", "forward")
     ]
 
 simpleFork = """
@@ -332,15 +341,14 @@ def test_simple_fork_with_points_left():
     journey.nextStage()
     journey.nextStage()
     journey.nextStage()
-    journey.nextStage()
     assert listener.history == [
         ("s01", "forward"),
         ("p01", "forward"),
         ("outgoing points selection", "left"),
         ("s02", "forward"),
         ("s02", "reverse"),
-        ("p01", "reverse"),
         ("outgoing points condition", "left"),
+        ("p01", "reverse"),
         ("s01", "reverse"),
         ("s01", "forward")
     ]
@@ -354,15 +362,14 @@ def test_simple_fork_with_points_right():
     journey.nextStage()
     journey.nextStage()
     journey.nextStage()
-    journey.nextStage()
     assert listener.history == [
         ("s01", "forward"),
         ("p01", "forward"),
         ("outgoing points selection", "right"),
         ("s03", "forward"),
         ("s03", "reverse"),
-        ("p01", "reverse"),
         ("outgoing points condition", "right"),
+        ("p01", "reverse"),
         ("s01", "reverse"),
         ("s01", "forward")
     ]
@@ -425,19 +432,17 @@ def test_converging_fork_with_points_left():
     journey.nextStage()
     journey.nextStage()
     journey.nextStage()
-    journey.nextStage()
-    journey.nextStage()
     assert listener.history == [
         ("s01", "forward"),
-        ("p01", "forward"),
         ("outgoing points condition", "right"),
+        ("p01", "forward"),
         ("s03", "forward"),
         ("s03", "reverse"),
         ("p01", "reverse"),
         ("outgoing points selection", "left"),
         ("s02", "forward"),
-        ("p01", "forward"),
         ("outgoing points condition", "left"),
+        ("p01", "forward"),
         ("s03", "forward"),
         ("s03", "reverse")
     ]
@@ -577,30 +582,26 @@ def test_triangle_with_with_points_right():
     journey.nextStage()
     journey.nextStage()
     journey.nextStage()
-    journey.nextStage()
-    journey.nextStage()
-    journey.nextStage()
     assert listener.history == [
         ("s01", "forward"),
         ("s01", "reverse"),
         ("p01", "reverse"),
         ("outgoing points selection", "right"),
         ("s06", "reverse"),
-        ("p03", "reverse"),
         ("outgoing points condition", "left"),
+        ("p03", "reverse"),
         ("s05", "reverse"),
         ("s05", "forward"),
         ("p03", "forward"),
         ("outgoing points selection", "right"),
         ("s04", "forward"),
-        ("p02", "forward"),
         ("outgoing points condition", "left"),
+        ("p02", "forward"),
         ("s03", "forward"),
         ("s03", "reverse"),
         ("p02", "reverse"),
         ("outgoing points selection", "right"),
         ("s02", "reverse"),
-        ("p01", "reverse"),
         ("outgoing points condition", "left"),
         ("p01", "forward"),
         ("s01", "forward")
@@ -622,30 +623,27 @@ def test_triangle_with_with_points_left():
     journey.nextStage()
     journey.nextStage()
     journey.nextStage()
-    journey.nextStage()
-    journey.nextStage()
-    journey.nextStage()
     assert listener.history == [
         ("s01", "forward"),
         ("s01", "reverse"),
         ("p01", "reverse"),
         ("outgoing points selection", "left"),
         ("s02", "forward"),
-        ("p02", "forward"),
         ("outgoing points condition", "right"),
+        ("p02", "forward"),
         ("s03", "forward"),
         ("s03", "reverse"),
         ("p02", "reverse"),
         ("outgoing points selection", "left"),
         ("s04", "reverse"),
-        ("p03", "reverse"),
         ("outgoing points condition", "right"),
+        ("p03", "reverse"),
         ("s05", "reverse"),
         ("s05", "forward"),
         ("p03", "forward"),
         ("outgoing points selection", "left"),
         ("s06", "forward"),
-        ("p01", "forward"),
         ("outgoing points condition", "right"),
+        ("p01", "forward"),
         ("s01", "forward")
     ]

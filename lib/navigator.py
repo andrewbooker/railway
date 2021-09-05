@@ -64,9 +64,9 @@ class Journey():
                 self._approachDivergence(points, nextPointsStage)
             else:
                 if nextDirection == self.direction:
-                    #travel in the correct direction down the points
+                    #travel in the correct direction back into the points
                     self.changeDirection()
-                    self.listener.connect(self.section, self.direction)
+                self.listener.connect(self.section, self.direction)
                 # proceed to next section
                 self._at(nextSection)
 
@@ -82,7 +82,12 @@ class Journey():
             next = self.section["next"]
             if self.direction in next:
                 nextSection = self._find(next[self.direction]["id"])
-                self._at(nextSection)
+                if "type" in nextSection and nextSection["type"] == "points" and len(next[self.direction]["params"]) > 1:
+                    self.section = nextSection
+                    self._traversePoints(next[self.direction])
+                else:
+                    # normal approach to points, or eg the section is a loop
+                    self._at(nextSection)
             else:
                 #end of the line
                 self.changeDirection()
