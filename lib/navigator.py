@@ -6,7 +6,7 @@ class Journey():
         self.listener = listener
         self.layout = json.loads(layoutStr)
         self.direction = "forward"
-        self.history = []
+        self.lastNonPoints = None
         self.section = None
         self.selectPoints = lambda: "left" if (randint(0, 1) > 0) else "right"
 
@@ -18,7 +18,6 @@ class Journey():
 
     def _at(self, s):
         self.section = s
-        self.history.append(s["id"])
         self.listener.connect(s, self.direction)
 
     @staticmethod
@@ -79,6 +78,7 @@ class Journey():
 
     def nextStage(self):
         if "next" in self.section:
+            self.lastNonPoints = self.section
             next = self.section["next"]
             if self.direction in next:
                 nextSection = self._find(next[self.direction]["id"])
@@ -88,5 +88,4 @@ class Journey():
                 self.changeDirection()
                 self.listener.connect(self.section, self.direction)
         elif "type" in self.section and self.section["type"] == "points":
-            previousSection = self._find(self.history[-2])
-            self._traversePoints(previousSection["next"][self.direction])
+            self._traversePoints(self.lastNonPoints["next"][self.direction])
