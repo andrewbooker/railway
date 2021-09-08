@@ -32,8 +32,9 @@ class Journey():
     def _afterConvergence(self, atPointsId, stage):
         points = self._find(atPointsId)
         nextPointsStage = "incoming" if stage == "outgoing" else "outgoing"
+        nextDirection = "reverse" if stage == "outgoing" else "forward"
         if nextPointsStage in points:
-            return (points, self.direction, nextPointsStage)
+            return (points, nextDirection, nextPointsStage)
 
         for s in self.layout:
             next = s["next"] # note this works only if regular sections with "next" elements are all specified before the points
@@ -55,23 +56,23 @@ class Journey():
         approachingDivergence = len(spec["params"]) < 2
         stage = spec["params"][0] if len(spec["params"]) > 0 else "outgoing"
         if approachingDivergence:
-            #self.direction = "forward" if stage == "outgoing" else "reverse" # not yet required by tests
             self._approachDivergence(points, stage)
         else:
-            self.direction = "reverse" if stage == "outgoing" else "forward"
             expectedPoints = spec["params"][1]
             self.listener.waitToSetPointsTo(expectedPoints, stage, points)
-            (nextSection, nextDirection, nextPointsStage) = self._afterConvergence(points["id"], stage)
+            (nextPoints, nextDirection, nextPointsStage) = self._afterConvergence(points["id"], stage)
             if nextPointsStage is not None:
-                self.listener.connect(points, self.direction)
+                self.direction = nextDirection
+                self.listener.connect(points, nextDirection)
                 self._approachDivergence(points, nextPointsStage)
             else:
-                if nextDirection == self.direction:
+                flipPointsDirection = nextDirection == self.direction or stage == "incoming"
+                if flipPointsDirection:
                     #travel in the correct direction back into the points
                     self.changeDirection()
                 self.listener.connect(points, self.direction)
                 # proceed to next section
-                self._at(nextSection)
+                self._at(nextPoints)
 
     def start(self):
         self._at(self.layout[0])
@@ -85,9 +86,15 @@ class Journey():
             next = self.section["next"]
             if self.direction in next:
                 nextSection = self._find(next[self.direction]["id"])
-                if "type" in nextSection and nextSection["type"] == "points" and len(next[self.direction]["params"]) > 1:
-                    self.section = nextSection
-                    self._traversePoints(next[self.direction])
+                if "type" in nextSection and nextSection["type"] == "points":
+                    if len(next[self.direction]["params"]) > 1:
+                        self.section = nextSection
+                        self._traversePoints(next[self.direction])
+                    else:
+                        if len(next[self.direction]["params"]) == 1:
+                            stage = next[self.direction]["params"][0]
+                            self.direction = "forward" if stage == "outgoing" else "reverse"
+                        self._at(nextSection)
                 else:
                     # normal approach to points, or eg the section is a loop
                     self._at(nextSection)
@@ -96,4 +103,6 @@ class Journey():
                 self.changeDirection()
                 self.listener.connect(self.section, self.direction)
         elif "type" in self.section and self.section["type"] == "points":
+            if self.direction not in self.lastNonPoints["next"]:
+                self.changeDirection()
             self._traversePoints(self.lastNonPoints["next"][self.direction])

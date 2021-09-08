@@ -42,7 +42,7 @@ class NavigationListener():
 
     def connect(self, section, direction):
         self.currentDirection = direction
-        shouldSet = section != self.currentSection or "until" in self.currentSection
+        shouldSet = self.currentSection is None or section["id"] != self.currentSection["id"] or "until" in self.currentSection
         self.currentSection = section
         if shouldSet:
             self._set()

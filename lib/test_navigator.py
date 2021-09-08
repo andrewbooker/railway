@@ -774,3 +774,105 @@ def test_back_to_back_return_loops_with_with_points_right():
         ("incoming points selection", "right"),
         ("r02", "reverse")
     ]
+
+returnLoopPointsIncoming = """
+[
+    {
+        "id": "s01",
+        "name": "main branch",
+        "next": {
+            "forward": {
+                "id": "p01",
+                "params": ["incoming"]
+            }
+        }
+    },
+    {
+        "id": "r01",
+        "name": "return loop",
+        "next": {
+            "forward": {
+                "id": "p01",
+                "params": ["incoming", "right"]
+            },
+            "reverse": {
+                "id": "p01",
+                "params": ["incoming", "left"]
+            }
+        }
+    },
+    {
+        "id": "p01",
+        "type": "points",
+        "name": "return loop points",
+        "incoming": {
+            "left": {
+                "id": "r01"
+            },
+            "right": {
+                "id": "r01",
+                "direction": "reverse"
+            }
+        }
+    }
+]
+"""
+def test_return_loop_points_incoming_with_points_left():
+    journey = Journey(returnLoopPointsIncoming, listener)
+    journey.selectPoints = lambda: "left"
+    journey.start()
+    assert listener.history == [
+        ("s01", "forward")
+    ]
+    journey.nextStage()
+    assert listener.history == [
+        ("s01", "forward"),
+        ("p01", "reverse")
+    ]
+    journey.nextStage()
+    assert listener.history == [
+        ("s01", "forward"),
+        ("p01", "reverse"),
+        ("incoming points selection", "left"),
+        ("r01", "forward")
+    ]
+    #journey.nextStage()
+    #assert listener.history == [
+    #    ("s01", "forward"),
+    #    ("p01", "reverse"),
+    #    ("incoming points selection", "left"),
+    #    ("r01", "forward"),
+    #    ("incoming points condition", "right"),
+    #    ("p01", "forward"),
+    #    ("s01", "reverse")
+    #]
+
+def test_return_loop_points_incoming_with_points_right():
+    journey = Journey(returnLoopPointsIncoming, listener)
+    journey.selectPoints = lambda: "right"
+    journey.start()
+    assert listener.history == [
+        ("s01", "forward")
+    ]
+    journey.nextStage()
+    assert listener.history == [
+        ("s01", "forward"),
+        ("p01", "reverse")
+    ]
+    journey.nextStage()
+    assert listener.history == [
+        ("s01", "forward"),
+        ("p01", "reverse"),
+        ("incoming points selection", "right"),
+        ("r01", "reverse")
+    ]
+    #journey.nextStage()
+    #assert listener.history == [
+    #    ("s01", "forward"),
+    #    ("p01", "reverse"),
+    #    ("incoming points selection", "right"),
+    #    ("r01", "reverse"),
+    #    ("incoming points condition", "left"),
+    #    ("p01", "forward"),
+    #    ("s01", "reverse")
+    #]
