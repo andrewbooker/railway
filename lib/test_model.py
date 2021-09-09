@@ -11,22 +11,26 @@ class Section():
         self.forwardUntil = None
         self.reverseUntil = None
 
+class Points(Section):
+    def __init__(self, name):
+        super().__init__(name)
+
 class Model():
     def __init__(self, m):
         js = json.loads(m)
         
         self.sections = {}
         for s in js:
-            section = Section(s["name"])
+            section = Points(s["name"]) if "type" in s and s["type"] == "points" else Section(s["name"])
             d = s["direction"]
             section.direction = (d["bank"], d["port"])
 
-            if len(s["next"]) > 0:
+            if "next" in s and len(s["next"]) > 0:
                 n = s["next"]
                 if "forward" in n:
                     section.next = (n["forward"]["id"], "forward")
                 if "reverse" in n:
-                    section.previous = (n["forward"]["id"], "reverse")
+                    section.previous = (n["reverse"]["id"], "reverse")
 
             if "until" in s:
                 u = s["until"]
@@ -80,5 +84,81 @@ def test_loop_has_self_referencing_next_and_previous_with_required_directions():
     assert section.forwardUntil == None
     assert section.reverseUntil == None
 
+outgoingPointsWithASiding = """
+[
+    {
+        "id": "p01",
+        "name": "main",
+        "type": "points",
+        "direction": {
+		    "bank": "RPi",
+		    "port": 26
+	    },
+        "until": {
+            "reverse": {
+	            "bank": "RPi",
+	            "port": 17
+            }
+        },
+        "outgoing": {
+            "left": {
+                "until": {
+		            "bank": "RPi",
+		            "port": 18
+	            }
+            },
+            "right": {
+                "id": "s01",
+                "direction": "forward"
+            },
+            "selector": {
+                "bank": "RPi",
+                "port": 25
+            },
+		    "detector": {
+			    "bank": "RPi",
+			    "port": 15
+		    }
+        }
+    },
+    {
+        "id": "s01",
+        "name": "siding",
+		"direction": {
+			"bank": "RPi",
+			"port": 27
+		},
+        "next": {
+            "reverse": {
+                "id": "p01",
+                "params": ["outgoing", "right"]
+            }
+        },
+        "until": {
+            "forward": {
+			    "bank": "RPi",
+			    "port": 14
+		    }
+        }
+    }
+]
+"""
 
+def test_outgoing_points_with_siding():
+    m = Model(outgoingPointsWithASiding)
+
+    siding = m.sections["s01"]
+    assert siding.name == "siding"
+    assert siding.next == None
+    assert siding.previous == ("p01", "reverse")
+    assert siding.direction == ("RPi", 27)
+    assert siding.forwardUntil == ("RPi", 14)
+    assert siding.reverseUntil == None
+
+    points = m.sections["p01"]
+    assert points.name == "main"
+    assert points.direction == ("RPi", 26)
+    assert points.forwardUntil == None
+    assert points.reverseUntil == ("RPi", 17)
+    assert points.__class__.__name__ == "Points"
 
