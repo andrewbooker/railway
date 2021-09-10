@@ -29,6 +29,10 @@ class Points(Section):
         self.incoming = None # or a Stage
 
 class Model():
+    @staticmethod
+    def portFrom(p):
+        return (p["bank"], p["port"])
+
     def __init__(self, m):
         js = json.loads(m)
         
@@ -36,8 +40,7 @@ class Model():
         for s in js:
             isPoints = "type" in s and s["type"] == "points"
             section = Points(s["name"]) if isPoints else Section(s["name"])
-            d = s["direction"]
-            section.direction = (d["bank"], d["port"])
+            section.direction = Model.portFrom(s["direction"])
 
             if "next" in s and len(s["next"]) > 0:
                 n = s["next"]
@@ -49,11 +52,9 @@ class Model():
             if "until" in s:
                 u = s["until"]
                 if "forward" in u:
-                    uf = u["forward"]
-                    section.forwardUntil = (uf["bank"], uf["port"])
+                    section.forwardUntil = Model.portFrom(u["forward"])
                 if "reverse" in u:
-                    uf = u["reverse"]
-                    section.reverseUntil = (uf["bank"], uf["port"])
+                    section.reverseUntil = Model.portFrom(u["reverse"])
 
             if "outgoing" in s:
                 o = s["outgoing"]
@@ -61,13 +62,11 @@ class Model():
                 r = o["right"]
                 left = Course()
                 if "until" in l:
-                    left.forwardUntil = (l["until"]["bank"], l["until"]["port"])
+                    left.forwardUntil = Model.portFrom(l["until"])
                 right = Course()
                 if "id" in r:
                     right.next = (r["id"], r["direction"])
-                det = o["detector"]
-                sel = o["selector"]
-                section.outgoing = Stage(left, right, (sel["bank"], sel["port"]), (det["bank"], det["port"]))
+                section.outgoing = Stage(left, right, Model.portFrom(o["selector"]), Model.portFrom(o["detector"]))
 
             self.sections[s["id"]] = section
 
