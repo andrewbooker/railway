@@ -23,9 +23,8 @@ class NavigateModel():
     def __init__(self, model, listener):
         self.model = model
         self.listener = listener
-        self.occupy = []
         for s in model.sections:
-            self.occupy.append((s, "forward"))
+            self.occupy = (s, "forward")
             return
 
     @staticmethod
@@ -33,16 +32,13 @@ class NavigateModel():
         return "reverse" if d == "forward" else "forward"
 
     def next(self):
-        if len(self.occupy) == 3:
-            self.occupy.pop(0)
-
-        last = self.occupy[-1]
+        last = self.occupy
         section = self.model.sections[last[0]]
         if (last[1] == "forward" and section.next is None) or (last[1] == "reverse" and section.previous is None):
-            self.occupy.append((last[0], NavigateModel.oppositeDirectionFrom(last[1])))
+            self.occupy = (last[0], NavigateModel.oppositeDirectionFrom(last[1]))
         self.listener.connect({"id": last[0]}, last[1])
 
-def test_single_section():
+def test_shuttle():
     m = Model(openLayout("example-layouts/shuttle.json"))
     listener = ReportingListener()
     nm = NavigateModel(m, listener)
@@ -58,4 +54,14 @@ def test_single_section():
     assert listener.history == [("s01", "forward"), ("s01", "reverse"), ("s01", "forward"), ("s01", "reverse")]
     nm.next()
     assert listener.history == [("s01", "forward"), ("s01", "reverse"), ("s01", "forward"), ("s01", "reverse"), ("s01", "forward")]
+
+def test_loop():
+    m = Model(openLayout("example-layouts/single-loop.json"))
+    listener = ReportingListener()
+    nm = NavigateModel(m, listener)
+
+    nm.next()
+    assert listener.history == [("s01", "forward")]
+    nm.next()
+    assert listener.history == [("s01", "forward"), ("s01", "forward")]
 
