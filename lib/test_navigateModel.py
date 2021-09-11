@@ -23,6 +23,8 @@ class NavigateModel():
     def __init__(self, model, listener):
         self.model = model
         self.listener = listener
+        self.pointsSelection = lambda: "left"
+        self.pointsCourse = None
         for s in model.sections:
             self.occupy = (s, "forward")
             return
@@ -47,10 +49,12 @@ class NavigateModel():
         self.listener.connect({"id": sectionId}, direction)
 
         if section.__class__ == Points:
-            if direction == "forward":
-                self.listener.setPointsTo("left", "outgoing", section)
-            else:
-                self.listener.waitToSetPointsTo("left", "outgoing", section)
+            if self.pointsCourse is None and direction == "forward":
+                self.listener.setPointsTo(self.pointsSelection(), "outgoing", section)
+                self.pointsCourse = section.outgoing.left
+            if self.pointsCourse is not None and direction == "reverse":
+                self.listener.waitToSetPointsTo(self.pointsSelection(), "outgoing", section)
+                self.pointsCourse = None
 
 def test_shuttle():
     m = Model(openLayout("example-layouts/shuttle.json"))
@@ -117,10 +121,11 @@ def test_two_stage_loop_reverse():
     nm.next()
     assert listener.history == [("s01", "reverse"), ("s02", "reverse"), ("s01", "reverse")]
 
-def test_self_contained_points():
+def test_self_contained_points_forward_left():
     m = Model(openLayout("example-layouts/points-as-large-y.json"))
     listener = ReportingListener()
     nm = NavigateModel(m, listener)
+    nm.pointsSelection = lambda: "left"
 
     nm.next()
     assert listener.history == [
@@ -142,4 +147,40 @@ def test_self_contained_points():
         ("outgoing points condition", "left"),
         ("p01", "forward"),
         ("outgoing points selection", "left")
+    ]
+
+def test_self_contained_points_reverse_right():
+    m = Model(openLayout("example-layouts/points-as-large-y.json"))
+    listener = ReportingListener()
+    nm = NavigateModel(m, listener)
+    nm.initialDirection("reverse")
+    nm.pointsSelection = lambda: "right"
+
+    nm.next()
+    assert listener.history == [
+        ("p01", "reverse")
+    ]
+    nm.next()
+    assert listener.history == [
+        ("p01", "reverse"),
+        ("p01", "forward"),
+        ("outgoing points selection", "right")
+    ]
+    nm.next()
+    assert listener.history == [
+        ("p01", "reverse"),
+        ("p01", "forward"),
+        ("outgoing points selection", "right"),
+        ("p01", "reverse"),
+        ("outgoing points condition", "right")
+    ]
+    nm.next()
+    assert listener.history == [
+        ("p01", "reverse"),
+        ("p01", "forward"),
+        ("outgoing points selection", "right"),
+        ("p01", "reverse"),
+        ("outgoing points condition", "right"),
+        ("p01", "forward"),
+        ("outgoing points selection", "right")
     ]
