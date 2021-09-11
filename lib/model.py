@@ -37,7 +37,8 @@ class Model():
         if "until" in spec:
             c.forwardUntil = Model.portFrom(spec["until"])
         if "id" in spec:
-            c.next = (spec["id"], spec["direction"])
+            direction = spec["direction"] if "direction" in spec else "forward"
+            c.next = (spec["id"], direction)
         return c
 
     def __init__(self, m):
@@ -54,7 +55,11 @@ class Model():
                 if "forward" in n:
                     section.next = (n["forward"]["id"], "forward")
                 if "reverse" in n:
-                    section.previous = (n["reverse"]["id"], "reverse")
+                    rv = n["reverse"]
+                    if "params" in rv:
+                        section.previous = (rv["id"], rv["params"][0], rv["params"][1])
+                    else:
+                        section.previous = (rv["id"], "reverse")
 
             if "until" in s:
                 u = s["until"]

@@ -1,0 +1,87 @@
+[
+    {
+        "id": "s01",
+        "name": "main branch",
+        "direction": {
+			"bank": "RPi",
+			"port": 23
+		},
+        "next": {
+            "forward": {
+                "id": "p01",
+                "params": []
+            }
+        },
+        "until": {
+			"reverse": {
+				"bank": "RPi",
+				"port": 14
+			}
+		}
+    },
+    {
+        "id": "s02",
+        "name": "branch left",
+        "direction": {
+			"bank": "RPi",
+			"port": 24
+		},
+        "next": {
+            "reverse": {
+                "id": "p01",
+                "params": ["outgoing", "left"]
+            }
+        },
+        "until": {
+			"forward": {
+				"bank": "RPi",
+				"port": 15
+			}
+		}
+    },
+    {
+        "id": "s03",
+        "name": "branch right",
+        "direction": {
+			"bank": "RPi",
+			"port": 25
+		},
+        "next": {
+            "reverse": {
+                "id": "p01",
+                "params": ["outgoing", "right"]
+            }
+        },
+        "until": {
+			"forward": {
+				"bank": "RPi",
+				"port": 16
+			}
+		}
+    },
+    {
+        "id": "p01",
+        "type": "points",
+        "name": "branching points",
+        "direction": {
+			"bank": "RPi",
+			"port": 26
+		},
+        "outgoing": {
+            "left": {
+                "id": "s02"
+            },
+            "right": {
+                "id": "s03"
+            },
+            "selector": {
+                "bank": "RPi",
+                "port": 26
+            },
+		    "detector": {
+			    "bank": "RPi",
+			    "port": 17
+		    }
+        }
+    }
+]

@@ -44,7 +44,7 @@ def test_loop_has_self_referencing_next_and_previous_with_required_directions():
     assert section.forwardUntil is None
     assert section.reverseUntil is None
 
-outgoingPointsWithASiding = """
+outgoingPointsWithSidingLeft = """
 [
     {
         "id": "p01",
@@ -129,12 +129,12 @@ def test_outgoing_points_as_complete_section():
     assert points.outgoing.right.previous is None
 
 def test_outgoing_points_with_siding():
-    m = Model(outgoingPointsWithASiding)
+    m = Model(outgoingPointsWithSidingLeft)
 
     siding = m.sections["s01"]
     assert siding.name == "siding"
     assert siding.next is None
-    assert siding.previous == ("p01", "reverse")
+    assert siding.previous == ("p01", "outgoing", "right")
     assert siding.direction == ("RPi", 27)
     assert siding.forwardUntil == ("RPi", 14)
     assert siding.reverseUntil is None
@@ -158,6 +158,25 @@ def test_outgoing_points_with_siding():
     assert points.outgoing.right.reverseUntil is None
     assert points.outgoing.detector == ("RPi", 15)
     assert points.outgoing.selector == ("RPi", 25)
+
+def test_simple_fork():
+    m = Model(openLayout("example-layouts/simple-fork.json"))
+
+    approach = m.sections["s01"]
+    assert approach.name == "main branch"
+    assert approach.direction == ("RPi", 23)
+    assert approach.next == ("p01", "forward")
+    assert approach.previous is None
+    assert approach.forwardUntil is None
+    assert approach.reverseUntil == ("RPi", 14)
+
+    left = m.sections["s02"]
+    assert left.name == "branch left"
+    assert left.direction == ("RPi", 24)
+    assert left.next is None
+    assert left.previous == ("p01", "outgoing", "left")
+    assert left.forwardUntil == ("RPi", 15)
+    assert left.reverseUntil is None
 
 #siding on the right
 #incoming, left and right have previous but no next
