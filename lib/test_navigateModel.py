@@ -36,6 +36,8 @@ class NavigateModel():
         section = self.model.sections[last[0]]
         if (last[1] == "forward" and section.next is None) or (last[1] == "reverse" and section.previous is None):
             self.occupy = (last[0], NavigateModel.oppositeDirectionFrom(last[1]))
+        elif last[1] == "forward" and section.next is not None:
+            self.occupy = section.next
         self.listener.connect({"id": last[0]}, last[1])
 
 def test_shuttle():
@@ -55,7 +57,7 @@ def test_shuttle():
     nm.next()
     assert listener.history == [("s01", "forward"), ("s01", "reverse"), ("s01", "forward"), ("s01", "reverse"), ("s01", "forward")]
 
-def test_loop():
+def test_single_loop():
     m = Model(openLayout("example-layouts/single-loop.json"))
     listener = ReportingListener()
     nm = NavigateModel(m, listener)
@@ -64,4 +66,18 @@ def test_loop():
     assert listener.history == [("s01", "forward")]
     nm.next()
     assert listener.history == [("s01", "forward"), ("s01", "forward")]
+
+def test_two_stage_loop():
+    m = Model(openLayout("example-layouts/two-stage-loop.json"))
+    listener = ReportingListener()
+    nm = NavigateModel(m, listener)
+
+    nm.next()
+    assert listener.history == [("s01", "forward")]
+    nm.next()
+    assert listener.history == [("s01", "forward"), ("s02", "forward")]
+    nm.next()
+    assert listener.history == [("s01", "forward"), ("s02", "forward"), ("s01", "forward")]
+    nm.next()
+    assert listener.history == [("s01", "forward"), ("s02", "forward"), ("s01", "forward"), ("s02", "forward")]
 

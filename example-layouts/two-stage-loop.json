@@ -1,0 +1,34 @@
+[
+    {
+        "id": "s01",
+        "name": "first half",
+        "next": {
+            "forward": {
+                "id": "s02"
+            },
+            "reverse": {
+                "id": "s02"
+            }
+        },
+        "direction": {
+			"bank": "RPi",
+			"port": 28
+		}
+    },
+    {
+        "id": "s02",
+        "name": "second half",
+        "next": {
+            "forward": {
+                "id": "s01"
+            },
+            "reverse": {
+                "id": "s01"
+            }
+        },
+        "direction": {
+			"bank": "RPi",
+			"port": 29
+		}
+    }
+]
