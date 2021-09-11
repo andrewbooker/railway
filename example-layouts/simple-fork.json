@@ -8,8 +8,7 @@
 		},
         "next": {
             "forward": {
-                "id": "p01",
-                "params": []
+                "id": "p01"
             }
         },
         "until": {

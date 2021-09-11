@@ -53,7 +53,11 @@ class Model():
             if "next" in s and len(s["next"]) > 0:
                 n = s["next"]
                 if "forward" in n:
-                    section.next = (n["forward"]["id"], "forward")
+                    fw = n["forward"]
+                    if "params" in fw:
+                        section.next = (fw["id"], fw["params"][0], fw["params"][1])
+                    else:
+                        section.next = (fw["id"], "forward")
                 if "reverse" in n:
                     rv = n["reverse"]
                     if "params" in rv:
@@ -76,5 +80,13 @@ class Model():
                 left = Model._courseFrom(o["left"])
                 right = Model._courseFrom(o["right"])
                 section.outgoing = Stage(left, right, Model.portFrom(o["selector"]), Model.portFrom(o["detector"]))
+
+            if "incoming" in s:
+                stage = s["incoming"]
+                l = stage["left"]
+                r = stage["right"]
+                left = Model._courseFrom(stage["left"])
+                right = Model._courseFrom(stage["right"])
+                section.incoming = Stage(left, right, Model.portFrom(stage["selector"]), Model.portFrom(stage["detector"]))
 
             self.sections[s["id"]] = section
