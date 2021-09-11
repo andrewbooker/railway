@@ -45,6 +45,12 @@ class NavigateModel():
             self.occupy = section.previous
         self.listener.connect({"id": last[0]}, last[1])
 
+        if section.__class__ == Points:
+            if last[1] == "forward":
+                self.listener.setPointsTo("left", "outgoing", section)
+            else:
+                self.listener.waitToSetPointsTo("left", "outgoing", section)
+
 def test_shuttle():
     m = Model(openLayout("example-layouts/shuttle.json"))
     listener = ReportingListener()
@@ -110,3 +116,29 @@ def test_two_stage_loop_reverse():
     nm.next()
     assert listener.history == [("s01", "reverse"), ("s02", "reverse"), ("s01", "reverse")]
 
+def test_self_contained_points():
+    m = Model(openLayout("example-layouts/points-as-large-y.json"))
+    listener = ReportingListener()
+    nm = NavigateModel(m, listener)
+
+    nm.next()
+    assert listener.history == [
+        ("p01", "forward"),
+        ("outgoing points selection", "left")
+    ]
+    nm.next()
+    assert listener.history == [
+        ("p01", "forward"),
+        ("outgoing points selection", "left"),
+        ("p01", "reverse"),
+        ("outgoing points condition", "left")
+    ]
+    nm.next()
+    assert listener.history == [
+        ("p01", "forward"),
+        ("outgoing points selection", "left"),
+        ("p01", "reverse"),
+        ("outgoing points condition", "left"),
+        ("p01", "forward"),
+        ("outgoing points selection", "left")
+    ]
