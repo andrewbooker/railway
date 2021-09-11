@@ -14,9 +14,9 @@ class Section(Course):
         self.direction = None
 
 class Stage():
-    def __init__(self, l: Course, r: Course, selector, detector):
-        self.left = l
-        self.right = r
+    def __init__(self, left: Course, right: Course, selector, detector):
+        self.left = left
+        self.right = right
         self.selector = selector
         self.detector = detector
 
@@ -62,6 +62,7 @@ class Model():
                     section.forwardUntil = Model.portFrom(u["forward"])
                 if "reverse" in u:
                     section.reverseUntil = Model.portFrom(u["reverse"])
+
 
             if "outgoing" in s:
                 o = s["outgoing"]
