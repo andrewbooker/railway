@@ -27,6 +27,9 @@ class NavigateModel():
             self.occupy = (s, "forward")
             return
 
+    def initialDirection(self, d):
+        self.occupy = (self.occupy[0], d)
+
     @staticmethod
     def oppositeDirectionFrom(d):
         return "reverse" if d == "forward" else "forward"
@@ -38,6 +41,8 @@ class NavigateModel():
             self.occupy = (last[0], NavigateModel.oppositeDirectionFrom(last[1]))
         elif last[1] == "forward" and section.next is not None:
             self.occupy = section.next
+        elif last[1] == "reverse" and section.previous is not None:
+            self.occupy = section.previous
         self.listener.connect({"id": last[0]}, last[1])
 
 def test_shuttle():
@@ -67,6 +72,17 @@ def test_single_loop():
     nm.next()
     assert listener.history == [("s01", "forward"), ("s01", "forward")]
 
+def test_single_loop_reverse():
+    m = Model(openLayout("example-layouts/single-loop.json"))
+    listener = ReportingListener()
+    nm = NavigateModel(m, listener)
+    nm.initialDirection("reverse")
+
+    nm.next()
+    assert listener.history == [("s01", "reverse")]
+    nm.next()
+    assert listener.history == [("s01", "reverse"), ("s01", "reverse")]
+
 def test_two_stage_loop():
     m = Model(openLayout("example-layouts/two-stage-loop.json"))
     listener = ReportingListener()
@@ -80,4 +96,17 @@ def test_two_stage_loop():
     assert listener.history == [("s01", "forward"), ("s02", "forward"), ("s01", "forward")]
     nm.next()
     assert listener.history == [("s01", "forward"), ("s02", "forward"), ("s01", "forward"), ("s02", "forward")]
+
+def test_two_stage_loop_reverse():
+    m = Model(openLayout("example-layouts/two-stage-loop.json"))
+    listener = ReportingListener()
+    nm = NavigateModel(m, listener)
+    nm.initialDirection("reverse")
+
+    nm.next()
+    assert listener.history == [("s01", "reverse")]
+    nm.next()
+    assert listener.history == [("s01", "reverse"), ("s02", "reverse")]
+    nm.next()
+    assert listener.history == [("s01", "reverse"), ("s02", "reverse"), ("s01", "reverse")]
 
