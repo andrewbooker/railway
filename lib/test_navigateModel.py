@@ -31,22 +31,23 @@ class NavigateModel():
         self.occupy = (self.occupy[0], d)
 
     @staticmethod
-    def oppositeDirectionFrom(d):
+    def opposite(d):
         return "reverse" if d == "forward" else "forward"
 
     def next(self):
-        last = self.occupy
-        section = self.model.sections[last[0]]
-        if (last[1] == "forward" and section.next is None) or (last[1] == "reverse" and section.previous is None):
-            self.occupy = (last[0], NavigateModel.oppositeDirectionFrom(last[1]))
-        elif last[1] == "forward" and section.next is not None:
+        (sectionId, direction) = self.occupy
+        section = self.model.sections[sectionId]
+
+        if (direction == "forward" and section.next is None) or (direction == "reverse" and section.previous is None):
+            self.occupy = (sectionId, NavigateModel.opposite(direction))
+        elif direction == "forward" and section.next is not None:
             self.occupy = section.next
-        elif last[1] == "reverse" and section.previous is not None:
+        elif direction == "reverse" and section.previous is not None:
             self.occupy = section.previous
-        self.listener.connect({"id": last[0]}, last[1])
+        self.listener.connect({"id": sectionId}, direction)
 
         if section.__class__ == Points:
-            if last[1] == "forward":
+            if direction == "forward":
                 self.listener.setPointsTo("left", "outgoing", section)
             else:
                 self.listener.waitToSetPointsTo("left", "outgoing", section)
