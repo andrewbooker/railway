@@ -31,6 +31,15 @@ class Model():
     def portFrom(p):
         return (p["bank"], p["port"])
 
+    @staticmethod
+    def _courseFrom(spec):
+        c = Course()
+        if "until" in spec:
+            c.forwardUntil = Model.portFrom(spec["until"])
+        if "id" in spec:
+            c.next = (spec["id"], spec["direction"])
+        return c
+
     def __init__(self, m):
         js = json.loads(m)
 
@@ -58,12 +67,8 @@ class Model():
                 o = s["outgoing"]
                 l = o["left"]
                 r = o["right"]
-                left = Course()
-                if "until" in l:
-                    left.forwardUntil = Model.portFrom(l["until"])
-                right = Course()
-                if "id" in r:
-                    right.next = (r["id"], r["direction"])
+                left = Model._courseFrom(o["left"])
+                right = Model._courseFrom(o["right"])
                 section.outgoing = Stage(left, right, Model.portFrom(o["selector"]), Model.portFrom(o["detector"]))
 
             self.sections[s["id"]] = section

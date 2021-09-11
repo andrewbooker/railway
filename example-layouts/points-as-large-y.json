@@ -1,0 +1,40 @@
+[
+    {
+        "id": "p01",
+        "name": "the track",
+        "type": "points",
+        "outgoing": {
+            "left": {
+                "until": {
+		            "bank": "RPi",
+		            "port": 14
+                }
+            },
+            "right": {
+                "until": { 
+		            "bank": "RPi",
+		            "port": 15
+                }
+	        },
+            "selector": {
+                "bank": "RPi",
+                "port": 25
+            },
+		    "detector": {
+			    "bank": "RPi",
+			    "port": 17
+		    }
+        },
+        "until": {
+            "reverse": {
+                "bank": "RPi",
+			    "port": 16
+            }
+        },
+        "direction": {
+			"bank": "RPi",
+			"port": 26
+		}
+    }
+]
+

@@ -104,6 +104,22 @@ outgoingPointsWithASiding = """
 ]
 """
 
+def test_outgoing_points_as_complete_section():
+    m = Model(openLayout("example-layouts/points-as-large-y.json"))
+
+    points = m.sections["p01"]
+    assert points.name == "the track"
+    assert points.direction == ("RPi", 26)
+    assert points.forwardUntil is None
+    assert points.reverseUntil == ("RPi", 16)
+    assert points.incoming is None
+    assert points.outgoing.detector == ("RPi", 17)
+    assert points.outgoing.selector == ("RPi", 25)
+    assert points.outgoing.left.next is None
+    assert points.outgoing.left.previous is None
+    assert points.outgoing.left.forwardUntil == ("RPi", 14)
+    assert points.outgoing.right.forwardUntil == ("RPi", 15)
+
 def test_outgoing_points_with_siding():
     m = Model(outgoingPointsWithASiding)
 
@@ -116,11 +132,11 @@ def test_outgoing_points_with_siding():
     assert siding.reverseUntil is None
 
     points = m.sections["p01"]
+    assert points.__class__.__name__ == "Points"
     assert points.name == "main"
     assert points.direction == ("RPi", 26)
     assert points.forwardUntil is None
     assert points.reverseUntil == ("RPi", 17)
-    assert points.__class__.__name__ == "Points"
     assert points.incoming is None
     assert points.outgoing.left.next is None
     assert points.outgoing.left.previous is None
@@ -134,5 +150,5 @@ def test_outgoing_points_with_siding():
     assert points.outgoing.selector == ("RPi", 25)
 
 #siding on the right
-#incoming
+#incoming, left and right have previous but no next
 
