@@ -41,6 +41,19 @@ class Model():
             c.next = (spec["id"], direction)
         return c
 
+    @staticmethod
+    def _nextSectionDirectionFrom(spec, direction):
+        sd = spec[direction]
+        if "params" in sd:
+            return (sd["id"], sd["params"][0], sd["params"][1])
+        return (sd["id"], direction)
+
+    @staticmethod
+    def _pointsStageFrom(stage):
+        left = Model._courseFrom(stage["left"])
+        right = Model._courseFrom(stage["right"])
+        return Stage(left, right, Model.portFrom(stage["selector"]), Model.portFrom(stage["detector"]))
+
     def __init__(self, m):
         js = json.loads(m)
 
@@ -53,17 +66,9 @@ class Model():
             if "next" in s and len(s["next"]) > 0:
                 n = s["next"]
                 if "forward" in n:
-                    fw = n["forward"]
-                    if "params" in fw:
-                        section.next = (fw["id"], fw["params"][0], fw["params"][1])
-                    else:
-                        section.next = (fw["id"], "forward")
+                    section.next = Model._nextSectionDirectionFrom(n, "forward")
                 if "reverse" in n:
-                    rv = n["reverse"]
-                    if "params" in rv:
-                        section.previous = (rv["id"], rv["params"][0], rv["params"][1])
-                    else:
-                        section.previous = (rv["id"], "reverse")
+                    section.previous = Model._nextSectionDirectionFrom(n, "reverse")
 
             if "until" in s:
                 u = s["until"]
@@ -72,21 +77,10 @@ class Model():
                 if "reverse" in u:
                     section.reverseUntil = Model.portFrom(u["reverse"])
 
-
             if "outgoing" in s:
-                o = s["outgoing"]
-                l = o["left"]
-                r = o["right"]
-                left = Model._courseFrom(o["left"])
-                right = Model._courseFrom(o["right"])
-                section.outgoing = Stage(left, right, Model.portFrom(o["selector"]), Model.portFrom(o["detector"]))
-
+                section.outgoing = Model._pointsStageFrom(s["outgoing"])
             if "incoming" in s:
-                stage = s["incoming"]
-                l = stage["left"]
-                r = stage["right"]
-                left = Model._courseFrom(stage["left"])
-                right = Model._courseFrom(stage["right"])
-                section.incoming = Stage(left, right, Model.portFrom(stage["selector"]), Model.portFrom(stage["detector"]))
+                section.incoming = Model._pointsStageFrom(s["incoming"])
 
             self.sections[s["id"]] = section
+
