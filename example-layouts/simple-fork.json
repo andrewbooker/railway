@@ -76,7 +76,7 @@
             },
             "selector": {
                 "bank": "RPi",
-                "port": 26
+                "port": 27
             },
 		    "detector": {
 			    "bank": "RPi",

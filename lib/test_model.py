@@ -44,6 +44,31 @@ def test_loop_has_self_referencing_next_and_previous_with_required_directions():
     assert section.forwardUntil is None
     assert section.reverseUntil is None
 
+
+def test_outgoing_points_as_complete_section():
+    m = Model(openLayout("example-layouts/points-as-large-y.json"))
+
+    points = m.sections["p01"]
+    assert points.__class__ == Points
+    assert points.name == "the track"
+    assert points.direction == ("RPi", 26)
+    assert points.forwardUntil is None
+    assert points.reverseUntil == ("RPi", 16)
+    assert points.incoming is None
+    assert points.next is None
+    assert points.previous is None
+
+    assert points.outgoing.detector == ("RPi", 17)
+    assert points.outgoing.selector == ("RPi", 25)
+    assert points.outgoing.left.next is None
+    assert points.outgoing.left.previous is None
+    assert points.outgoing.left.forwardUntil == ("RPi", 14)
+    assert points.outgoing.left.reverseUntil is None
+    assert points.outgoing.right.forwardUntil == ("RPi", 15)
+    assert points.outgoing.right.reverseUntil is None
+    assert points.outgoing.right.next is None
+    assert points.outgoing.right.previous is None
+
 outgoingPointsWithSidingLeft = """
 [
     {
@@ -104,31 +129,7 @@ outgoingPointsWithSidingLeft = """
 ]
 """
 
-def test_outgoing_points_as_complete_section():
-    m = Model(openLayout("example-layouts/points-as-large-y.json"))
-
-    points = m.sections["p01"]
-    assert points.__class__ == Points
-    assert points.name == "the track"
-    assert points.direction == ("RPi", 26)
-    assert points.forwardUntil is None
-    assert points.reverseUntil == ("RPi", 16)
-    assert points.incoming is None
-    assert points.next is None
-    assert points.previous is None
-
-    assert points.outgoing.detector == ("RPi", 17)
-    assert points.outgoing.selector == ("RPi", 25)
-    assert points.outgoing.left.next is None
-    assert points.outgoing.left.previous is None
-    assert points.outgoing.left.forwardUntil == ("RPi", 14)
-    assert points.outgoing.left.reverseUntil is None
-    assert points.outgoing.right.forwardUntil == ("RPi", 15)
-    assert points.outgoing.right.reverseUntil is None
-    assert points.outgoing.right.next is None
-    assert points.outgoing.right.previous is None
-
-def test_outgoing_points_with_siding():
+def test_outgoing_points_with_siding_left():
     m = Model(outgoingPointsWithSidingLeft)
 
     siding = m.sections["s01"]
@@ -178,6 +179,30 @@ def test_simple_fork():
     assert left.forwardUntil == ("RPi", 15)
     assert left.reverseUntil is None
 
-#siding on the right
-#incoming, left and right have previous but no next
+    right = m.sections["s03"]
+    assert right.name == "branch right"
+    assert right.direction == ("RPi", 25)
+    assert right.next is None
+    assert right.previous == ("p01", "outgoing", "right")
+    assert right.forwardUntil == ("RPi", 16)
+    assert right.reverseUntil is None
 
+    points = m.sections["p01"]
+    assert points.__class__ == Points
+    assert points.name == "branching points"
+    assert points.direction == ("RPi", 26)
+    assert points.next is None
+    assert points.previous is None
+    assert points.forwardUntil is None
+    assert points.forwardUntil is None
+    assert points.incoming is None
+    assert points.outgoing.left.next == ("s02", "forward")
+    assert points.outgoing.left.previous is None
+    assert points.outgoing.left.reverseUntil is None
+    assert points.outgoing.left.forwardUntil is None
+    assert points.outgoing.right.next == ("s03", "forward")
+    assert points.outgoing.right.previous is None
+    assert points.outgoing.right.forwardUntil is None
+    assert points.outgoing.right.reverseUntil is None
+    assert points.outgoing.detector == ("RPi", 17)
+    assert points.outgoing.selector == ("RPi", 27)
