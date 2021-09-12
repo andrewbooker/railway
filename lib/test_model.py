@@ -135,7 +135,7 @@ def test_outgoing_points_with_siding_left():
     siding = m.sections["s01"]
     assert siding.name == "siding"
     assert siding.next is None
-    assert siding.previous == ("p01", "outgoing", "left")
+    assert siding.previous == ("p01", "reverse", "outgoing", "left")
     assert siding.direction == ("RPi", 27)
     assert siding.forwardUntil == ("RPi", 14)
     assert siding.reverseUntil is None
@@ -175,7 +175,7 @@ def test_simple_fork():
     assert left.name == "branch left"
     assert left.direction == ("RPi", 24)
     assert left.next is None
-    assert left.previous == ("p01", "outgoing", "left")
+    assert left.previous == ("p01", "reverse", "outgoing", "left")
     assert left.forwardUntil == ("RPi", 15)
     assert left.reverseUntil is None
 
@@ -183,7 +183,7 @@ def test_simple_fork():
     assert right.name == "branch right"
     assert right.direction == ("RPi", 25)
     assert right.next is None
-    assert right.previous == ("p01", "outgoing", "right")
+    assert right.previous == ("p01", "reverse", "outgoing", "right")
     assert right.forwardUntil == ("RPi", 16)
     assert right.reverseUntil is None
 
@@ -272,7 +272,7 @@ def test_incoming_points_with_siding_right():
 
     siding = m.sections["s01"]
     assert siding.name == "siding"
-    assert siding.next == ("p01", "incoming", "right")
+    assert siding.next == ("p01", "forward", "incoming", "right")
     assert siding.previous is None
     assert siding.direction == ("RPi", 27)
     assert siding.forwardUntil is None

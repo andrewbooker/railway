@@ -45,7 +45,7 @@ class Model():
     def _nextSectionDirectionFrom(spec, direction):
         sd = spec[direction]
         if "params" in sd:
-            return (sd["id"], sd["params"][0], sd["params"][1])
+            return (sd["id"], direction, sd["params"][0], sd["params"][1])
         return (sd["id"], direction)
 
     @staticmethod
