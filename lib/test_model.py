@@ -192,7 +192,7 @@ def test_simple_fork():
     assert points.name == "branching points"
     assert points.direction == ("RPi", 26)
     assert points.next is None
-    assert points.previous is None
+    assert points.previous == ("s01", "reverse")
     assert points.forwardUntil is None
     assert points.forwardUntil is None
     assert points.incoming is None
