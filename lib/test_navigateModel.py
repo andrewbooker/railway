@@ -27,13 +27,24 @@ class NavigateModel():
         self.initialDir = "forward"
         self.occupy = []
 
-
     def initialDirection(self, d):
         self.initialDir = d
 
     @staticmethod
     def opposite(d):
         return "reverse" if d == "forward" else "forward"
+
+    @staticmethod
+    def possibleNextStage(direction, section, sectionId, isPoints):
+        if direction == "forward" and section.next is not None:
+            return section.next
+        if direction == "reverse" and section.previous is not None:
+            return section.previous
+        if not isPoints and ((direction == "forward" and section.next is None) or (direction == "reverse" and section.previous is None)):
+            return (sectionId, NavigateModel.opposite(direction))
+        if (direction == "forward" and section.forwardUntil is not None) or (direction == "reverse" and section.reverseUntil is not None):
+            return (sectionId, NavigateModel.opposite(direction))
+        return None
 
     def next(self):
         if len(self.occupy) == 0:
@@ -42,32 +53,21 @@ class NavigateModel():
                 break
         current = self.occupy[-1]
         (sectionId, direction) = current[:2]
-        approachingConvergence = len(current) > 2
-        currentStage = current[2] if approachingConvergence else "outgoing"
-        currentSelection = current[3] if approachingConvergence else None
         section = self.model.sections[sectionId]
         isPoints = section.__class__ == Points
-
-        nextSection = None
-
-        if direction == "forward" and section.next is not None:
-            nextSection = section.next
-        if direction == "reverse" and section.previous is not None:
-            nextSection = section.previous
-        if not isPoints and ((direction == "forward" and section.next is None) or (direction == "reverse" and section.previous is None)):
-            nextSection = (sectionId, NavigateModel.opposite(direction))
-        if (direction == "forward" and section.forwardUntil is not None) or (direction == "reverse" and section.reverseUntil is not None):
-            nextSection = (sectionId, NavigateModel.opposite(direction))
-
+        nextSection = NavigateModel.possibleNextStage(direction, section, sectionId, isPoints)
         if nextSection is not None:
             self.occupy.append(nextSection)
+
+        approachingConvergence = len(current) > 2
+        currentStage = current[2] if approachingConvergence else "outgoing" #("outgoing" if not hasattr(section, "incoming") else "incoming")
 
         if not isPoints or (not approachingConvergence and (currentStage == "outgoing" and direction == "reverse") or (currentStage == "incoming" and direction == "forward")):
             self.listener.connect({"id": sectionId}, direction)
             return
 
         if approachingConvergence:
-            self.listener.waitToSetPointsTo(currentSelection, currentStage, section)
+            self.listener.waitToSetPointsTo(current[3], currentStage, section)
             self.listener.connect({"id": sectionId}, direction)
         else:
             selection = self.pointsSelection()
@@ -75,16 +75,17 @@ class NavigateModel():
             course = getattr(stage, selection)
             self.listener.connect({"id": sectionId}, direction)
             self.listener.setPointsTo(selection, currentStage, section)
-            if direction == "forward":
+            if currentStage == "outgoing":
                 if course.next is not None:
                     self.occupy.append(course.next)
                 elif course.forwardUntil is not None:
                     self.occupy.append((sectionId, NavigateModel.opposite(direction), currentStage, selection))
-            if direction == "reverse":
-                if course.previous is not None:
-                    self.occupy.append(course.previous)
+            else:
+                if course.next is not None:
+                    self.occupy.append(course.next)
                 elif course.reverseUntil is not None:
                     self.occupy.append((sectionId, NavigateModel.opposite(direction), currentStage, selection))
+
 
 def test_shuttle():
     m = Model(openLayout("example-layouts/shuttle.json"))
