@@ -56,13 +56,17 @@ class NavigateModel():
         section = self.model.sections[sectionId]
         isPoints = section.__class__ == Points
         nextSection = NavigateModel.possibleNextStage(direction, section, sectionId, isPoints)
-        if nextSection is not None:
+        if nextSection is not None and nextSection.__class__ != Stage:
             self.occupy.append(nextSection)
 
         approachingConvergence = len(current) > 2
-        currentStage = current[2] if approachingConvergence else "outgoing" #("outgoing" if not hasattr(section, "incoming") else "incoming")
+        currentStage = None
+        if approachingConvergence:
+            currentStage = current[2]
+        elif nextSection.__class__ == Stage:
+            currentStage = "outgoing" if nextSection == section.outgoing else "incoming"
 
-        if not isPoints or (not approachingConvergence and (currentStage == "outgoing" and direction == "reverse") or (currentStage == "incoming" and direction == "forward")):
+        if not isPoints or currentStage is None:
             self.listener.connect({"id": sectionId}, direction)
             return
 
@@ -81,8 +85,8 @@ class NavigateModel():
                 elif course.forwardUntil is not None:
                     self.occupy.append((sectionId, NavigateModel.opposite(direction), currentStage, selection))
             else:
-                if course.next is not None:
-                    self.occupy.append(course.next)
+                if course.previous is not None:
+                    self.occupy.append(course.previous)
                 elif course.reverseUntil is not None:
                     self.occupy.append((sectionId, NavigateModel.opposite(direction), currentStage, selection))
 
@@ -259,4 +263,56 @@ def test_simple_fork_points_left():
         ("s02", "reverse"),
         ("outgoing points condition", "left"),
         ("p01", "reverse")
+    ]
+
+
+def test_simple_fork_incoming_points_left():
+    m = Model(openLayout("example-layouts/simple-fork-incoming.json"))
+    listener = ReportingListener()
+    nm = NavigateModel(m, listener)
+    nm.pointsSelection = lambda: "left"
+
+    nm.next()
+    assert listener.history == [
+        ("s01", "forward")
+    ]
+    nm.next()
+    assert listener.history == [
+        ("s01", "forward"),
+        ("s01", "reverse")
+    ]
+    nm.next()
+    assert listener.history == [
+        ("s01", "forward"),
+        ("s01", "reverse"),
+        ("p01", "reverse"),
+        ("incoming points selection", "left")
+    ]
+    nm.next()
+    assert listener.history == [
+        ("s01", "forward"),
+        ("s01", "reverse"),
+        ("p01", "reverse"),
+        ("incoming points selection", "left"),
+        ("s02", "reverse")
+    ]
+    nm.next()
+    assert listener.history == [
+        ("s01", "forward"),
+        ("s01", "reverse"),
+        ("p01", "reverse"),
+        ("incoming points selection", "left"),
+        ("s02", "reverse"),
+        ("s02", "forward")
+    ]
+    nm.next()
+    assert listener.history == [
+        ("s01", "forward"),
+        ("s01", "reverse"),
+        ("p01", "reverse"),
+        ("incoming points selection", "left"),
+        ("s02", "reverse"),
+        ("s02", "forward"),
+        ("incoming points condition", "left"),
+        ("p01", "forward")
     ]
