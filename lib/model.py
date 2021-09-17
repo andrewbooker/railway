@@ -32,13 +32,17 @@ class Model():
         return (p["bank"], p["port"])
 
     @staticmethod
-    def _courseFrom(spec):
+    def _courseFrom(points, stage, selection):
         c = Course()
+        spec = points[stage][selection]
         if "until" in spec:
             c.forwardUntil = Model.portFrom(spec["until"])
         if "id" in spec:
             direction = spec["direction"] if "direction" in spec else "forward"
-            c.next = (spec["id"], direction)
+            if stage == "outgoing":
+                c.next = (spec["id"], direction)
+            else:
+                c.previous = (spec["id"], direction)
         return c
 
     @staticmethod
@@ -49,10 +53,10 @@ class Model():
         return (sd["id"], direction)
 
     @staticmethod
-    def _pointsStageFrom(stage):
-        left = Model._courseFrom(stage["left"])
-        right = Model._courseFrom(stage["right"])
-        return Stage(left, right, Model.portFrom(stage["selector"]), Model.portFrom(stage["detector"]))
+    def _pointsStageFrom(points, stage):
+        left = Model._courseFrom(points, stage, "left")
+        right = Model._courseFrom(points, stage, "right")
+        return Stage(left, right, Model.portFrom(points[stage]["selector"]), Model.portFrom(points[stage]["detector"]))
 
     def __init__(self, m):
         js = json.loads(m)
@@ -78,10 +82,10 @@ class Model():
                     section.reverseUntil = Model.portFrom(u["reverse"])
 
             if "outgoing" in s:
-                section.outgoing = Model._pointsStageFrom(s["outgoing"])
+                section.outgoing = Model._pointsStageFrom(s, "outgoing")
                 section.next = section.outgoing
             if "incoming" in s:
-                section.incoming = Model._pointsStageFrom(s["incoming"])
+                section.incoming = Model._pointsStageFrom(s, "incoming")
                 section.previous = section.incoming
 
             self.sections[s["id"]] = section

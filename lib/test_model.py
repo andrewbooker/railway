@@ -291,8 +291,8 @@ def test_incoming_points_with_siding_right():
     assert points.incoming.left.previous is None
     assert points.incoming.left.reverseUntil is None
     assert points.incoming.left.forwardUntil == ("RPi", 18)
-    assert points.incoming.right.next == ("s01", "reverse")
-    assert points.incoming.right.previous is None
+    assert points.incoming.right.previous == ("s01", "reverse")
+    assert points.incoming.right.next is None
     assert points.incoming.right.forwardUntil is None
     assert points.incoming.right.reverseUntil is None
     assert points.incoming.detector == ("RPi", 15)
