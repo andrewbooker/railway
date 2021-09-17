@@ -55,7 +55,7 @@ def test_outgoing_points_as_complete_section():
     assert points.forwardUntil is None
     assert points.reverseUntil == ("RPi", 16)
     assert points.incoming is None
-    assert points.next is None
+    assert points.next == points.outgoing
     assert points.previous is None
 
     assert points.outgoing.detector == ("RPi", 17)
@@ -144,7 +144,7 @@ def test_outgoing_points_with_siding_left():
     assert points.__class__ == Points
     assert points.name == "main"
     assert points.direction == ("RPi", 26)
-    assert points.next is None
+    assert points.next == points.outgoing
     assert points.previous is None
     assert points.forwardUntil is None
     assert points.reverseUntil == ("RPi", 17)
@@ -191,7 +191,7 @@ def test_simple_fork():
     assert points.__class__ == Points
     assert points.name == "branching points"
     assert points.direction == ("RPi", 26)
-    assert points.next is None
+    assert points.next == points.outgoing
     assert points.previous == ("s01", "reverse")
     assert points.forwardUntil is None
     assert points.forwardUntil is None
@@ -283,7 +283,7 @@ def test_incoming_points_with_siding_right():
     assert points.name == "main"
     assert points.direction == ("RPi", 26)
     assert points.next is None
-    assert points.previous is None
+    assert points.previous == points.incoming
     assert points.forwardUntil == ("RPi", 17)
     assert points.reverseUntil is None
     assert points.outgoing is None

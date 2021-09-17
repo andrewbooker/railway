@@ -79,8 +79,10 @@ class Model():
 
             if "outgoing" in s:
                 section.outgoing = Model._pointsStageFrom(s["outgoing"])
+                section.next = section.outgoing
             if "incoming" in s:
                 section.incoming = Model._pointsStageFrom(s["incoming"])
+                section.previous = section.incoming
 
             self.sections[s["id"]] = section
 
