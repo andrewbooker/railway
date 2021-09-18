@@ -48,7 +48,7 @@ class Model():
     @staticmethod
     def _nextSectionDirectionFrom(spec, direction):
         sd = spec[direction]
-        if "params" in sd:
+        if "params" in sd and len(sd["params"]) > 1:
             stage = sd["params"][0]
             direction = "reverse" if stage == "outgoing" else "forward"
             return (sd["id"], direction, stage, sd["params"][1])

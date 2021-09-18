@@ -61,6 +61,11 @@
 			    "bank": "RPi",
 			    "port": 15
 		    }
+        },
+        "next": {
+            "reverse": {
+                "id": "s01"
+            }
         }
     }
 ]
