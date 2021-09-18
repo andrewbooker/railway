@@ -25,7 +25,7 @@ class NavigateModel():
         self.listener = listener
         self.pointsSelection = lambda: "left"
         self.initialDir = "forward"
-        self.occupy = []
+        self.current = None
 
     def initialDirection(self, d):
         self.initialDir = d
@@ -55,11 +55,11 @@ class NavigateModel():
         return None
 
     def next(self):
-        if len(self.occupy) == 0:
+        if self.current is None:
             for s in self.model.sections:
                 self._proceedTo((s, self.initialDir))
                 break
-        current = self.occupy[-1]
+        current = self.current
         (sectionId, direction) = current[:2]
         section = self.model.sections[sectionId]
         isPoints = section.__class__ == Points
@@ -101,7 +101,7 @@ class NavigateModel():
                 self._proceedTo((sectionId, NavigateModel.opposite(direction), stage, selection))
 
     def _proceedTo(self, to):
-        self.occupy.append(to)
+        self.current = to
 
 
 def test_shuttle():
