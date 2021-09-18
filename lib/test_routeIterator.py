@@ -19,7 +19,7 @@ def openLayout(fileName):
 
 
 from model import *
-class NavigateModel():
+class RouteIterator():
     def __init__(self, model, listener):
         self.model = model
         self.listener = listener
@@ -41,9 +41,9 @@ class NavigateModel():
         if direction == "reverse" and section.previous is not None:
             return section.previous
         if not isPoints and ((direction == "forward" and section.next is None) or (direction == "reverse" and section.previous is None)):
-            return (sectionId, NavigateModel.opposite(direction))
+            return (sectionId, RouteIterator.opposite(direction))
         if (direction == "forward" and section.forwardUntil is not None) or (direction == "reverse" and section.reverseUntil is not None):
-            return (sectionId, NavigateModel.opposite(direction))
+            return (sectionId, RouteIterator.opposite(direction))
         return None
 
     @staticmethod
@@ -63,12 +63,12 @@ class NavigateModel():
         (sectionId, direction) = current[:2]
         section = self.model.sections[sectionId]
         isPoints = section.__class__ == Points
-        nextSection = NavigateModel.possibleNextSection(direction, section, sectionId, isPoints)
+        nextSection = RouteIterator.possibleNextSection(direction, section, sectionId, isPoints)
         if nextSection is not None and nextSection.__class__ != Stage:
             self._proceedTo(nextSection)
 
         approachingConvergence = len(current) > 2
-        currentStage = NavigateModel.currentStage(approachingConvergence, current, nextSection, section)
+        currentStage = RouteIterator.currentStage(approachingConvergence, current, nextSection, section)
 
         if not isPoints or currentStage is None:
             self.listener.connect({"id": sectionId}, direction)
@@ -93,12 +93,12 @@ class NavigateModel():
             if course.next is not None:
                 self._proceedTo(course.next)
             elif course.forwardUntil is not None:
-                self._proceedTo((sectionId, NavigateModel.opposite(direction), stage, selection))
+                self._proceedTo((sectionId, RouteIterator.opposite(direction), stage, selection))
         else:
             if course.previous is not None:
                 self._proceedTo(course.previous)
             elif course.reverseUntil is not None:
-                self._proceedTo((sectionId, NavigateModel.opposite(direction), stage, selection))
+                self._proceedTo((sectionId, RouteIterator.opposite(direction), stage, selection))
 
     def _proceedTo(self, to):
         self.current = to
@@ -107,7 +107,7 @@ class NavigateModel():
 def test_shuttle():
     m = Model(openLayout("example-layouts/shuttle.json"))
     listener = ReportingListener()
-    nm = NavigateModel(m, listener)
+    nm = RouteIterator(m, listener)
 
     assert listener.history == []
     nm.next()
@@ -124,7 +124,7 @@ def test_shuttle():
 def test_single_loop():
     m = Model(openLayout("example-layouts/single-loop.json"))
     listener = ReportingListener()
-    nm = NavigateModel(m, listener)
+    nm = RouteIterator(m, listener)
 
     nm.next()
     assert listener.history == [("s01", "forward")]
@@ -134,7 +134,7 @@ def test_single_loop():
 def test_single_loop_reverse():
     m = Model(openLayout("example-layouts/single-loop.json"))
     listener = ReportingListener()
-    nm = NavigateModel(m, listener)
+    nm = RouteIterator(m, listener)
     nm.initialDirection("reverse")
 
     nm.next()
@@ -145,7 +145,7 @@ def test_single_loop_reverse():
 def test_two_stage_loop():
     m = Model(openLayout("example-layouts/two-stage-loop.json"))
     listener = ReportingListener()
-    nm = NavigateModel(m, listener)
+    nm = RouteIterator(m, listener)
 
     nm.next()
     assert listener.history == [("s01", "forward")]
@@ -159,7 +159,7 @@ def test_two_stage_loop():
 def test_two_stage_loop_reverse():
     m = Model(openLayout("example-layouts/two-stage-loop.json"))
     listener = ReportingListener()
-    nm = NavigateModel(m, listener)
+    nm = RouteIterator(m, listener)
     nm.initialDirection("reverse")
 
     nm.next()
@@ -173,7 +173,7 @@ def test_two_stage_loop_reverse():
 def test_self_contained_points_forward_left():
     m = Model(openLayout("example-layouts/points-as-large-y.json"))
     listener = ReportingListener()
-    nm = NavigateModel(m, listener)
+    nm = RouteIterator(m, listener)
     nm.pointsSelection = lambda: "left"
 
     nm.next()
@@ -202,7 +202,7 @@ def test_self_contained_points_forward_left():
 def test_self_contained_points_reverse_right():
     m = Model(openLayout("example-layouts/points-as-large-y.json"))
     listener = ReportingListener()
-    nm = NavigateModel(m, listener)
+    nm = RouteIterator(m, listener)
     nm.initialDirection("reverse")
     nm.pointsSelection = lambda: "right"
 
@@ -239,7 +239,7 @@ def test_self_contained_points_reverse_right():
 def test_simple_fork_points_left():
     m = Model(openLayout("example-layouts/simple-fork.json"))
     listener = ReportingListener()
-    nm = NavigateModel(m, listener)
+    nm = RouteIterator(m, listener)
     nm.pointsSelection = lambda: "left"
 
     nm.next()
@@ -282,7 +282,7 @@ def test_simple_fork_points_left():
 def test_simple_fork_incoming_points_left():
     m = Model(openLayout("example-layouts/simple-fork-incoming.json"))
     listener = ReportingListener()
-    nm = NavigateModel(m, listener)
+    nm = RouteIterator(m, listener)
     nm.pointsSelection = lambda: "left"
 
     nm.next()
@@ -334,7 +334,7 @@ def test_simple_fork_incoming_points_left():
 def test_return_loops_back_to_back_points_left():
     m = Model(openLayout("example-layouts/return-loops-back-to-back.json"))
     listener = ReportingListener()
-    nm = NavigateModel(m, listener)
+    nm = RouteIterator(m, listener)
     nm.pointsSelection = lambda: "left"
 
     nm.next()
@@ -384,7 +384,7 @@ def test_return_loops_back_to_back_points_left():
 def test_return_loops_back_to_back_points_right():
     m = Model(openLayout("example-layouts/return-loops-back-to-back.json"))
     listener = ReportingListener()
-    nm = NavigateModel(m, listener)
+    nm = RouteIterator(m, listener)
     nm.pointsSelection = lambda: "right"
 
     nm.next()
