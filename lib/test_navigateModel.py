@@ -35,7 +35,7 @@ class NavigateModel():
         return "reverse" if d == "forward" else "forward"
 
     @staticmethod
-    def possibleNextStage(direction, section, sectionId, isPoints):
+    def possibleNextSection(direction, section, sectionId, isPoints):
         if direction == "forward" and section.next is not None:
             return section.next
         if direction == "reverse" and section.previous is not None:
@@ -46,25 +46,29 @@ class NavigateModel():
             return (sectionId, NavigateModel.opposite(direction))
         return None
 
+    @staticmethod
+    def currentStage(approachingConvergence, current, nextSection, section):
+        if approachingConvergence:
+            return current[2]
+        elif nextSection.__class__ == Stage:
+            return "outgoing" if nextSection == section.outgoing else "incoming"
+        return None
+
     def next(self):
         if len(self.occupy) == 0:
             for s in self.model.sections:
-                self.occupy.append((s, self.initialDir))
+                self._proceedTo((s, self.initialDir))
                 break
         current = self.occupy[-1]
         (sectionId, direction) = current[:2]
         section = self.model.sections[sectionId]
         isPoints = section.__class__ == Points
-        nextSection = NavigateModel.possibleNextStage(direction, section, sectionId, isPoints)
+        nextSection = NavigateModel.possibleNextSection(direction, section, sectionId, isPoints)
         if nextSection is not None and nextSection.__class__ != Stage:
-            self.occupy.append(nextSection)
+            self._proceedTo(nextSection)
 
         approachingConvergence = len(current) > 2
-        currentStage = None
-        if approachingConvergence:
-            currentStage = current[2]
-        elif nextSection.__class__ == Stage:
-            currentStage = "outgoing" if nextSection == section.outgoing else "incoming"
+        currentStage = NavigateModel.currentStage(approachingConvergence, current, nextSection, section)
 
         if not isPoints or currentStage is None:
             self.listener.connect({"id": sectionId}, direction)
@@ -74,38 +78,30 @@ class NavigateModel():
             self.listener.waitToSetPointsTo(current[3], currentStage, section)
             self.listener.connect({"id": sectionId}, direction)
             if nextSection.__class__ == Stage:
-                currentStage = "incoming" if nextSection == section.incoming else "outgoing"
-                selection = self.pointsSelection()
-                course = getattr(nextSection, selection)
-
-                self.listener.setPointsTo(selection, currentStage, section)
-                if currentStage == "outgoing":
-                    if course.next is not None:
-                        self.occupy.append(course.next)
-                    elif course.forwardUntil is not None:
-                        self.occupy.append((sectionId, NavigateModel.opposite(direction), currentStage, selection))
-                else:
-                    if course.previous is not None:
-                        self.occupy.append(course.previous) #(course.previous[0], direction)) #stick with current direction if previous is forwards
-                    elif course.reverseUntil is not None:
-                        self.occupy.append((sectionId, NavigateModel.opposite(direction), currentStage, selection))
+                nextStage = "incoming" if nextSection == section.incoming else "outgoing"
+                self._approachDivergence(nextStage, direction, nextSection, section, sectionId)
         else:
-            selection = self.pointsSelection()
             stage = getattr(section, currentStage)
-            course = getattr(stage, selection)
             self.listener.connect({"id": sectionId}, direction)
+            self._approachDivergence(currentStage, direction, stage, section, sectionId)
 
-            self.listener.setPointsTo(selection, currentStage, section)
-            if currentStage == "outgoing":
-                if course.next is not None:
-                    self.occupy.append(course.next)
-                elif course.forwardUntil is not None:
-                    self.occupy.append((sectionId, NavigateModel.opposite(direction), currentStage, selection))
-            else:
-                if course.previous is not None:
-                    self.occupy.append(course.previous)
-                elif course.reverseUntil is not None:
-                    self.occupy.append((sectionId, NavigateModel.opposite(direction), currentStage, selection))
+    def _approachDivergence(self, stage, direction, nextSection, section, sectionId):
+        selection = self.pointsSelection()
+        self.listener.setPointsTo(selection, stage, section)
+        course = getattr(nextSection, selection)
+        if stage == "outgoing":
+            if course.next is not None:
+                self._proceedTo(course.next)
+            elif course.forwardUntil is not None:
+                self._proceedTo((sectionId, NavigateModel.opposite(direction), stage, selection))
+        else:
+            if course.previous is not None:
+                self._proceedTo(course.previous)
+            elif course.reverseUntil is not None:
+                self._proceedTo((sectionId, NavigateModel.opposite(direction), stage, selection))
+
+    def _proceedTo(self, to):
+        self.occupy.append(to)
 
 
 def test_shuttle():
