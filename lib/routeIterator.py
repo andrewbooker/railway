@@ -1,7 +1,17 @@
 from model import *
 
+class NavigationListener():
+    def connect(self, section, direction):
+        pass
+
+    def setPointsTo(self, s, st, p):
+        pass
+
+    def waitToSetPointsTo(self, s, st, p):
+        pass
+
 class RouteIterator():
-    def __init__(self, model, listener):
+    def __init__(self, model, listener: NavigationListener):
         self.model = model
         self.listener = listener
         self.pointsSelection = lambda: "left"
@@ -56,7 +66,7 @@ class RouteIterator():
             return
 
         if approachingConvergence:
-            self.listener.waitToSetPointsTo(current[3], currentStage, section)
+            self.listener.waitToSetPointsTo(current[3], currentStage, {"id": sectionId})
             self.listener.connect({"id": sectionId}, direction)
             if nextSection.__class__ == Stage:
                 nextStage = "incoming" if nextSection == section.incoming else "outgoing"
@@ -68,7 +78,7 @@ class RouteIterator():
 
     def _approachDivergence(self, stage, direction, nextSection, section, sectionId):
         selection = self.pointsSelection()
-        self.listener.setPointsTo(selection, stage, section)
+        self.listener.setPointsTo(selection, stage, {"id": sectionId})
         course = getattr(nextSection, selection)
         if stage == "outgoing":
             if course.next is not None:

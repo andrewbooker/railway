@@ -1,24 +1,27 @@
 
-class ReportingListener():
-    def __init__(self):
-        self.history = []
-
-    def connect(self, section, direction):
-        self.history.append((section["id"], direction))
-
-    def setPointsTo(self, s, st, p):
-        self.history.append(("%s points selection" % st, s))
-
-    def waitToSetPointsTo(self, s, st, p):
-        self.history.append(("%s points condition" % st, s))
-
 
 def openLayout(fileName):
     with open(fileName, "r") as layoutSpec:
         return layoutSpec.read()
 
 from model import *
-from routeIterator import RouteIterator
+from routeIterator import RouteIterator, NavigationListener
+
+class ReportingListener(NavigationListener):
+    def __init__(self):
+        self.history = []
+        self.lastPoints = []
+
+    def connect(self, section, direction):
+        self.history.append((section["id"], direction))
+
+    def setPointsTo(self, s, st, p):
+        self.history.append(("%s points selection" % st, s))
+        self.lastPoints = (p["id"])
+
+    def waitToSetPointsTo(self, s, st, p):
+        self.history.append(("%s points condition" % st, s))
+        self.lastPoints = p["id"]
 
 
 def test_shuttle():
@@ -94,6 +97,7 @@ def test_self_contained_points_forward_left():
     nm.pointsSelection = lambda: "left"
 
     nm.next()
+    assert listener.lastPoints == "p01"
     assert listener.history == [
         ("p01", "forward"),
         ("outgoing points selection", "left")
