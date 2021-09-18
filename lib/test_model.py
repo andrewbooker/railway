@@ -298,3 +298,36 @@ def test_incoming_points_with_siding_right():
     assert points.incoming.detector == ("RPi", 15)
     assert points.incoming.selector == ("RPi", 25)
 
+
+def test_return_loops_back_to_back():
+    m = Model(openLayout("example-layouts/return-loops-back-to-back.json"))
+
+    loop1 = m.sections["r01"]
+    assert loop1.next == ("p01", "reverse", "outgoing", "right")
+    assert loop1.previous == ("p01", "reverse", "outgoing", "left")
+    assert loop1.forwardUntil is None
+    assert loop1.reverseUntil is None
+
+    loop2 = m.sections["r02"]
+    assert loop2.next == ("p01", "forward", "incoming", "right")
+    assert loop2.previous == ("p01", "forward", "incoming", "left")
+    assert loop2.forwardUntil is None
+    assert loop2.reverseUntil is None
+
+    points = m.sections["p01"]
+    assert points.forwardUntil is None
+    assert points.reverseUntil is None
+    assert points.next == points.outgoing
+    assert points.previous == points.incoming
+    assert points.outgoing.left.previous is None
+    assert points.outgoing.left.next == ("r01", "forward")
+    assert points.outgoing.right.previous is None
+    assert points.outgoing.right.next == ("r01", "reverse")
+    assert points.outgoing.detector == ("RPi", 15)
+    assert points.outgoing.selector == ("RPi", 25)
+    assert points.incoming.detector == ("RPi", 16)
+    assert points.incoming.selector == ("RPi", 27)
+    assert points.incoming.left.previous == ("r02", "forward")
+    assert points.incoming.left.next is None
+    assert points.incoming.right.previous == ("r02", "reverse")
+    assert points.incoming.right.next is None
