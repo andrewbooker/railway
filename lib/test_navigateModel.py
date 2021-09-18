@@ -73,11 +73,28 @@ class NavigateModel():
         if approachingConvergence:
             self.listener.waitToSetPointsTo(current[3], currentStage, section)
             self.listener.connect({"id": sectionId}, direction)
+            if nextSection.__class__ == Stage:
+                currentStage = "incoming" if nextSection == section.incoming else "outgoing"
+                selection = self.pointsSelection()
+                course = getattr(nextSection, selection)
+
+                self.listener.setPointsTo(selection, currentStage, section)
+                if currentStage == "outgoing":
+                    if course.next is not None:
+                        self.occupy.append(course.next)
+                    elif course.forwardUntil is not None:
+                        self.occupy.append((sectionId, NavigateModel.opposite(direction), currentStage, selection))
+                else:
+                    if course.previous is not None:
+                        self.occupy.append(course.previous) #(course.previous[0], direction)) #stick with current direction if previous is forwards
+                    elif course.reverseUntil is not None:
+                        self.occupy.append((sectionId, NavigateModel.opposite(direction), currentStage, selection))
         else:
             selection = self.pointsSelection()
             stage = getattr(section, currentStage)
             course = getattr(stage, selection)
             self.listener.connect({"id": sectionId}, direction)
+
             self.listener.setPointsTo(selection, currentStage, section)
             if currentStage == "outgoing":
                 if course.next is not None:
@@ -315,4 +332,119 @@ def test_simple_fork_incoming_points_left():
         ("s02", "forward"),
         ("incoming points condition", "left"),
         ("p01", "forward")
+    ]
+
+
+def test_return_loops_back_to_back_points_left():
+    m = Model(openLayout("example-layouts/return-loops-back-to-back.json"))
+    listener = ReportingListener()
+    nm = NavigateModel(m, listener)
+    nm.pointsSelection = lambda: "left"
+
+    nm.next()
+    assert listener.history == [
+        ("r01", "forward")
+    ]
+    nm.next()
+    assert listener.history == [
+        ("r01", "forward"),
+        ("outgoing points condition", "right"),
+        ("p01", "reverse"),
+        ("incoming points selection", "left")
+    ]
+    nm.next()
+    assert listener.history == [
+        ("r01", "forward"),
+        ("outgoing points condition", "right"),
+        ("p01", "reverse"),
+        ("incoming points selection", "left"),
+        ("r02", "forward")
+    ]
+    nm.next()
+    assert listener.history == [
+        ("r01", "forward"),
+        ("outgoing points condition", "right"),
+        ("p01", "reverse"),
+        ("incoming points selection", "left"),
+        ("r02", "forward"),
+        ("incoming points condition", "right"),
+        ("p01", "forward"),
+        ("outgoing points selection", "left")
+    ]
+    nm.next()
+    assert listener.history == [
+        ("r01", "forward"),
+        ("outgoing points condition", "right"),
+        ("p01", "reverse"),
+        ("incoming points selection", "left"),
+        ("r02", "forward"),
+        ("incoming points condition", "right"),
+        ("p01", "forward"),
+        ("outgoing points selection", "left"),
+        ("r01", "forward")
+    ]
+
+
+def test_return_loops_back_to_back_points_right():
+    m = Model(openLayout("example-layouts/return-loops-back-to-back.json"))
+    listener = ReportingListener()
+    nm = NavigateModel(m, listener)
+    nm.pointsSelection = lambda: "right"
+
+    nm.next()
+    assert listener.history == [
+        ("r01", "forward")
+    ]
+    nm.next()
+    assert listener.history == [
+        ("r01", "forward"),
+        ("outgoing points condition", "right"),
+        ("p01", "reverse"),
+        ("incoming points selection", "right")
+    ]
+    nm.next()
+    assert listener.history == [
+        ("r01", "forward"),
+        ("outgoing points condition", "right"),
+        ("p01", "reverse"),
+        ("incoming points selection", "right"),
+        ("r02", "reverse")
+    ]
+    nm.next()
+    assert listener.history == [
+        ("r01", "forward"),
+        ("outgoing points condition", "right"),
+        ("p01", "reverse"),
+        ("incoming points selection", "right"),
+        ("r02", "reverse"),
+        ("incoming points condition", "left"),
+        ("p01", "forward"),
+        ("outgoing points selection", "right"),
+    ]
+    nm.next()
+    assert listener.history == [
+        ("r01", "forward"),
+        ("outgoing points condition", "right"),
+        ("p01", "reverse"),
+        ("incoming points selection", "right"),
+        ("r02", "reverse"),
+        ("incoming points condition", "left"),
+        ("p01", "forward"),
+        ("outgoing points selection", "right"),
+        ("r01", "reverse")
+    ]
+    nm.next()
+    assert listener.history == [
+        ("r01", "forward"),
+        ("outgoing points condition", "right"),
+        ("p01", "reverse"),
+        ("incoming points selection", "right"),
+        ("r02", "reverse"),
+        ("incoming points condition", "left"),
+        ("p01", "forward"),
+        ("outgoing points selection", "right"),
+        ("r01", "reverse"),
+        ("outgoing points condition", "left"),
+        ("p01", "reverse"),
+        ("incoming points selection", "right")
     ]
