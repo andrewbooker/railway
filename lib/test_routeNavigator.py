@@ -101,7 +101,7 @@ class RouteNavigator(NavigationListener):
             self.detectionListener.setCallback(self.nextRequestor)
             self.detectionListener.setNextDetector(RouteNavigator.portId(section.reverseUntil), 1)
 
-        if section.next is not None:
+        if direction == "forward" and section.next is not None:
             if section.next.__class__ == Stage:
                 return
             else:
@@ -174,3 +174,37 @@ def test_return_loop():
     assert detectionListener.callback is not None
     assert pointsController.last3 == [("RPi_25", "left")]
 
+    detectionListener.callback()
+    assert directionController.last3 == [("RPi_23", "forward"), ("RPi_26", "forward"), ("RPi_24", "forward")]
+    assert detectionListener.portId == "RPi_15"
+    assert detectionListener.value == 0
+    assert detectionListener.callback is not None
+    assert pointsController.last3 == [("RPi_25", "left")]
+
+    detectionListener.callback()
+    assert directionController.last3 == [("RPi_26", "forward"), ("RPi_24", "forward"), ("RPi_26", "reverse")]
+    assert detectionListener.portId == "RPi_15"
+    assert detectionListener.value == 0
+    assert detectionListener.callback is not None
+    assert pointsController.last3 == [("RPi_25", "left"), ("RPi_25", "right")]
+
+    detectionListener.callback()
+    assert directionController.last3 == [("RPi_24", "forward"), ("RPi_26", "reverse"), ("RPi_23", "reverse")]
+    assert detectionListener.portId == "RPi_14"
+    assert detectionListener.value == 1
+    assert detectionListener.callback is not None
+    assert pointsController.last3 == [("RPi_25", "left"), ("RPi_25", "right")]
+
+    detectionListener.callback()
+    assert detectionListener.portId == "RPi_15"
+    assert detectionListener.value == 0
+    assert detectionListener.callback is not None
+    assert directionController.last3 == [("RPi_26", "reverse"), ("RPi_23", "reverse"), ("RPi_23", "forward")]
+    assert pointsController.last3 == [("RPi_25", "left"), ("RPi_25", "right")]
+
+    detectionListener.callback()
+    assert detectionListener.portId == "RPi_15"
+    assert detectionListener.value == 0
+    assert detectionListener.callback is not None
+    assert directionController.last3 == [("RPi_23", "reverse"), ("RPi_23", "forward"), ("RPi_26", "forward")]
+    assert pointsController.last3 == [("RPi_25", "left"), ("RPi_25", "right"), ("RPi_25", "left")]
