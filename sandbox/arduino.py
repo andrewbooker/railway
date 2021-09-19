@@ -1,43 +1,21 @@
 #!/usr/bin/env python
 
-import pyfirmata
 import time
 import threading
-import sys
 import readchar
+import sys
+import os
+parentDir = os.path.dirname(os.getcwd())
+if "railway" not in parentDir:
+    print("needs to run in sandbox")
+    exit()
+
+sys.path.append(parentDir)
+from lib.arduinoPorts import UsingArduino
+
 
 def stdout(s):
     sys.stdout.write("%s\n\r" % s)
-
-class Input():
-    def __init__(self, board, port):
-        self.pin = board.get_pin("d:%d:i" % port)
-
-    def get(self):        
-        return self.pin.read()
-
-class Output():
-    def __init__(self, board, port):
-        self.pin = board.get_pin("d:%d:o" % port)
-
-    def set(self, v):        
-        return self.pin.write(v)
-
-class UsingArduino():
-    def __init__(self):
-        self.board = pyfirmata.ArduinoMega("/dev/ttyACM0")
-        pyfirmata.util.Iterator(self.board).start()
-        print("Arduino started")
-
-    def __del__(self):
-        self.board.exit()
-        print("Arduino stopped")
-
-    def input(self, port):
-        return Input(self.board, port)
-
-    def output(self, port):
-        return Output(self.board, port)
 
 
 def detect(shouldStop, ua, pin):
