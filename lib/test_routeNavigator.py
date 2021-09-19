@@ -11,6 +11,9 @@ class DetectionListener():
     def setCallback(self, c):
         pass
 
+    def clearCallback(self):
+        pass
+
     def setNextDetector(self, d, v):
         pass
 
@@ -74,6 +77,7 @@ class RouteNavigator(NavigationListener):
         self.nextRequestor = r
 
     def connect(self, sId, direction):
+        self.detectionListener.clearCallback()
         section = self.model.sections[sId["id"]]
         self.currentDirection = direction
         self.directionController.set(RouteNavigator.portId(section.direction), self.currentDirection)
@@ -84,15 +88,38 @@ class RouteNavigator(NavigationListener):
             self.detectionListener.setCallback(self.nextRequestor)
             self.detectionListener.setNextDetector(RouteNavigator.portId(section.reverseUntil), 1)
 
+        if section.next is not None:
+            nextSection = self.model.sections[section.next[0]]
+            if nextSection.__class__ == Points:
+                pointsStage = nextSection.outgoing if hasattr(nextSection, "outgoing") else nextSection.incoming
+                self.detectionListener.setNextDetector(RouteNavigator.portId(pointsStage.detector), 0)
+                self.detectionListener.setCallback(self.nextRequestor)
 
-def test_shuttle():
-    m = Model(openLayout("example-layouts/shuttle.json"))
+    def setPointsTo(self, s, stage, p):
+        points = self.model.sections[p["id"]]
+        self.detectionListener.waitFor(RouteNavigator.portId(points.detector), 0)
+        self.pointsController.set(p["id"], stage, s)
+
+    def waitToSetPointsTo(self, s, stage, p):
+        points = self.model.sections[p["id"]]
+        self.detectionListener.setCallback(self.nextRequestor)
+        self.detectionListener.setNextDetector(RouteNavigator.portId(points.detector), 0)
+        self.pointsController.set(p["id"], stage, s)
+
+
+def startFrom(fileName):
+    m = Model(openLayout(fileName))
     directionController = LocalDirectionController()
     detectionListener = LocalDetectionListener()
     navigator = RouteNavigator(m, directionController, detectionListener)
     iterator = RouteIterator(m, navigator)
     navigator.setNextRequestor(iterator.next)
     iterator.next()
+    return detectionListener, directionController
+
+
+def test_shuttle():
+    (detectionListener, directionController) = startFrom("example-layouts/shuttle.json")
 
     assert detectionListener.portId == "RPi_14"
     assert detectionListener.value == 1
@@ -111,3 +138,11 @@ def test_shuttle():
     assert detectionListener.callback is not None
     assert directionController.last3 == [("RPi_23", "forward"), ("RPi_23", "reverse"), ("RPi_23", "forward")]
 
+
+def test_return_loop():
+    (detectionListener, directionController) = startFrom("example-layouts/return-loop.json")
+
+    assert detectionListener.portId == "RPi_15"
+    assert detectionListener.value == 0
+    assert detectionListener.callback is not None
+    assert directionController.last3 == [("RPi_23", "forward")]
