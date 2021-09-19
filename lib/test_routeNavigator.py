@@ -208,3 +208,41 @@ def test_return_loop():
     assert detectionListener.callback is not None
     assert directionController.last3 == [("RPi_23", "reverse"), ("RPi_23", "forward"), ("RPi_26", "forward")]
     assert pointsController.last3 == [("RPi_25", "left"), ("RPi_25", "right"), ("RPi_25", "left")]
+
+
+def test_return_loops_back_to_back():
+    (detectionListener, directionController, pointsController) = startFrom("example-layouts/return-loops-back-to-back.json")
+
+    assert detectionListener.portId == "RPi_15"
+    assert detectionListener.value == 0
+    assert detectionListener.callback is not None
+    assert directionController.last3 == [("RPi_23", "forward")]
+    assert pointsController.last3 == []
+
+    detectionListener.callback()
+    assert detectionListener.portId == "RPi_15"  # should be a list of 15 and 16
+    assert detectionListener.value == 0
+    assert detectionListener.callback is not None
+    assert directionController.last3 == [("RPi_23", "forward"), ("RPi_26", "reverse")]
+    assert pointsController.last3 == [("RPi_25", "right"), ("RPi_27", "left")]
+
+    detectionListener.callback()
+    assert detectionListener.portId == "RPi_15"  # should be a list of 15 and 16
+    assert detectionListener.value == 0
+    assert detectionListener.callback is not None
+    assert directionController.last3 == [("RPi_23", "forward"), ("RPi_26", "reverse"), ("RPi_24", "forward")]
+    assert pointsController.last3 == [("RPi_25", "right"), ("RPi_27", "left")]
+
+    detectionListener.callback()
+    assert detectionListener.portId == "RPi_16"
+    assert detectionListener.value == 0
+    assert detectionListener.callback is not None
+    assert directionController.last3 == [("RPi_26", "reverse"), ("RPi_24", "forward"), ("RPi_26", "forward")]
+    assert pointsController.last3 == [("RPi_27", "left"), ("RPi_27", "right"), ("RPi_25", "left")]
+
+    detectionListener.callback()
+    assert detectionListener.portId == "RPi_15"
+    assert detectionListener.value == 0
+    assert detectionListener.callback is not None
+    assert directionController.last3 == [("RPi_24", "forward"), ("RPi_26", "forward"), ("RPi_23", "forward")]
+    assert pointsController.last3 == [("RPi_27", "left"), ("RPi_27", "right"), ("RPi_25", "left")]
