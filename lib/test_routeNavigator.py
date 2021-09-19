@@ -60,12 +60,26 @@ class LocalDirectionController(DirectionController):
             self.last3.pop(0)
         self.last3.append((portId, direction))
 
+class PointsController():
+    def set(self, pId, s):
+        pass
+
+class LocalPointsController(PointsController):
+    def __init__(self):
+        self.last3 = []
+
+    def set(self, pId, s):
+        if len(self.last3) == 3:
+            self.last3.pop(0)
+        self.last3.append((pId, s))
+
 
 class RouteNavigator(NavigationListener):
-    def __init__(self, model: Model, directionController: DirectionController, detectionListener: DetectionListener):
+    def __init__(self, model: Model, directionController: DirectionController, detectionListener: DetectionListener, pointsController: PointsController):
         self.model = model
         self.detectionListener = detectionListener
         self.directionController = directionController
+        self.pointsController = pointsController
         self.currentDirection = "forward"
         self.nextRequestor = None
 
@@ -77,7 +91,6 @@ class RouteNavigator(NavigationListener):
         self.nextRequestor = r
 
     def connect(self, sId, direction):
-        self.detectionListener.clearCallback()
         section = self.model.sections[sId["id"]]
         self.currentDirection = direction
         self.directionController.set(RouteNavigator.portId(section.direction), self.currentDirection)
@@ -89,37 +102,43 @@ class RouteNavigator(NavigationListener):
             self.detectionListener.setNextDetector(RouteNavigator.portId(section.reverseUntil), 1)
 
         if section.next is not None:
-            nextSection = self.model.sections[section.next[0]]
-            if nextSection.__class__ == Points:
-                pointsStage = nextSection.outgoing if hasattr(nextSection, "outgoing") else nextSection.incoming
-                self.detectionListener.setNextDetector(RouteNavigator.portId(pointsStage.detector), 0)
-                self.detectionListener.setCallback(self.nextRequestor)
+            if section.next.__class__ == Stage:
+                return
+            else:
+                nextSection = self.model.sections[section.next[0]]
+                if nextSection.__class__ == Points:
+                    pointsStage = nextSection.next
+                    self.detectionListener.setNextDetector(RouteNavigator.portId(pointsStage.detector), 0)
+                    self.detectionListener.setCallback(self.nextRequestor)
 
-    def setPointsTo(self, s, stage, p):
+    def setPointsTo(self, s, st, p):
         points = self.model.sections[p["id"]]
-        self.detectionListener.waitFor(RouteNavigator.portId(points.detector), 0)
-        self.pointsController.set(p["id"], stage, s)
+        stage = getattr(points, st)
+        self.detectionListener.waitFor(RouteNavigator.portId(stage.detector), 0)
+        self.pointsController.set(RouteNavigator.portId(stage.selector), s)
 
-    def waitToSetPointsTo(self, s, stage, p):
+    def waitToSetPointsTo(self, s, st, p):
         points = self.model.sections[p["id"]]
+        stage = getattr(points, st)
         self.detectionListener.setCallback(self.nextRequestor)
-        self.detectionListener.setNextDetector(RouteNavigator.portId(points.detector), 0)
-        self.pointsController.set(p["id"], stage, s)
+        self.detectionListener.setNextDetector(RouteNavigator.portId(stage.detector), 0)
+        self.pointsController.set(RouteNavigator.portId(stage.selector), s)
 
 
 def startFrom(fileName):
     m = Model(openLayout(fileName))
     directionController = LocalDirectionController()
     detectionListener = LocalDetectionListener()
-    navigator = RouteNavigator(m, directionController, detectionListener)
+    pointsController = LocalPointsController()
+    navigator = RouteNavigator(m, directionController, detectionListener, pointsController)
     iterator = RouteIterator(m, navigator)
     navigator.setNextRequestor(iterator.next)
     iterator.next()
-    return detectionListener, directionController
+    return (detectionListener, directionController, pointsController)
 
 
 def test_shuttle():
-    (detectionListener, directionController) = startFrom("example-layouts/shuttle.json")
+    (detectionListener, directionController) = startFrom("example-layouts/shuttle.json")[:2]
 
     assert detectionListener.portId == "RPi_14"
     assert detectionListener.value == 1
@@ -140,9 +159,18 @@ def test_shuttle():
 
 
 def test_return_loop():
-    (detectionListener, directionController) = startFrom("example-layouts/return-loop.json")
+    (detectionListener, directionController, pointsController) = startFrom("example-layouts/return-loop.json")
 
     assert detectionListener.portId == "RPi_15"
     assert detectionListener.value == 0
     assert detectionListener.callback is not None
     assert directionController.last3 == [("RPi_23", "forward")]
+    assert pointsController.last3 == []
+
+    detectionListener.callback()
+    assert directionController.last3 == [("RPi_23", "forward"), ("RPi_26", "forward")]
+    assert detectionListener.portId == "RPi_15"
+    assert detectionListener.value == 0
+    assert detectionListener.callback is not None
+    assert pointsController.last3 == [("RPi_25", "left")]
+
