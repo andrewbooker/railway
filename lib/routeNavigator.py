@@ -55,11 +55,11 @@ class RouteNavigator(NavigationListener):
             self.detectionListener.setNextDetector(RouteNavigator.portId(section.reverseUntil), 1)
 
         if direction == "forward" and section.next is not None:
-            if section.next.__class__ == Stage:
+            if section.next.__class__.__name__ == "Stage":
                 return
             else:
                 nextSection = self.model.sections[section.next[0]]
-                if nextSection.__class__ == Points:
+                if nextSection.__class__.__name__ == "Points":
                     pointsStage = nextSection.next
                     self.detectionListener.setNextDetector(RouteNavigator.portId(pointsStage.detector), 0)
                     self.detectionListener.setCallback(self.nextRequestor)

@@ -1,11 +1,15 @@
 #!/usr/bin/env python
 
+import sys
+import os
+sys.path.append(os.path.join(os.getcwd(), "lib"))
+from lib.routeIterator import RouteIterator
+from lib.routeNavigator import *
+
 
 import threading
 import readchar
-import sys
 import time
-from lib.navigator import Journey
 
 
 layoutStr = None
@@ -23,10 +27,7 @@ def say(*what):
     sys.stdout.write("%s\r\n" % p)
 
 
-from lib.navigationListener import NavigationListener
-
-
-class TrafficListener():
+class TrafficListener(DetectionListener):
     def __init__(self, detectors, shouldStop):
         self.shouldStop = shouldStop
         self.detectors = detectors
@@ -58,13 +59,14 @@ class TrafficListener():
         if self.detectors.stateOf(self.detector) == self.requiredState:
             self.callback()
 
-class DirectionRelays():
+class DirectionRelays(DirectionController):
     def set(self, portId, direction):
         say(direction, "at", portId)
 
 class Detector():
     def __init__(self):
         self.state = 0
+
 
 class KeyboardDetectors():
     def __init__(self):
@@ -87,48 +89,32 @@ class KeyboardDetectors():
             self.detectors[c] = Detector()
         self.detectors[c].state = 0 if self.detectors[c].state == 1 else 1
 
-class PointsController():
-    def __init__(self):
-        self.points = {}
 
-    def fromLayout(self, layout):
-        for p in layout:
-            if "type" in p and p["type"] == "points":
-                self.points[p["id"]] = p
+from lib.model import Model
+class StdoutPointsController(PointsController):
+    def __init__(self, model):
+        self.model = model
 
-    def fromId(self, pId):
-        return self.points[pId]
+    def set(self, port, s):
+        say("setting", port, "to", s)
 
-    def set(self, pId, stage, s):
-        p = self.points[pId]
-        say("setting", p["name"], stage, "to", s, "on", NavigationListener.portId(p[stage]["selector"]))
+from lib.cmd import *
 
-from lib.cmd import Cmd, shouldStop
 
-pointsController = PointsController()
-directionRelays = DirectionRelays()
 detectors = KeyboardDetectors()
-traffic = TrafficListener(detectors, shouldStop)
-navigation = NavigationListener(traffic, directionRelays, pointsController)
-journey = Journey(layoutStr, navigation)
 
-pointsController.fromLayout(journey.layout)
-navigation.setNextRequestor(journey.nextStage)
+model = Model(layoutStr)
+directionController = DirectionRelays()
+detectionListener = TrafficListener(detectors, shouldStop)
+pointsController = StdoutPointsController(model)
+navigator = RouteNavigator(model, directionController, detectionListener, pointsController)
+iterator = RouteIterator(model, navigator)
+navigator.setNextRequestor(iterator.next)
+
 
 print("starting")
-journey.start()
-
-class ControlLoop():
-    def __init__(self, c, i):
-        self.c = c
-        self.i = i
-
-    def start(self, shouldStop):
-        while not shouldStop.is_set():
-            self.c()
-            time.sleep(self.i)
-
-controlLoop = ControlLoop(traffic.poll, 1.0)
+iterator.next()
+controlLoop = ControlLoop(detectionListener.poll, 0.1)
 
 cmd = Cmd(detectors.onCmd)
 threadables = [

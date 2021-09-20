@@ -41,7 +41,7 @@ class RouteIterator():
     def currentStage(approachingConvergence, current, nextSection, section):
         if approachingConvergence:
             return current[2]
-        elif nextSection.__class__ == Stage:
+        elif nextSection.__class__.__name__ == "Stage":
             return "outgoing" if nextSection == section.outgoing else "incoming"
         return None
 
@@ -53,9 +53,9 @@ class RouteIterator():
         current = self.current
         (sectionId, direction) = current[:2]
         section = self.model.sections[sectionId]
-        isPoints = section.__class__ == Points
+        isPoints = section.__class__.__name__ == "Points"
         nextSection = RouteIterator.possibleNextSection(direction, section, sectionId, isPoints)
-        if nextSection is not None and nextSection.__class__ != Stage:
+        if nextSection is not None and nextSection.__class__.__name__ != "Stage":
             self._proceedTo(nextSection)
 
         approachingConvergence = len(current) > 2
@@ -68,7 +68,7 @@ class RouteIterator():
         if approachingConvergence:
             self.listener.waitToSetPointsTo(current[3], currentStage, {"id": sectionId})
             self.listener.connect({"id": sectionId}, direction)
-            if nextSection.__class__ == Stage:
+            if nextSection.__class__.__name__ == "Stage":
                 nextStage = "incoming" if nextSection == section.incoming else "outgoing"
                 self._approachDivergence(nextStage, direction, nextSection, section, sectionId)
         else:
