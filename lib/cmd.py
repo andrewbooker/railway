@@ -14,4 +14,20 @@ class Cmd():
             else:
                 self.callback(c)
 
+import time
+class ControlLoop():
+    def __init__(self, c, i):
+        self.c = c
+        self.i = i
+
+    def start(self, shouldStop):
+        passed = 0
+        dt = 0.05
+        while not shouldStop.is_set():
+            if passed > self.i:
+                self.c()
+                passed = 0
+            time.sleep(dt)
+            passed += dt
+
 shouldStop = threading.Event()
