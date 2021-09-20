@@ -16,8 +16,8 @@ def test_single_section():
     assert section.next is None
     assert section.previous is None
     assert section.direction == ("RPi", 23)
-    assert section.forwardUntil == ("RPi", 14)
-    assert section.reverseUntil == ("RPi", 15)
+    assert section.forwardUntil == ("arduino", 52)
+    assert section.reverseUntil == ("arduino", 53)
 
 loop = """
 [

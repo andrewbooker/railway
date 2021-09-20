@@ -9,12 +9,12 @@
 		},
 		"until": {
             "forward": {
-			    "bank": "RPi",
-			    "port": 14
+			    "bank": "arduino",
+			    "port": 52
 		    },
             "reverse": {
-				"bank": "RPi",
-				"port": 15
+				"bank": "arduino",
+				"port": 53
 			}
         }
 	}

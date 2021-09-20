@@ -70,19 +70,19 @@ def startFrom(fileName):
 def test_shuttle():
     (detectionListener, directionController) = startFrom("example-layouts/shuttle.json")[:2]
 
-    assert detectionListener.portId == "RPi_14"
+    assert detectionListener.portId == "arduino_52"
     assert detectionListener.value == 1
     assert detectionListener.callback is not None
     assert directionController.last3 == [("RPi_23", "forward")]
 
     detectionListener.callback()
-    assert detectionListener.portId == "RPi_15"
+    assert detectionListener.portId == "arduino_53"
     assert detectionListener.value == 1
     assert detectionListener.callback is not None
     assert directionController.last3 == [("RPi_23", "forward"), ("RPi_23", "reverse")]
 
     detectionListener.callback()
-    assert detectionListener.portId == "RPi_14"
+    assert detectionListener.portId == "arduino_52"
     assert detectionListener.value == 1
     assert detectionListener.callback is not None
     assert directionController.last3 == [("RPi_23", "forward"), ("RPi_23", "reverse"), ("RPi_23", "forward")]

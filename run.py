@@ -17,6 +17,9 @@ if len(sys.argv) < 2:
     print("specify layout json file")
     exit()
 
+manualTest = True if len(sys.argv) < 3 else False
+print("Using", "keyboard control" if manualTest else "Arduino")
+
 with open(sys.argv[1], "r") as layoutSpec:
     layoutStr = layoutSpec.read()
 
@@ -90,23 +93,40 @@ class KeyboardDetectors():
         self.detectors[c].state = 0 if self.detectors[c].state == 1 else 1
 
 
+from lib.arduinoPorts import UsingArduino
+class ArduinoDetectors():
+    def __init__(self):
+        self.a = UsingArduino()
+        self.ports = {}
+
+    def _at(self, p):
+        if p not in self.ports:
+            self.ports[p] = self.a.input(int(p))
+        return self.ports[p]
+
+    def stateOf(self, of):
+        (bank, port) = of.split("_")
+        if bank != "arduino":
+            return 0
+        return self._at(port).get()
+
+
 from lib.model import Model
 class StdoutPointsController(PointsController):
-    def __init__(self, model):
-        self.model = model
-
     def set(self, port, s):
         say("setting", port, "to", s)
 
+
+def screenTest():
+    return (KeyboardDetectors(), DirectionRelays(), StdoutPointsController())
+
+def arduinoTest():
+    return (ArduinoDetectors(), DirectionRelays(), StdoutPointsController())
+
+(detectors, directionController, pointsController) = screenTest() if manualTest else arduinoTest()
 from lib.cmd import *
-
-
-detectors = KeyboardDetectors()
-
-model = Model(layoutStr)
-directionController = DirectionRelays()
 detectionListener = TrafficListener(detectors, shouldStop)
-pointsController = StdoutPointsController(model)
+model = Model(layoutStr)
 navigator = RouteNavigator(model, directionController, detectionListener, pointsController)
 iterator = RouteIterator(model, navigator)
 navigator.setNextRequestor(iterator.next)
@@ -116,7 +136,10 @@ print("starting")
 iterator.next()
 controlLoop = ControlLoop(detectionListener.poll, 0.1)
 
-cmd = Cmd(detectors.onCmd)
+def doNothing(c):
+    pass
+
+cmd = Cmd(detectors.onCmd if manualTest else doNothing)
 threadables = [
     cmd,
     controlLoop
