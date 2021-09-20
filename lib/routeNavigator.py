@@ -44,6 +44,7 @@ class RouteNavigator(NavigationListener):
         self.nextRequestor = r
 
     def connect(self, sId, direction):
+        self.detectionListener.clearCallback()
         section = self.model.sections[sId["id"]]
         self.currentDirection = direction
         self.directionController.set(RouteNavigator.portId(section.direction), self.currentDirection)
@@ -53,16 +54,18 @@ class RouteNavigator(NavigationListener):
         if direction == "reverse" and section.reverseUntil is not None:
             self.detectionListener.setCallback(self.nextRequestor)
             self.detectionListener.setNextDetector(RouteNavigator.portId(section.reverseUntil), 1)
+        if section.__class__.__name__ == "Points":  # should just be getLastDetector, skip if None. Do not proceed until detector = 1
+            pointsStage = section.next if section.next is not None else section.previous  # should poss base this on direction, as this should differentiate between back-to-back stages
+            self.detectionListener.setNextDetector(RouteNavigator.portId(pointsStage.detector), 1)
+            self.detectionListener.setCallback(self.nextRequestor)
+            return
 
-        if direction == "forward" and section.next is not None:
-            if section.next.__class__.__name__ == "Stage":
-                return
-            else:
-                nextSection = self.model.sections[section.next[0]]
-                if nextSection.__class__.__name__ == "Points":
-                    pointsStage = nextSection.next
-                    self.detectionListener.setNextDetector(RouteNavigator.portId(pointsStage.detector), 0)
-                    self.detectionListener.setCallback(self.nextRequestor)
+        if direction == "forward" and section.next is not None and section.next.__class__.__name__ != "Stage":
+            nextSection = self.model.sections[section.next[0]]
+            if nextSection.__class__.__name__ == "Points":
+                pointsStage = nextSection.next
+                self.detectionListener.setNextDetector(RouteNavigator.portId(pointsStage.detector), 0)
+                self.detectionListener.setCallback(self.nextRequestor)
 
     def setPointsTo(self, s, st, p):
         points = self.model.sections[p["id"]]

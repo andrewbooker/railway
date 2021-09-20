@@ -18,7 +18,7 @@ class LocalDetectionListener(DetectionListener):
         self.value = None
 
     def clearCallback(self):
-        self.callback = None
+        self.clear()
 
     def setCallback(self, c):
         self.callback = c
@@ -114,7 +114,7 @@ def test_return_loop():
     detectionListener.callback()
     assert directionController.last3 == [("RPi_26", "forward"), ("RPi_24", "forward"), ("RPi_26", "reverse")]
     assert detectionListener.portId == "RPi_15"
-    assert detectionListener.value == 0
+    assert detectionListener.value == 1
     assert detectionListener.callback is not None
     assert pointsController.last3 == [("RPi_25", "left"), ("RPi_25", "right")]
 
@@ -164,7 +164,7 @@ def test_return_loops_back_to_back():
     assert pointsController.last3 == [("RPi_25", "right"), ("RPi_27", "left")]
 
     detectionListener.callback()
-    assert detectionListener.portId == "RPi_16"
+    assert detectionListener.portId == "RPi_15"
     assert detectionListener.value == 0
     assert detectionListener.callback is not None
     assert directionController.last3 == [("RPi_26", "reverse"), ("RPi_24", "forward"), ("RPi_26", "forward")]
