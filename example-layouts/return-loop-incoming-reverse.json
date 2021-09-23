@@ -1,0 +1,71 @@
+[
+    {
+        "id": "s01",
+        "name": "main branch",
+        "next": {
+            "reverse": {
+                "id": "p01",
+                "params": ["incoming"]
+            }
+        },
+		"direction": {
+			"bank": "RPi",
+			"port": 23
+		},
+		"until": {
+			"forward": {
+				"bank": "RPi",
+				"port": 14
+			}
+		}
+    },
+    {
+        "id": "r01",
+        "name": "return loop",
+		"direction": {
+			"bank": "RPi",
+			"port": 24
+		},
+        "next": {
+            "forward": {
+                "id": "p01",
+                "params": ["incoming", "right"]
+            },
+            "reverse": {
+                "id": "p01",
+                "params": ["incoming", "left"]
+            }
+        }
+    },
+    {
+        "id": "p01",
+        "name": "return loop points",
+        "type": "points",
+        "direction": {
+		    "bank": "RPi",
+		    "port": 26
+	    },
+        "incoming": {
+            "left": {
+                "id": "r01"
+            },
+            "right": {
+                "id": "r01",
+                "direction": "reverse"
+            },
+            "selector": {
+                "bank": "RPi",
+                "port": 25
+            },
+		    "detector": {
+			    "bank": "RPi",
+			    "port": 15
+		    }
+        },
+        "next": {
+            "forward": {
+                "id": "s01"
+            }
+        }
+    }
+]
