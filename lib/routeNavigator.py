@@ -69,9 +69,8 @@ class RouteNavigator(NavigationListener):
         setPoints = lambda: self._traversePoints(stage, s)
         self.detectionListener.waitFor(RouteNavigator.portId(stage.detector), 0, "selection (divergence)").then(setPoints)
 
-
     def waitToSetPointsTo(self, s, st, p):
         points = self.model.sections[p["id"]]
         stage = getattr(points, st)
-        self.detectionListener.setNextDetector(RouteNavigator.portId(stage.detector), 0, "condition (convergence)")
-        self.pointsController.set(RouteNavigator.portId(stage.selector), s)
+        setPoints = lambda: self._traversePoints(stage, s)
+        self.detectionListener.waitFor(RouteNavigator.portId(stage.detector), 0, "condition (convergence)").then(setPoints)

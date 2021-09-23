@@ -117,10 +117,16 @@ def test_return_loop():
 
     detectionListener.set("RPi_15", 0)
     assert directionController.last3 == [("RPi_26", "forward"), ("RPi_24", "forward"), ("RPi_26", "reverse")]
-    assert pointsController.last3 == [("RPi_25", "left"), ("RPi_25", "right")]
-    assert detectionListener.awaiting == {("RPi_15", 0): ("condition (convergence)", None)}
+    assert pointsController.last3 == [("RPi_25", "left")]
+    assert detectionListener.awaiting[("RPi_15", 0)][0] == "condition (convergence)"
+    assert len(detectionListener.awaiting) == 1
 
     detectionListener.set("RPi_15", 0)
+    assert directionController.last3 == [("RPi_26", "forward"), ("RPi_24", "forward"), ("RPi_26", "reverse")]
+    assert pointsController.last3 == [("RPi_25", "left"), ("RPi_25", "right")]
+    assert detectionListener.awaiting == {("RPi_15", 1): ("from points to next section", None)}
+
+    detectionListener.set("RPi_15", 1)
     assert directionController.last3 == [("RPi_24", "forward"), ("RPi_26", "reverse"), ("RPi_23", "reverse")]
     assert pointsController.last3 == [("RPi_25", "left"), ("RPi_25", "right")]
     assert detectionListener.awaiting == {("RPi_14", 1): ("reverseUntil", None)}
@@ -170,14 +176,19 @@ def test_return_loop_incoming_reverse():
     assert detectionListener.awaiting == {("RPi_15", 0): ("from section to points", None)}
 
     detectionListener.set("RPi_15", 0)
-    assert pointsController.last3 == [("RPi_25", "left"), ('RPi_25', 'right')]
+    assert pointsController.last3 == [("RPi_25", "left")]
     assert directionController.last3 == [('RPi_26', 'reverse'), ('RPi_24', 'forward'), ('RPi_26', 'forward')]
     assert detectionListener.awaiting[("RPi_15", 0)][0] == "condition (convergence)"
     assert len(detectionListener.awaiting) == 1
 
     detectionListener.set("RPi_15", 0)
     assert pointsController.last3 == [("RPi_25", "left"), ('RPi_25', 'right')]
-    assert directionController.last3 == [('RPi_24', 'forward'), ('RPi_26', 'forward'), ('RPi_23', 'forward')]
+    assert directionController.last3 == [('RPi_26', 'reverse'), ('RPi_24', 'forward'), ('RPi_26', 'forward')]
+    assert detectionListener.awaiting == {("RPi_15", 1): ("from points to next section", None)}
+
+    detectionListener.set("RPi_15", 1)
+    assert pointsController.last3 == [("RPi_25", "left"), ('RPi_25', 'right')]
+    assert directionController.last3 == [('RPi_24', 'forward'), ('RPi_26', 'forward'), ("RPi_23", "forward")]
     assert detectionListener.awaiting == {("RPi_14", 1): ("forwardUntil", None)}
 
     detectionListener.set("RPi_14", 1)
@@ -187,7 +198,6 @@ def test_return_loop_incoming_reverse():
 
 
 def test_return_loops_back_to_back():
-    return
     (detectionListener, directionController, pointsController) = startFrom("example-layouts/return-loops-back-to-back.json")
 
     assert directionController.last3 == [("RPi_23", "forward")]
@@ -196,18 +206,33 @@ def test_return_loops_back_to_back():
 
     detectionListener.set("RPi_15", 0)
     assert directionController.last3 == [("RPi_23", "forward"), ("RPi_26", "reverse")]
-    assert pointsController.last3 == [("RPi_25", "right")]
+    assert pointsController.last3 == []
     assert len(detectionListener.awaiting) == 2
-    assert detectionListener.awaiting[("RPi_15", 0)] == ("condition (convergence)", None)
+    assert detectionListener.awaiting[("RPi_15", 0)][0] == "condition (convergence)"
     assert detectionListener.awaiting[("RPi_16", 0)][0] == "selection (divergence)"
 
     detectionListener.set("RPi_15", 0)
-    assert directionController.last3 == [("RPi_23", "forward"), ("RPi_26", "reverse"), ("RPi_24", "forward")]
+    assert directionController.last3 == [("RPi_23", "forward"), ("RPi_26", "reverse")]
+    assert pointsController.last3 == [("RPi_25", "right")]
+    assert len(detectionListener.awaiting) == 2
+    assert detectionListener.awaiting[("RPi_16", 0)][0] == "selection (divergence)"
+    assert detectionListener.awaiting[("RPi_15", 1)] == ("from points to next section", None)
+
+    detectionListener.set("RPi_16", 0)
+    assert directionController.last3 == [("RPi_23", "forward"), ("RPi_26", "reverse")]
     assert pointsController.last3 == [("RPi_25", "right"), ("RPi_27", "left")]
+    assert len(detectionListener.awaiting) == 2
+    assert detectionListener.awaiting[("RPi_15", 1)] == ("from points to next section", None)
+    assert detectionListener.awaiting[("RPi_16", 1)] == ("from points to next section", None)
+
+    detectionListener.set("RPi_15", 1)
+    assert pointsController.last3 == [("RPi_25", "right"), ("RPi_27", "left")]
+    assert directionController.last3 == [("RPi_23", "forward"), ("RPi_26", "reverse"), ("RPi_24", "forward")]
     return
 
-    detectionListener.set("RPi_15", 1)  # should be 16, but ok 15 as it's all the same power
+    detectionListener.set("RPi_16", 1)
     assert pointsController.last3 == [("RPi_25", "right"), ("RPi_27", "left")]
+    assert directionController.last3 == [("RPi_23", "forward"), ("RPi_26", "reverse"), ("RPi_24", "forward")]
 
     detectionListener.set("RPi_15", 0)  # wrong!! should be 16 to set the points, and THEN 15 to set the power
     assert pointsController.last3 == [("RPi_25", "right"), ("RPi_27", "left"), ("RPi_27", "right")]
