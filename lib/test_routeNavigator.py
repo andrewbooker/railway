@@ -7,28 +7,43 @@ from model import *
 from routeIterator import *
 from routeNavigator import *
 
+class AndThen():
+    def __init__(self):
+        self.m = None
+
+    def then(self, m):
+        self.m = m
+
+    def exec(self):
+        self.m()
 
 class LocalDetectionListener(DetectionListener):
     def __init__(self):
         self.callback = None
-        self.portId = None
-        self.value = None
+        self.awaiting = {}
 
     def setCallback(self, c):
         self.callback = c
 
     def set(self, portId, value):
-        if portId == self.portId and value == self.value:
-            self.callback()
+        k = (portId, value)
+        if k not in self.awaiting:
+            return
 
-    def setNextDetector(self, d, v):
-        self.portId = d
-        self.value = v
+        cb = self.awaiting[k]
+        del(self.awaiting[k])
+        if cb is not None:
+            cb.exec()
+            return
+        self.callback()
 
-    def waitFor(self, d, state):
-        self.detector = d
-        self.value = state
+    def setNextDetector(self, p, v):
+        self.awaiting[(p, v)] = None
 
+    def waitFor(self, p, v):
+        cb = AndThen()
+        self.awaiting[(p, v)] = cb
+        return cb
 
 
 class LocalDirectionController(DirectionController):
@@ -86,67 +101,59 @@ def test_return_loop():
 
     detectionListener.set("RPi_15", 0)
     assert directionController.last3 == [("RPi_23", "forward"), ("RPi_26", "forward")]
+    assert pointsController.last3 == []
+    detectionListener.set("RPi_15", 0)
     assert pointsController.last3 == [("RPi_25", "left")]
+    assert directionController.last3 == [("RPi_23", "forward"), ("RPi_26", "forward")]
+
+    detectionListener.set("RPi_15", 1)
+    assert pointsController.last3 == [("RPi_25", "left")]
+    assert directionController.last3 == [("RPi_23", "forward"), ("RPi_26", "forward"), ("RPi_24", "forward")]
 
     detectionListener.set("RPi_15", 0)
-    assert directionController.last3 == [("RPi_23", "forward"), ("RPi_26", "forward"), ("RPi_24", "forward")]
-    assert detectionListener.portId == "RPi_15"
-    assert detectionListener.value == 0
-    assert pointsController.last3 == [("RPi_25", "left")]
-
-    detectionListener.callback()
     assert directionController.last3 == [("RPi_26", "forward"), ("RPi_24", "forward"), ("RPi_26", "reverse")]
-    assert detectionListener.portId == "RPi_15"
-    assert detectionListener.value == 1
     assert pointsController.last3 == [("RPi_25", "left"), ("RPi_25", "right")]
 
-    detectionListener.callback()
+    detectionListener.set("RPi_15", 1)
     assert directionController.last3 == [("RPi_24", "forward"), ("RPi_26", "reverse"), ("RPi_23", "reverse")]
-    assert detectionListener.portId == "RPi_14"
-    assert detectionListener.value == 1
     assert pointsController.last3 == [("RPi_25", "left"), ("RPi_25", "right")]
 
-    detectionListener.callback()
-    assert detectionListener.portId == "RPi_15"
-    assert detectionListener.value == 0
+    detectionListener.set("RPi_14", 1)
     assert directionController.last3 == [("RPi_26", "reverse"), ("RPi_23", "reverse"), ("RPi_23", "forward")]
     assert pointsController.last3 == [("RPi_25", "left"), ("RPi_25", "right")]
 
-    detectionListener.callback()
-    assert detectionListener.portId == "RPi_15"
-    assert detectionListener.value == 0
+    detectionListener.set("RPi_15", 0)
     assert directionController.last3 == [("RPi_23", "reverse"), ("RPi_23", "forward"), ("RPi_26", "forward")]
+    detectionListener.set("RPi_15", 0)
     assert pointsController.last3 == [("RPi_25", "left"), ("RPi_25", "right"), ("RPi_25", "left")]
 
 
 def test_return_loops_back_to_back():
     (detectionListener, directionController, pointsController) = startFrom("example-layouts/return-loops-back-to-back.json")
 
-    assert detectionListener.portId == "RPi_15"
-    assert detectionListener.value == 0
     assert directionController.last3 == [("RPi_23", "forward")]
     assert pointsController.last3 == []
+    assert detectionListener.awaiting == {("RPi_15", 0): None}
 
-    detectionListener.callback()
-    assert detectionListener.portId == "RPi_15"  # should be a list of 15 and 16
-    assert detectionListener.value == 0
+    detectionListener.set("RPi_15", 0)
+    assert directionController.last3 == [("RPi_23", "forward"), ("RPi_26", "reverse")]
+    assert pointsController.last3 == [("RPi_25", "right")]
+
+    detectionListener.set("RPi_16", 0)
     assert directionController.last3 == [("RPi_23", "forward"), ("RPi_26", "reverse")]
     assert pointsController.last3 == [("RPi_25", "right"), ("RPi_27", "left")]
 
-    detectionListener.callback()
-    assert detectionListener.portId == "RPi_15"  # should be a list of 15 and 16
-    assert detectionListener.value == 0
+    detectionListener.set("RPi_15", 1)  # should be 16, but ok 15 as it's all the same power
     assert directionController.last3 == [("RPi_23", "forward"), ("RPi_26", "reverse"), ("RPi_24", "forward")]
     assert pointsController.last3 == [("RPi_25", "right"), ("RPi_27", "left")]
 
-    detectionListener.callback()
-    assert detectionListener.portId == "RPi_15"
-    assert detectionListener.value == 0
+    detectionListener.set("RPi_15", 0)  # wrong!! should be 16 to set the points, and THEN 15 to set the power
+    assert pointsController.last3 == [("RPi_25", "right"), ("RPi_27", "left"), ("RPi_27", "right")]
     assert directionController.last3 == [("RPi_26", "reverse"), ("RPi_24", "forward"), ("RPi_26", "forward")]
-    assert pointsController.last3 == [("RPi_27", "left"), ("RPi_27", "right"), ("RPi_25", "left")]
 
-    detectionListener.callback()
-    assert detectionListener.portId == "RPi_15"
-    assert detectionListener.value == 0
+    detectionListener.set("RPi_15", 1)
     assert directionController.last3 == [("RPi_24", "forward"), ("RPi_26", "forward"), ("RPi_23", "forward")]
-    assert pointsController.last3 == [("RPi_27", "left"), ("RPi_27", "right"), ("RPi_25", "left")]
+    assert pointsController.last3 == [("RPi_25", "right"), ("RPi_27", "left"), ("RPi_27", "right")]
+
+    detectionListener.set("RPi_15", 0)
+    #assert pointsController.last3 == [("RPi_27", "left"), ("RPi_27", "right"), ("RPi_25", "left")]

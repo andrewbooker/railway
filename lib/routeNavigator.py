@@ -1,8 +1,5 @@
 
 class DetectionListener():
-    def setCallback(self, c):
-        pass
-
     def setNextDetector(self, d, v):
         pass
 
@@ -59,8 +56,9 @@ class RouteNavigator(NavigationListener):
     def setPointsTo(self, s, st, p):
         points = self.model.sections[p["id"]]
         stage = getattr(points, st)
-        self.detectionListener.waitFor(RouteNavigator.portId(stage.detector), 0)
-        self.pointsController.set(RouteNavigator.portId(stage.selector), s)
+        setPoints = lambda: self.pointsController.set(RouteNavigator.portId(stage.selector), s)
+        self.detectionListener.waitFor(RouteNavigator.portId(stage.detector), 0).then(setPoints)
+
 
     def waitToSetPointsTo(self, s, st, p):
         points = self.model.sections[p["id"]]
