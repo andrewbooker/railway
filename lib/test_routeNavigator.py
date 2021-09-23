@@ -10,15 +10,9 @@ from routeNavigator import *
 
 class LocalDetectionListener(DetectionListener):
     def __init__(self):
-        self.clear()
-
-    def clear(self):
         self.callback = None
         self.portId = None
         self.value = None
-
-    def clearCallback(self):
-        self.clear()
 
     def setCallback(self, c):
         self.callback = c
@@ -62,7 +56,7 @@ def startFrom(fileName):
     pointsController = LocalPointsController()
     navigator = RouteNavigator(m, directionController, detectionListener, pointsController)
     iterator = RouteIterator(m, navigator)
-    navigator.setNextRequestor(iterator.next)
+    detectionListener.setCallback(iterator.next)
     iterator.next()
     return (detectionListener, directionController, pointsController)
 
