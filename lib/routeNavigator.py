@@ -33,6 +33,15 @@ class RouteNavigator(NavigationListener):
     def portId(p):
         return "%s_%s" % (p[0], p[1])
 
+    def _nextPointsStage(self, direction, points, stageSpec):
+        expectedStage = stageSpec[2] if len(stageSpec) > 2 else None
+        if expectedStage is not None:
+            return getattr(points, expectedStage)
+        if direction == "forward":
+            return points.incoming if points.incoming is not None else points.outgoing
+        if direction == "reverse":
+            return points.outgoing if points.outgoing is not None else points.incoming
+
     def connect(self, sId, direction):
         section = self.model.sections[sId["id"]]
         self.currentDirection = direction
@@ -44,9 +53,8 @@ class RouteNavigator(NavigationListener):
 
         if direction == "forward" and section.next is not None and section.next.__class__.__name__ != "Stage":
             nextSection = self.model.sections[section.next[0]]
-            if nextSection.__class__.__name__ == "Points":  # doesn't need to be points, just needs an inbound detector
-                # get next detector....
-                pointsStage = nextSection.next if nextSection.next.__class__.__name__ == "Stage" else getattr(nextSection, section.next[2])
+            if nextSection.__class__.__name__ == "Points":
+                pointsStage = self._nextPointsStage(direction, nextSection, section.next)
                 self.detectionListener.setNextDetector(RouteNavigator.portId(pointsStage.detector), 0, "from section to points")
             elif section.__class__.__name__ == "Points" and section.outgoing is not None: # and section.incoming is None:
                 self.detectionListener.setNextDetector(RouteNavigator.portId(section.outgoing.detector), 1, "from points to next section")
@@ -54,7 +62,7 @@ class RouteNavigator(NavigationListener):
         if direction == "reverse" and section.previous is not None and section.previous.__class__.__name__ != "Stage":
             previousSection = self.model.sections[section.previous[0]]
             if previousSection.__class__.__name__ == "Points":
-                pointsStage = previousSection.previous if previousSection.previous.__class__.__name__ == "Stage" else getattr(previousSection, section.next[2])
+                pointsStage = self._nextPointsStage(direction, previousSection, section.previous)
                 self.detectionListener.setNextDetector(RouteNavigator.portId(pointsStage.detector), 0, "from section to points")
             elif section.__class__.__name__ == "Points" and section.incoming is not None:  #and section.outgoing is None:
                 self.detectionListener.setNextDetector(RouteNavigator.portId(getattr(section, "incoming").detector), 1, "from points to next section")
