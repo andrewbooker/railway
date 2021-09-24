@@ -44,10 +44,11 @@ class RouteNavigator(NavigationListener):
 
         if direction == "forward" and section.next is not None and section.next.__class__.__name__ != "Stage":
             nextSection = self.model.sections[section.next[0]]
-            if nextSection.__class__.__name__ == "Points":
+            if nextSection.__class__.__name__ == "Points":  # doesn't need to be points, just needs an inbound detector
+                # get next detector....
                 pointsStage = nextSection.next if nextSection.next.__class__.__name__ == "Stage" else getattr(nextSection, section.next[2])
                 self.detectionListener.setNextDetector(RouteNavigator.portId(pointsStage.detector), 0, "from section to points")
-            elif section.__class__.__name__ == "Points" and section.outgoing is not None:
+            elif section.__class__.__name__ == "Points" and section.outgoing is not None: # and section.incoming is None:
                 self.detectionListener.setNextDetector(RouteNavigator.portId(section.outgoing.detector), 1, "from points to next section")
             return
         if direction == "reverse" and section.previous is not None and section.previous.__class__.__name__ != "Stage":
@@ -55,22 +56,26 @@ class RouteNavigator(NavigationListener):
             if previousSection.__class__.__name__ == "Points":
                 pointsStage = previousSection.previous if previousSection.previous.__class__.__name__ == "Stage" else getattr(previousSection, section.next[2])
                 self.detectionListener.setNextDetector(RouteNavigator.portId(pointsStage.detector), 0, "from section to points")
-            elif section.__class__.__name__ == "Points" and section.incoming is not None:
+            elif section.__class__.__name__ == "Points" and section.incoming is not None:  #and section.outgoing is None:
                 self.detectionListener.setNextDetector(RouteNavigator.portId(getattr(section, "incoming").detector), 1, "from points to next section")
 
-
-    def _traversePoints(self, stage, selection):
+    def _traversePoints(self, points, stage, selection):
         self.pointsController.set(RouteNavigator.portId(stage.selector), selection)
-        self.detectionListener.setNextDetector(RouteNavigator.portId(stage.detector), 1, "from points to next section")
+        if (stage == points.incoming and points.outgoing is None) or (stage == points.outgoing and points.incoming is None):
+            self.detectionListener.setNextDetector(RouteNavigator.portId(stage.detector), 1, "traversing points to next section")
+        if stage == points.incoming and self.currentDirection == "forward":
+            self.detectionListener.setNextDetector(RouteNavigator.portId(stage.detector), 1, "traversing incoming points to next section")
+        if stage == points.outgoing and self.currentDirection == "reverse":
+            self.detectionListener.setNextDetector(RouteNavigator.portId(stage.detector), 1, "traversing outgoing points to next section")
 
     def setPointsTo(self, s, st, p):
         points = self.model.sections[p["id"]]
         stage = getattr(points, st)
-        setPoints = lambda: self._traversePoints(stage, s)
+        setPoints = lambda: self._traversePoints(points, stage, s)
         self.detectionListener.waitFor(RouteNavigator.portId(stage.detector), 0, "selection (divergence)").then(setPoints)
 
     def waitToSetPointsTo(self, s, st, p):
         points = self.model.sections[p["id"]]
         stage = getattr(points, st)
-        setPoints = lambda: self._traversePoints(stage, s)
+        setPoints = lambda: self._traversePoints(points, stage, s)
         self.detectionListener.waitFor(RouteNavigator.portId(stage.detector), 0, "condition (convergence)").then(setPoints)
