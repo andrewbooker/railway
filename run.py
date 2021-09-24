@@ -5,6 +5,7 @@ import os
 sys.path.append(os.path.join(os.getcwd(), "lib"))
 from lib.routeIterator import RouteIterator
 from lib.routeNavigator import *
+from lib.detectionRouter import DetectionRouter
 
 
 import threading
@@ -30,41 +31,27 @@ def say(*what):
     sys.stdout.write("%s\r\n" % p)
 
 
-class TrafficListener(DetectionListener):
-    def __init__(self, detectors, shouldStop):
-        self.shouldStop = shouldStop
-        self.detectors = detectors
-        self.callback = None
-        self.detector = None
-        self.requiredState = None
+class TrafficListener():
+    def __init__(self, detectorInputs, detectionRouter):
+        self.detectionRouter = detectionRouter
+        self.detectorInputs = detectorInputs
+        self.detectorPorts = []
 
-    def setCallback(self, c):
-        self.callback = c
-
-    def clearCallback(self):
-        self.callback = None
-
-    def setNextDetector(self, d, state):
-        self.detector = d
-        self.requiredState = state
-        say("waiting for", state, "on", d)
-
-    def waitFor(self, d, state):
-        self.detector = None
-        self.callback = None
-        say("blocking wait for", state, "on", d)
-        while self.detectors.stateOf(d) != state and not self.shouldStop.is_set():
-            time.sleep(0.05)
+    def registerPorts(self, ports, bank):
+        for p in ports:
+            self.detectorPorts.append("%s_%d" % (bank, p))
 
     def poll(self):
-        if self.detector is None or self.callback is None:
-            return
-        if self.detectors.stateOf(self.detector) == self.requiredState:
-            self.callback()
+        for d in self.detectorPorts:
+            self.detectionRouter.receiveUpdate(d, self.detectorInputs.stateOf(d))
 
 class DirectionRelays(DirectionController):
     def set(self, portId, direction):
         say(direction, "at", portId)
+
+# should be read from the model
+allRpiPorts = [14, 15, 16, 23, 24, 25, 26, 27]
+allArduinoPorts = [14, 15]
 
 class Detector():
     def __init__(self):
@@ -76,6 +63,8 @@ class KeyboardDetectors():
         self.lookup = {
             "RPi_14": "1",
             "RPi_15": "2"
+            #"arduino_14": "1",
+            #"arduino_15": "2"
         }
         self.detectors = {}
 
@@ -123,17 +112,27 @@ def screenTest():
 def arduinoTest():
     return (ArduinoDetectors(), DirectionRelays(), StdoutPointsController())
 
+
+
+
 (detectors, directionController, pointsController) = screenTest() if manualTest else arduinoTest()
 from lib.cmd import *
-detectionListener = TrafficListener(detectors, shouldStop)
+detectionRouter = DetectionRouter()
+detectionListener = TrafficListener(detectors, detectionRouter)
+detectionListener.registerPorts(allArduinoPorts, "RPi")
 model = Model(layoutStr)
-navigator = RouteNavigator(model, directionController, detectionListener, pointsController)
+navigator = RouteNavigator(model, directionController, detectionRouter, pointsController)
 iterator = RouteIterator(model, navigator)
-navigator.setNextRequestor(iterator.next)
+
+def next():
+    iterator.next()
+    say(detectionRouter.awaiting)
+
+detectionRouter.setCallback(next)
 
 
 print("starting")
-iterator.next()
+next()
 controlLoop = ControlLoop(detectionListener.poll, 0.1)
 
 def doNothing(c):

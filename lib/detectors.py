@@ -1,6 +1,7 @@
 
 import time
 
+#used in controller.py (ie not currently in use)
 class Detector():
     def __init__(self, port, pos, callback):
         self.callback = callback
