@@ -1,0 +1,67 @@
+[
+    {
+        "id": "p01",
+        "name": "outgoing points",
+        "direction": {
+			"bank": "RPi",
+			"port": 25
+		},
+        "outgoing": {
+            "left": {
+                "id": "p02",
+                "direction": "reverse"
+            },
+            "right": {
+                "id": "p02",
+                "params": ["incoming", "right"]
+            },
+            "selector": {
+                "bank": "RPi",
+                "port": 27
+            },
+			"detector": {
+				"bank": "RPi",
+				"port": 15
+			}
+        },
+        "next": {
+            "reverse": {
+                "id": "p02",
+                "params": ["incoming", "left"]
+             }
+        }            
+    },
+    {
+        "id": "p02",
+        "name": "incoming points",
+        "direction": {
+			"bank": "RPi",
+			"port": 26
+		},
+        "type": "points",
+        "incoming": {
+            "left": {
+                "id": "p01"
+            },
+            "right": {
+                "id": "p01",
+                "params": ["outgoing", "right"]
+            },
+            "selector": {
+                "bank": "RPi",
+                "port": 28
+            },
+			"detector": {
+				"bank": "RPi",
+				"port": 16
+			}
+        },
+        "next": {
+            "forward": {
+                "id": "p01",
+                "params": ["outgoing", "left"]
+            }    
+        }
+    }
+    
+]

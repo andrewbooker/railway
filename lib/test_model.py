@@ -364,3 +364,14 @@ def test_return_loop():
     assert points.outgoing.detector == ("RPi", 15)
     assert points.outgoing.selector == ("RPi", 25)
     assert points.incoming is None
+
+def test_opposing_points_loop():
+    m = Model(openLayout("example-layouts/opposing-points-loop.json"))
+
+    out = m.sections["p01"]
+    assert out.next == out.outgoing
+    assert out.previous == ("p02", "forward", "incoming", "left")
+
+    inc = m.sections["p02"]
+    assert inc.previous == inc.incoming
+    assert inc.next == ("p01", "reverse", "outgoing", "left")
