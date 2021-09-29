@@ -1,0 +1,71 @@
+[
+    {
+        "id": "s01",
+        "name": "main branch",
+        "next": {
+            "forward": {
+                "id": "p01",
+                "params": ["outgoing"]
+            }
+        },
+		"direction": {
+			"bank": "arduino",
+			"port": 2
+		},
+		"until": {
+			"reverse": {
+				"bank": "arduino",
+				"port": 52
+			}
+		}
+    },
+    {
+        "id": "r01",
+        "name": "return loop",
+		"direction": {
+			"bank": "arduino",
+			"port": 3
+		},
+        "next": {
+            "forward": {
+                "id": "p01",
+                "params": ["outgoing", "right"]
+            },
+            "reverse": {
+                "id": "p01",
+                "params": ["outgoing", "left"]
+            }
+        }
+    },
+    {
+        "id": "p01",
+        "name": "return loop points",
+        "type": "points",
+        "direction": {
+		    "bank": "arduino",
+		    "port": 4
+	    },
+        "outgoing": {
+            "left": {
+                "id": "r01"
+            },
+            "right": {
+                "id": "r01",
+                "direction": "reverse"
+            },
+            "selector": {
+                "bank": "arduino",
+                "port": 5
+            },
+		    "detector": {
+			    "bank": "arduino",
+			    "port": 53
+		    }
+        },
+        "next": {
+            "reverse": {
+                "id": "s01"
+            }
+        }
+    }
+]

@@ -51,7 +51,7 @@ class DirectionRelays(DirectionController):
 
 # should be read from the model
 allRpiPorts = [14, 15, 16, 23, 24, 25, 26, 27]
-allArduinoPorts = [14, 15]
+allArduinoPorts = [52, 53]
 
 class Detector():
     def __init__(self):
@@ -97,7 +97,7 @@ class ArduinoDetectors():
         (bank, port) = of.split("_")
         if bank != "arduino":
             return 0
-        return self._at(port).get()
+        return 1 if self._at(port).get() else 0
 
 
 from lib.model import Model
@@ -119,7 +119,7 @@ def arduinoTest():
 from lib.cmd import *
 detectionRouter = DetectionRouter()
 detectionListener = TrafficListener(detectors, detectionRouter)
-detectionListener.registerPorts(allArduinoPorts, "RPi")
+detectionListener.registerPorts(allArduinoPorts, "arduino")
 model = Model(layoutStr)
 navigator = RouteNavigator(model, directionController, detectionRouter, pointsController)
 iterator = RouteIterator(model, navigator)
