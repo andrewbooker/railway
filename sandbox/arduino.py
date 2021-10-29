@@ -29,7 +29,7 @@ def detect(shouldStop, ua, pin):
             stdout("%d in state %d" % (pin, 0 if d != 1 else d))
             inState = d
 
-        time.sleep(0.1)
+        time.sleep(0.05)
     stdout("stopping read on %d" % pin)
 
 def blink(shouldStop, ua, pin):
@@ -41,13 +41,25 @@ def blink(shouldStop, ua, pin):
         time.sleep(0.5)
     stdout("stopping blink on %d" % pin)
 
+def servo(shouldStop, ua, pin):
+    p = ua.servoPwmPort(pin, 10)
+    state = 0
+    while not shouldStop.is_set():
+        v = 70 if state == 0 else 20
+        stdout("servo %d" % v)
+        p.set(v)
+        state = 1 if state == 0 else 0
+        time.sleep(1.6)
+    stdout("stopping servo on %d" % pin)
+
 
 ua = UsingArduino()
 shouldStop = threading.Event()
 threads = []
 threads.append(threading.Thread(target=detect, args=(shouldStop, ua, 52), daemon=True))
 threads.append(threading.Thread(target=detect, args=(shouldStop, ua, 53), daemon=True))
-threads.append(threading.Thread(target=blink, args=(shouldStop, ua, 5), daemon=True))
+#threads.append(threading.Thread(target=blink, args=(shouldStop, ua, 5), daemon=True))
+#threads.append(threading.Thread(target=servo, args=(shouldStop, ua, 6), daemon=True))
 print("Started (press 'q' to stop)")
 [t.start() for t in threads]
 
