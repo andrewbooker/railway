@@ -17,6 +17,10 @@ ard = UsingArduino()
 class TmpArd():
     def __init__(self):
         self.a = [
+            ard.output(41),
+            ard.output(43),
+            ard.output(45),
+            ard.output(47),
             ard.output(48),
             ard.output(49),
             ard.output(50),
