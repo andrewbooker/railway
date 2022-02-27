@@ -6,15 +6,12 @@ from lib.cmd import *
 import RPi.GPIO as GPIO
 
 import sys
-state = int(sys.argv[1])
+port = int(sys.argv[1])
+state = int(sys.argv[2])
 
 #rpi = UsingRPi()
 ard = UsingArduino()
-c = ard.output(49)
-d = ard.output(50)
-x = ard.output(51)
-
-ps = [c, d, x]
+ps = [ard.output(port)]
 
 for p in ps:
     p.set(state)
