@@ -1,0 +1,50 @@
+[
+    {
+        "id": "WEX",
+        "name": "western expressway",
+        "next": {
+            "forward": {
+                "id": "NUC"
+            },
+            "reverse": {
+                "id": "SUC"
+            }
+        },
+        "direction": {
+            "bank": "arduino",
+            "port": 49
+        }
+    },
+    {
+        "id": "NUC",
+        "name": "northern upper curve",
+        "next": {
+            "forward": {
+                "id": "SUC"
+            },
+            "reverse": {
+                "id": "WEX"
+            }
+        },
+        "direction": {
+		    "bank": "arduino",
+            "port": 50
+        }
+    },
+    {
+        "id": "SUC",
+        "name": "southern upper curve",
+        "next": {
+            "forward": {
+                "id": "WEX"
+            },
+            "reverse": {
+                "id": "NUC"
+            }
+        },
+        "direction": {
+            "bank": "arduino",
+            "port": 51
+        }
+    }
+]
