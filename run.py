@@ -6,7 +6,10 @@ sys.path.append(os.path.join(os.getcwd(), "lib"))
 from lib.routeIterator import RouteIterator
 from lib.routeNavigator import *
 from lib.detectionRouter import DetectionRouter
-
+from lib.speed import MotionController, Speed
+from lib.distribution import Direction
+from lib.monitor import PowerMonitor
+from lib.cmd import *
 
 import threading
 import readchar
@@ -17,19 +20,8 @@ layoutStr = None
 if len(sys.argv) < 2:
     print("specify layout json file")
     exit()
-
-manualTest = True if len(sys.argv) < 3 else False
-print("Using", "keyboard control" if manualTest else "Arduino")
-
 with open(sys.argv[1], "r") as layoutSpec:
     layoutStr = layoutSpec.read()
-
-def say(*what):
-    p = what[0]
-    for i in range(1, len(what)):
-        p = "%s %s" % (p, what[i])
-    sys.stdout.write("%s\r\n" % p)
-
 
 class TrafficListener():
     def __init__(self, detectorInputs, detectionRouter):
@@ -45,47 +37,29 @@ class TrafficListener():
         for d in self.detectorPorts:
             self.detectionRouter.receiveUpdate(d, self.detectorInputs.stateOf(d))
 
-class DirectionRelays(DirectionController):
-    def set(self, portId, direction):
-        say(direction, "at", portId)
-
-# should be read from the model
-allRpiPorts = [14, 15, 16, 23, 24, 25, 26, 27]
-allArduinoPorts = [52, 53]
-
 class Detector():
     def __init__(self):
         self.state = 0
 
+from lib.rpiPorts import UsingRPi
+rpi = UsingRPi()
 
-class KeyboardDetectors():
-    def __init__(self):
-        self.lookup = {
-            "RPi_14": "1",
-            "RPi_15": "2"
-            #"arduino_14": "1",
-            #"arduino_15": "2"
-        }
-        self.detectors = {}
+class DirectionRelays(DirectionController):
+    def __init__(self, ardu):
+        self.a = ardu
+        self.ports = {}
 
-    def stateOf(self, of):
-        if of not in self.lookup:
-            return 0
-        c = self.lookup[of]
-        if c not in self.detectors:
-            return 0
-        return self.detectors[c].state
-
-    def onCmd(self, c):
-        if c not in self.detectors:
-            self.detectors[c] = Detector()
-        self.detectors[c].state = 0 if self.detectors[c].state == 1 else 1
+    def set(self, portId, direction):
+        if portId not in self.ports:
+            self.ports[portId] = self.a.output(int(portId.split("_")[1]))
+        say(direction, "at", portId)
+        self.ports[portId].set(direction)
 
 
 from lib.arduinoPorts import UsingArduino
 class ArduinoDetectors():
-    def __init__(self):
-        self.a = UsingArduino()
+    def __init__(self, ardu):
+        self.a = ardu
         self.ports = {}
 
     def _at(self, p):
@@ -105,23 +79,39 @@ class StdoutPointsController(PointsController):
     def set(self, port, s):
         say("setting", port, "to", s)
 
+ard = UsingArduino()
+pointsController = StdoutPointsController()
 
-def screenTest():
-    return (KeyboardDetectors(), DirectionRelays(), StdoutPointsController())
-
-def arduinoTest():
-    return (ArduinoDetectors(), DirectionRelays(), StdoutPointsController())
-
-
-
-
-(detectors, directionController, pointsController) = screenTest() if manualTest else arduinoTest()
-from lib.cmd import *
+detectors = ArduinoDetectors(ard)
 detectionRouter = DetectionRouter()
 detectionListener = TrafficListener(detectors, detectionRouter)
-detectionListener.registerPorts(allArduinoPorts, "arduino")
+
 model = Model(layoutStr)
-navigator = RouteNavigator(model, directionController, detectionRouter, pointsController)
+allRpiDetectionPorts = [14, 15] #read this from the model
+detectionListener.registerPorts(allRpiDetectionPorts, "rpi")
+
+
+monitor = PowerMonitor()
+speed = Speed(rpi.pwmPort(12), monitor)
+
+
+def say(*what):
+    p = what[0]
+    for i in range(1, len(what)):
+        p = "%s %s" % (p, what[i])
+    monitor.setMessage("%s\r\n" % p)
+
+directionRelays = DirectionRelays(ard)
+wd = type("WEX_direction", (), {})
+setattr(wd, "set", lambda d: directionRelays.set("ignoredString_49", d)) # read from model
+sectionDirections = {
+    "WEX": wd
+}
+
+startingSection = "WEX"
+controlLoop = ControlLoop(detectionListener.poll, 0.1)
+controller = MotionController(speed, sectionDirections, monitor, 70, startingSection)
+navigator = RouteNavigator(model, directionRelays, detectionRouter, pointsController)
 iterator = RouteIterator(model, navigator)
 
 def next():
@@ -130,16 +120,15 @@ def next():
 
 detectionRouter.setCallback(next)
 
-
 print("starting")
-next()
-controlLoop = ControlLoop(detectionListener.poll, 0.1)
 
 def doNothing(c):
     pass
 
-cmd = Cmd(detectors.onCmd if manualTest else doNothing)
+from lib.cmd import *
+cmd = Cmd(controller.onCmd)
 threadables = [
+    speed,
     cmd,
     controlLoop
 ]
