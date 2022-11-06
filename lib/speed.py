@@ -16,7 +16,8 @@ class MotionController():
         self.currentSection = startingSection
 
     def _start(self):
-        self.monitor.setMessage("ramping up %s" % ("forwards" if self.isForwards else "reverse"))
+        d = "forwards" if self.isForwards else "reverse"
+        self.monitor.setMessage("ramping up %s %s" % (self.currentSection, d))
         self.directionOf[self.currentSection].set(self.isForwards)
         self.isRunning = True
         self.speed.rampTo(self.maxSpeed, lambda: self.monitor.setMessage("holding steady"))
