@@ -12,7 +12,7 @@
         },
         "direction": {
             "bank": "arduino",
-            "port": 49
+            "port": 41
         }
     },
     {
@@ -20,7 +20,7 @@
         "name": "northern upper curve",
         "next": {
             "forward": {
-                "id": "SUC"
+                "id": "NSP"
             },
             "reverse": {
                 "id": "WEX"
@@ -29,6 +29,22 @@
         "direction": {
 		    "bank": "arduino",
             "port": 50
+        }
+    },
+    {
+        "id": "NSP",
+        "name": "north-south back-to-back points",
+        "next": {
+            "forward": {
+                "id": "SUC"
+            },
+            "reverse": {
+                "id": "NSP"
+            }
+        },
+        "direction": {
+		    "bank": "arduino",
+            "port": 51
         }
     },
     {
@@ -44,7 +60,7 @@
         },
         "direction": {
             "bank": "arduino",
-            "port": 51
+            "port": 48
         }
     }
 ]
