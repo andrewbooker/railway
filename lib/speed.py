@@ -48,16 +48,16 @@ class MotionController():
         if wasRunning:
             self._start()
 
-#remove this and have something layout-aware pass 's' or 'd' commands
-    def onPass(self, v, pos):
-        return
-        if self.isStopping or not v:
+    def setCurrentSection(self, s):
+        self.currentSection = s
+
+    def onPass(self, pos, sectionName):
+        if self.isStopping:
             return
 
-        self.monitor.setMessage("passed checkpoint %s" % pos)
-        if (pos in ["A"] and self.isForwards) or (pos in ["B"] and not self.isForwards):
-            self.commandsBlocked = True
-            self._changeDirection()
+        self.monitor.setMessage("passed checkpoint %s on %s" % (pos, sectionName))
+        self.commandsBlocked = True
+        self._changeDirection()
 
     def onCmd(self, c):
         if self.commandsBlocked:

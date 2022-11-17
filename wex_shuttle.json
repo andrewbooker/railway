@@ -1,0 +1,20 @@
+[
+    {
+        "id": "WEX",
+        "name": "western expressway",
+        "until": {
+            "forward": {
+                "bank": "RPi",
+                "port": 15
+            },
+            "reverse": {
+                "bank": "RPi",
+                "port": 14
+            }
+        },
+        "direction": {
+            "bank": "arduino",
+            "port": 41
+        }
+    }
+]

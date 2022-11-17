@@ -18,15 +18,17 @@ class PointsController():
 
 
 from routeIterator import NavigationListener
+from speed import MotionController
 from model import *
 
 
 class RouteNavigator(NavigationListener):
-    def __init__(self, model: Model, directionController: DirectionController, detectionListener: DetectionListener, pointsController: PointsController):
+    def __init__(self, model: Model, directionController: DirectionController, detectionListener: DetectionListener, pointsController: PointsController, motionController: MotionController):
         self.model = model
         self.detectionListener = detectionListener
         self.directionController = directionController
         self.pointsController = pointsController
+        self.motionController = motionController
         self.currentDirection = "forward"
 
     @staticmethod
@@ -46,10 +48,11 @@ class RouteNavigator(NavigationListener):
         section = self.model.sections[sId["id"]]
         self.currentDirection = direction
         self.directionController.set(RouteNavigator.portId(section.direction), self.currentDirection)
+        cd = lambda: self.motionController.onPass(section.name, section.direction)
         if direction == "forward" and section.forwardUntil is not None:
-            self.detectionListener.setNextDetector(RouteNavigator.portId(section.forwardUntil), 1, "forwardUntil")
+            self.detectionListener.waitFor(RouteNavigator.portId(section.forwardUntil), 1, "forwardUntil").then(cd)
         if direction == "reverse" and section.reverseUntil is not None:
-            self.detectionListener.setNextDetector(RouteNavigator.portId(section.reverseUntil), 1, "reverseUntil")
+            self.detectionListener.waitFor(RouteNavigator.portId(section.reverseUntil), 1, "reverseUntil").then(cd)
 
         if direction == "forward" and section.next is not None and section.next.__class__.__name__ != "Stage":
             nextSection = self.model.sections[section.next[0]]

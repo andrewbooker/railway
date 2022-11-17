@@ -37,12 +37,25 @@ class TrafficListener():
         for d in self.detectorPorts:
             self.detectionRouter.receiveUpdate(d, self.detectorInputs.stateOf(d))
 
-class Detector():
-    def __init__(self):
-        self.state = 0
-
 from lib.rpiPorts import UsingRPi
 rpi = UsingRPi()
+
+class GenericDetectors():
+    def __init__(self, device, deviceName):
+        self.device = device
+        self.deviceName = deviceName
+        self.ports = {}
+
+    def _at(self, p):
+        if p not in self.ports:
+            self.ports[p] = self.device.input(int(p))
+        return self.ports[p]
+
+    def stateOf(self, of):
+        (bank, port) = of.split("_")
+        if bank != self.deviceName:
+            return 0
+        return 1 if self._at(port).get() else 0
 
 class DirectionRelays(DirectionController):
     def __init__(self, ardu):
@@ -52,26 +65,17 @@ class DirectionRelays(DirectionController):
     def set(self, portId, direction):
         if portId not in self.ports:
             self.ports[portId] = self.a.output(int(portId.split("_")[1]))
-        say(direction, "at", portId)
-        self.ports[portId].set(direction)
+        self.ports[portId].set(not direction)
 
 
 from lib.arduinoPorts import UsingArduino
-class ArduinoDetectors():
+class ArduinoDetectors(GenericDetectors):
     def __init__(self, ardu):
-        self.a = ardu
-        self.ports = {}
+        GenericDetectors.__init__(self, ardu, "arduino")
 
-    def _at(self, p):
-        if p not in self.ports:
-            self.ports[p] = self.a.input(int(p))
-        return self.ports[p]
-
-    def stateOf(self, of):
-        (bank, port) = of.split("_")
-        if bank != "arduino":
-            return 0
-        return 1 if self._at(port).get() else 0
+class RpiDetectors(GenericDetectors):
+    def __init__(self, r):
+        GenericDetectors.__init__(self, r, "RPi")
 
 
 from lib.model import Model
@@ -82,13 +86,14 @@ class StdoutPointsController(PointsController):
 ard = UsingArduino()
 pointsController = StdoutPointsController()
 
-detectors = ArduinoDetectors(ard)
+#detectors = ArduinoDetectors(ard) # will eventually all be arduino but using RPi for first small layouts
+detectors = RpiDetectors(rpi)
 detectionRouter = DetectionRouter()
 detectionListener = TrafficListener(detectors, detectionRouter)
 
 model = Model(layoutStr)
 allRpiDetectionPorts = [14, 15] #read this from the model
-detectionListener.registerPorts(allRpiDetectionPorts, "rpi")
+detectionListener.registerPorts(allRpiDetectionPorts, "RPi")
 
 
 monitor = PowerMonitor()
@@ -101,9 +106,10 @@ def say(*what):
         p = "%s %s" % (p, what[i])
     monitor.setMessage("%s\r\n" % p)
 
+
 directionRelays = DirectionRelays(ard)
 wd = type("WEX_direction", (), {})
-setattr(wd, "set", lambda d: directionRelays.set("ignoredString_49", d)) # read from model
+setattr(wd, "set", lambda d: say(d)) #directionRelays.set("ignoredString_41", d)) # read from model
 sectionDirections = {
     "WEX": wd
 }
@@ -111,20 +117,22 @@ sectionDirections = {
 startingSection = "WEX"
 controlLoop = ControlLoop(detectionListener.poll, 0.1)
 controller = MotionController(speed, sectionDirections, monitor, 70, startingSection)
-navigator = RouteNavigator(model, directionRelays, detectionRouter, pointsController)
+navigator = RouteNavigator(model, directionRelays, detectionRouter, pointsController, controller)
 iterator = RouteIterator(model, navigator)
 
-def next():
+def nextSection():
     iterator.next()
-    say(detectionRouter.awaiting)
+    #say(detectionRouter.awaiting)
 
-detectionRouter.setCallback(next)
+class Cb():
+    def exec(self):
+        nextSection()
+
+
+detectionRouter.setCallback(Cb())
 
 print("starting")
-
-def doNothing(c):
-    pass
-
+nextSection()
 from lib.cmd import *
 cmd = Cmd(controller.onCmd)
 threadables = [
