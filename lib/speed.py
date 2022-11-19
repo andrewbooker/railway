@@ -37,6 +37,11 @@ class MotionController():
         while self.isRunning:
             time.sleep(0.05)
 
+    def _hardStop(self):
+        self.speed._setTo(0)
+        self._setStopped()
+        self.commandsBlocked = True
+
     def _changeDirection(self):
         wasRunning = self.isRunning
         if self.isRunning and not self.isStopping:
@@ -52,12 +57,14 @@ class MotionController():
         self.currentSection = s
 
     def onPass(self, pos, sectionName):
-        if self.isStopping:
+        if self.isStopping or self.commandsBlocked:
             return
 
-        self.monitor.setMessage("passed checkpoint %s on %s" % (pos, sectionName))
         self.commandsBlocked = True
+        self.monitor.setMessage("passed checkpoint %s on %s" % (pos, sectionName))
+        self._hardStop()
         self._changeDirection()
+        self._start()
 
     def onCmd(self, c):
         if self.commandsBlocked:

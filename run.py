@@ -109,7 +109,7 @@ def say(*what):
 
 directionRelays = DirectionRelays(ard)
 wd = type("WEX_direction", (), {})
-setattr(wd, "set", lambda d: say(d)) #directionRelays.set("ignoredString_41", d)) # read from model
+setattr(wd, "set", lambda d: directionRelays.set("arduino_41", d)) # read from model
 sectionDirections = {
     "WEX": wd
 }
