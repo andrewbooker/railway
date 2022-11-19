@@ -30,6 +30,7 @@ class RouteNavigator(NavigationListener):
         self.pointsController = pointsController
         self.motionController = motionController
         self.currentDirection = "forward"
+        self.motionController.changeDirectionCallback = self.toggleDirection
 
     @staticmethod
     def portId(p):
@@ -44,17 +45,19 @@ class RouteNavigator(NavigationListener):
         if direction == "reverse":
             return points.outgoing if points.outgoing is not None else points.incoming
 
-    def _changeDirection(self, section, sId):
-        self.motionController.onPass(sId["id"], self.currentDirection)
+    def _changeDirection(self):
+        self.motionController.onCheckpoint()
+
+    def toggleDirection(self, sId):
         self.connect(sId, "reverse" if self.currentDirection == "forward" else "forward")
 
     def connect(self, sId, direction):
         section = self.model.sections[sId["id"]]
         self.currentDirection = direction
         if direction == "forward" and section.forwardUntil is not None:
-            self.detectionListener.waitFor(RouteNavigator.portId(section.forwardUntil), 1, "forwardUntil").then(lambda: self._changeDirection(section, sId))
+            self.detectionListener.waitFor(RouteNavigator.portId(section.forwardUntil), 1, "forwardUntil").then(lambda: self._changeDirection())
         if direction == "reverse" and section.reverseUntil is not None:
-            self.detectionListener.waitFor(RouteNavigator.portId(section.reverseUntil), 1, "reverseUntil").then(lambda: self._changeDirection(section, sId))
+            self.detectionListener.waitFor(RouteNavigator.portId(section.reverseUntil), 1, "reverseUntil").then(lambda: self._changeDirection())
 
         if direction == "forward" and section.next is not None and section.next.__class__.__name__ != "Stage":
             nextSection = self.model.sections[section.next[0]]

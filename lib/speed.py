@@ -14,6 +14,7 @@ class MotionController():
         self.commandsBlocked = False
         self.monitor.setMessage("set to %s" % ("forwards" if self.isForwards else "reverse"))
         self.currentSection = startingSection
+        self.changeDirectionCallback = None
 
     def _start(self):
         d = "forwards" if self.isForwards else "reverse"
@@ -49,6 +50,8 @@ class MotionController():
 
         self.isForwards = not self.isForwards
         self.monitor.setMessage("changing to %s" % ("forwards" if self.isForwards else "reverse"))
+        if self.changeDirectionCallback is not None:
+            self.changeDirectionCallback({"id": self.currentSection})
 
         if wasRunning:
             self._start()
@@ -56,12 +59,12 @@ class MotionController():
     def setCurrentSection(self, s):
         self.currentSection = s
 
-    def onPass(self, pos, sectionName):
+    def onCheckpoint(self):
         if self.isStopping or self.commandsBlocked:
             return
 
         self.commandsBlocked = True
-        self.monitor.setMessage("passed checkpoint %s on %s" % (pos, sectionName))
+        self.monitor.setMessage("hit checkpoint")
         self._hardStop()
         self._changeDirection()
         self._start()
