@@ -65,6 +65,7 @@ class MotionController():
         self._hardStop()
         self._changeDirection()
         self._start()
+        self.commandsBlocked = False
 
     def onCmd(self, c):
         if self.commandsBlocked:

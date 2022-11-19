@@ -44,15 +44,17 @@ class RouteNavigator(NavigationListener):
         if direction == "reverse":
             return points.outgoing if points.outgoing is not None else points.incoming
 
+    def _changeDirection(self, section, sId):
+        self.motionController.onPass(sId["id"], self.currentDirection)
+        self.connect(sId, "reverse" if self.currentDirection == "forward" else "forward")
+
     def connect(self, sId, direction):
         section = self.model.sections[sId["id"]]
         self.currentDirection = direction
-        self.directionController.set(RouteNavigator.portId(section.direction), self.currentDirection)
-        cd = lambda: self.motionController.onPass(section.name, section.direction)
         if direction == "forward" and section.forwardUntil is not None:
-            self.detectionListener.waitFor(RouteNavigator.portId(section.forwardUntil), 1, "forwardUntil").then(cd)
+            self.detectionListener.waitFor(RouteNavigator.portId(section.forwardUntil), 1, "forwardUntil").then(lambda: self._changeDirection(section, sId))
         if direction == "reverse" and section.reverseUntil is not None:
-            self.detectionListener.waitFor(RouteNavigator.portId(section.reverseUntil), 1, "reverseUntil").then(cd)
+            self.detectionListener.waitFor(RouteNavigator.portId(section.reverseUntil), 1, "reverseUntil").then(lambda: self._changeDirection(section, sId))
 
         if direction == "forward" and section.next is not None and section.next.__class__.__name__ != "Stage":
             nextSection = self.model.sections[section.next[0]]
