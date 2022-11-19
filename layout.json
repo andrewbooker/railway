@@ -27,7 +27,7 @@
             }
         },
         "direction": {
-		    "bank": "arduino",
+            "bank": "arduino",
             "port": 50
         }
     },
@@ -43,7 +43,7 @@
             }
         },
         "direction": {
-		    "bank": "arduino",
+            "bank": "arduino",
             "port": 51
         }
     },
