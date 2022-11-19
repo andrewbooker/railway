@@ -42,20 +42,22 @@ monitor = PowerMonitor()
 speed = Speed(rpi.pwmPort(12), monitor)
 direction = Direction(pwr)
 
+
+def onPass(a, b):
+    monitor.setMessage("points %s %s" % (a, b))
+
 controller = MotionController(speed, {"any": direction}, monitor, 70, "any")
-detectorA = Detector(rpi.input(14), "A", controller.onPass)
-detectorB = Detector(rpi.input(15), "B", controller.onPass)
+detectorA = Detector(rpi.input(14), "A", onPass)
+detectorB = Detector(rpi.input(15), "B", onPass)
 
 from lib.cmd import *
 cmd = Cmd(controller.onCmd)
-#controlLoop = ControlLoop(lambda: controller.onCmd('d'), 64)
 
 targets = [
     speed,
     detectorA,
     detectorB,
-    cmd,
-    #controlLoop
+    cmd
 ]
 threads = [threading.Thread(target=t.start, args=(shouldStop,), daemon=True) for t in targets]
 
