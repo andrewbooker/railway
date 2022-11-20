@@ -54,6 +54,7 @@ class RouteNavigator(NavigationListener):
     def connect(self, sId, direction):
         section = self.model.sections[sId["id"]]
         self.currentDirection = direction
+        self.directionController.set(RouteNavigator.portId(section.direction), self.currentDirection)
         if direction == "forward" and section.forwardUntil is not None:
             self.detectionListener.waitFor(RouteNavigator.portId(section.forwardUntil), 1, "forwardUntil").then(lambda: self._changeDirection())
         if direction == "reverse" and section.reverseUntil is not None:

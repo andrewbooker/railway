@@ -37,7 +37,7 @@ class TrafficListener():
         for d in self.detectorPorts:
             self.detectionRouter.receiveUpdate(d, self.detectorInputs.stateOf(d))
 
-from lib.rpiPorts import UsingRPi
+from lib.rpiPorts import UsingRPi, ServoPwmPort
 rpi = UsingRPi()
 
 class GenericDetectors():
@@ -65,7 +65,7 @@ class DirectionRelays(DirectionController):
     def set(self, portId, direction):
         if portId not in self.ports:
             self.ports[portId] = self.a.output(int(portId.split("_")[1]))
-        self.ports[portId].set(not direction)
+        self.ports[portId].set(0 if direction == "forward" else 1)
 
 
 from lib.arduinoPorts import UsingArduino
@@ -79,12 +79,14 @@ class RpiDetectors(GenericDetectors):
 
 
 from lib.model import Model
-class StdoutPointsController(PointsController):
+class ServoPointsController(PointsController):
     def set(self, port, s):
-        say("setting", port, "to", s)
+        points = Points(rpi.servoPwmPort(port, Points.LEFT))
+        points.set(s)
+
 
 ard = UsingArduino()
-pointsController = StdoutPointsController()
+pointsController = ServoPointsController()
 
 #detectors = ArduinoDetectors(ard) # will eventually all be arduino but using RPi for first small layouts
 detectors = RpiDetectors(rpi)
@@ -107,12 +109,21 @@ def say(*what):
     monitor.setMessage("%s\r\n" % p)
 
 
+ds = [
+    ("WEX", "arduino", 41),
+    ("NR", "arduino", 43),
+    ("NRLP", "arduino", 45),
+    ("NRL", "arduino", 47)
+]
 directionRelays = DirectionRelays(ard)
-wd = type("WEX_direction", (), {})
-setattr(wd, "set", lambda d: directionRelays.set("arduino_41", d)) # read from model
-sectionDirections = {
-    "WEX": wd
-}
+sectionDirections = {}
+def doNothing(ignoreDirection):
+    pass
+
+for d in ds:
+    dd = type("%s_direction" % d[0], (), {})
+    setattr(dd, "set", doNothing)
+    sectionDirections[d[0]] = dd
 
 startingSection = "WEX"
 controlLoop = ControlLoop(detectionListener.poll, 0.1)
