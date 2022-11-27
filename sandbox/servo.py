@@ -13,8 +13,10 @@ from lib.rpiPorts import UsingRPi, ServoPwmPort
 import time
 import random
 
+port = int(sys.argv[1])
+
 rpi = UsingRPi()
-points = Points(rpi.servoPwmPort(15, Points.LEFT))
+points = Points(rpi.servoPwmPort(port, Points.LEFT))
 try:
     while True:
         time.sleep(3)
