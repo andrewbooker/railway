@@ -3,9 +3,11 @@ def openLayout(fileName):
     with open(fileName, "r") as layoutSpec:
         return layoutSpec.read()
 
+
 from routeIterator import *
 from routeNavigator import *
-from detectionRouter import DetectionRouter
+from detectionRouter import *
+
 
 class LocalDirectionController(DirectionController):
     def __init__(self):
@@ -30,14 +32,22 @@ class LocalPointsController(PointsController):
         self.last3.append((pId, s))
 
 
+class LocalMotionController:
+    def onCheckpoint(self):
+        self.changeDirectionCallback({"id": "s01"})
+
+
 def startFrom(fileName):
     m = Model(openLayout(fileName))
+
     directionController = LocalDirectionController()
     detectionListener = DetectionRouter()
     pointsController = LocalPointsController()
-    navigator = RouteNavigator(m, directionController, detectionListener, pointsController)
+    navigator = RouteNavigator(m, directionController, detectionListener, pointsController, LocalMotionController())
     iterator = RouteIterator(m, navigator)
-    detectionListener.setCallback(iterator.next)
+    cb = AndThen()
+    cb.then(lambda: iterator.next)
+    detectionListener.setCallback(cb)
     iterator.next()
     return (detectionListener, directionController, pointsController)
 
