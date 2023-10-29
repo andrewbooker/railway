@@ -1,11 +1,11 @@
 
-class Points():
+class HardwarePoints():
     LEFT = 9
     RIGHT = 6
 
     def __init__(self, device):
         self.device = device
-        self.val = Points.RIGHT
+        self.val = HardwarePoints.RIGHT
 
     def _setTo(self, d, desc):
         if d == self.val:
@@ -15,8 +15,8 @@ class Points():
         print("set to", desc)
 
     def left(self):
-        self._setTo(Points.LEFT, "left")
+        self._setTo(HardwarePoints.LEFT, "left")
 
     def right(self):
-        self._setTo(Points.RIGHT, "right")
+        self._setTo(HardwarePoints.RIGHT, "right")
 
