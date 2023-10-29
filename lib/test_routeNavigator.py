@@ -9,6 +9,11 @@ from routeNavigator import *
 from detectionRouter import *
 
 
+class LeftPointsSelector(PointsSelector):
+    def select(self):
+        return "left"
+
+
 class LocalDirectionController(DirectionController):
     def __init__(self):
         self.clear()
@@ -32,7 +37,7 @@ class LocalPointsController(PointsController):
         self.last3.append((pId, s))
 
 
-class LocalMotionController:
+class LocalMotionController():
     def onCheckpoint(self):
         self.changeDirectionCallback({"id": "s01"})
 
@@ -44,7 +49,7 @@ def startFrom(fileName):
     detectionListener = DetectionRouter()
     pointsController = LocalPointsController()
     navigator = RouteNavigator(m, directionController, detectionListener, pointsController, LocalMotionController())
-    iterator = RouteIterator(m, navigator)
+    iterator = RouteIterator(m, navigator, LeftPointsSelector())
     cb = AndThen()
     cb.then(iterator.next)
     detectionListener.setCallback(cb)

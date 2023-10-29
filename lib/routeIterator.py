@@ -1,6 +1,7 @@
 from model import *
 
-class NavigationListener():
+
+class NavigationListener:
     def connect(self, section, direction):
         pass
 
@@ -10,11 +11,17 @@ class NavigationListener():
     def waitToSetPointsTo(self, s, st, p):
         pass
 
-class RouteIterator():
-    def __init__(self, model, listener: NavigationListener):
+
+class PointsSelector:
+    def select(self):
+        pass
+
+
+class RouteIterator:
+    def __init__(self, model, listener: NavigationListener, pointsSelector):
         self.model = model
         self.listener = listener
-        self.pointsSelection = lambda: "left"
+        self.pointsSelector = pointsSelector
         self.initialDir = "forward"
         self.current = None
 
@@ -70,14 +77,14 @@ class RouteIterator():
             self.listener.connect({"id": sectionId}, direction)
             if nextSection.__class__.__name__ == "Stage":
                 nextStage = "incoming" if nextSection == section.incoming else "outgoing"
-                self._approachDivergence(nextStage, direction, nextSection, section, sectionId)
+                self._approachDivergence(nextStage, direction, nextSection, sectionId)
         else:
             stage = getattr(section, currentStage)
             self.listener.connect({"id": sectionId}, direction)
-            self._approachDivergence(currentStage, direction, stage, section, sectionId)
+            self._approachDivergence(currentStage, direction, stage, sectionId)
 
-    def _approachDivergence(self, stage, direction, nextSection, section, sectionId):
-        selection = self.pointsSelection()
+    def _approachDivergence(self, stage, direction, nextSection, sectionId):
+        selection = self.pointsSelector.select()
         self.listener.setPointsTo(selection, stage, {"id": sectionId})
         course = getattr(nextSection, selection)
         if stage == "outgoing":
