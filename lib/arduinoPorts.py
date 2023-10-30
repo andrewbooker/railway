@@ -1,4 +1,6 @@
 import pyfirmata
+
+from lib.monitor import StatusComponent
 from lib.ports import Ports
 
 
@@ -27,15 +29,21 @@ class ServoPwmPort:
         self.pin.write(v / 100.0)
 
 
+class StdOutStatus(StatusComponent):
+    def setValue(self, v):
+        print(v)
+
+
 class UsingArduino(Ports):
-    def __init__(self):
+    def __init__(self, status: StatusComponent = StdOutStatus(0)):
+        self.status = status
         self.board = pyfirmata.ArduinoMega("/dev/ttyACM0")
         pyfirmata.util.Iterator(self.board).start()
-        print("Arduino started")
+        self.status.setValue("Arduino started")
 
     def __del__(self):
         self.board.exit()
-        print("Arduino stopped")
+        self.status.setValue("Arduino stopped")
 
     def input(self, port):
         return Input(self.board, port)
