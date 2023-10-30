@@ -1,5 +1,3 @@
-from model import *
-
 
 class NavigationListener:
     def connect(self, section, direction):
