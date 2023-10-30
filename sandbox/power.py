@@ -35,17 +35,15 @@ if __name__ == '__main__':
     monitor = PowerMonitor()
     shouldStop = threading.Event()
     cmd = Cmd(nothing(monitor))
-    monitor.setMessage("starting")
+    monitor.setStatus("starting")
 
     threads = [
         threading.Thread(target=set_power, args=(monitor, shouldStop), daemon=True),
         threading.Thread(target=set_msg, args=(monitor, shouldStop), daemon=True),
         threading.Thread(target=cmd.start, args=(shouldStop,), daemon=True)
     ]
-    monitor.setMessage("threads ready")
+    monitor.setStatus("threads ready")
     [thread.start() for thread in threads]
-    monitor.setMessage("threads started")
+    monitor.setStatus("threads started")
     [thread.join() for thread in threads]
-    monitor.setMessage("threads stopped")
-
-
+    monitor.setStatus("threads stopped")
