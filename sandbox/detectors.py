@@ -10,8 +10,8 @@ sys.path.append(parentDir)
 from lib.rpiPorts import UsingRPi
 from lib.cmd import *
 from lib.detectors import Detector
-from lib.stdump import Dump
-import RPi.GPIO as GPIO
+from stdump import Dump
+
 
 possiblePorts = [
     8, 14, 15, 23, 24, 25
