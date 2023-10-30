@@ -1,21 +1,24 @@
-
 import pyfirmata
+from lib.ports import Ports
 
-class Input():
+
+class Input:
     def __init__(self, board, port):
         self.pin = board.get_pin("d:%d:i" % port)
 
     def get(self):
         return self.pin.read()
 
-class Output():
+
+class Output:
     def __init__(self, board, port):
         self.pin = board.get_pin("d:%d:o" % port)
 
     def set(self, v):
         return self.pin.write(v)
 
-class ServoPwmPort():
+
+class ServoPwmPort:
     def __init__(self, board, port, initVal):
         self.pin = board.get_pin("d:%d:p" % port)
         self.set(initVal)
@@ -23,7 +26,8 @@ class ServoPwmPort():
     def set(self, v):
         self.pin.write(v / 100.0)
 
-class UsingArduino():
+
+class UsingArduino(Ports):
     def __init__(self):
         self.board = pyfirmata.ArduinoMega("/dev/ttyACM0")
         pyfirmata.util.Iterator(self.board).start()

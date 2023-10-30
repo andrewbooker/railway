@@ -1,7 +1,8 @@
-
 import RPi.GPIO as GPIO
+from lib.ports import Ports
 
-class PwmPort():
+
+class PwmPort:
     def __init__(self, port, f=100, initVal=0):
         GPIO.setup(port, GPIO.OUT, initial=GPIO.LOW)
         self.pwm = GPIO.PWM(port, f)
@@ -13,11 +14,13 @@ class PwmPort():
     def set(self, value):
         self.pwm.ChangeDutyCycle(value)
 
+
 class ServoPwmPort(PwmPort):
     def __init__(self, port, initVal):
         super().__init__(port, 50, initVal)
 
-class Input():
+
+class Input:
     def __init__(self, port):
         self.port = port
         GPIO.setup(self.port, GPIO.IN)
@@ -25,7 +28,8 @@ class Input():
     def get(self):
         return GPIO.input(self.port)
 
-class Output():
+
+class Output:
     def __init__(self, port):
         self.port = port
         GPIO.setup(self.port, GPIO.OUT, initial=GPIO.LOW)
@@ -33,7 +37,8 @@ class Output():
     def set(self, v):
         GPIO.output(self.port, v)
 
-class UsingRPi():
+
+class UsingRPi(Ports):
     def __init__(self):
         GPIO.setmode(GPIO.BCM)
         self.devices = []
