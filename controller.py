@@ -1,16 +1,20 @@
 #!/usr/bin/env python
 
-import math
 import os
-import threading
+from lib.monitor import PowerMonitor
+from lib.speed import Speed
+from lib.motionController import MotionController
+from lib.distribution import Direction
+from lib.detectors import Detector
+from lib.rpiPorts import UsingRPi
+from lib.arduinoPorts import UsingArduino
 os.system("clear")
 print("")
 
 portA = 12
 portB = 18
 
-from lib.rpiPorts import UsingRPi
-from lib.arduinoPorts import UsingArduino
+
 rpi = UsingRPi()
 ard = UsingArduino()
 
@@ -32,11 +36,6 @@ class TmpArd():
             a.set(v)
 
 
-from lib.monitor import PowerMonitor
-from lib.speed import MotionController, Speed
-from lib.distribution import Direction
-from lib.detectors import Detector
-
 pwr = TmpArd()
 monitor = PowerMonitor()
 speed = Speed(rpi.pwmPort(12), monitor)
@@ -46,7 +45,8 @@ direction = Direction(pwr)
 def onPass(a, b):
     monitor.setMessage("points %s %s" % (a, b))
 
-controller = MotionController(speed, {"any": direction}, monitor, 70, "any")
+
+controller = MotionController(speed, {"any": direction}, monitor.msg, 70, "any")
 detectorA = Detector(rpi.input(14), "A", onPass)
 detectorB = Detector(rpi.input(15), "B", onPass)
 
