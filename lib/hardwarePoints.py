@@ -1,5 +1,5 @@
 
-class HardwarePoints():
+class HardwarePoints:
     LEFT = 9
     RIGHT = 6
 
@@ -12,7 +12,6 @@ class HardwarePoints():
             return
         self.device.set(d)
         self.val = d
-        print("set to", desc)
 
     def left(self):
         self._setTo(HardwarePoints.LEFT, "left")
