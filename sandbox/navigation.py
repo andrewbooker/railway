@@ -27,8 +27,9 @@ class DescriptiveNavigationListener(NavigationListener):
 
 class RandomPointsSelector(PointsSelector):
     def select(self):
-        print("selection required")
-        return "left" if random.random() > 0.5 else "right"
+        s = "left" if 0 != (int(random.random() * 10) % 2) else "right"
+        print("selection required:", s)
+        return s
 
 
 layoutStr = None
