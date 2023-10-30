@@ -1,5 +1,9 @@
+from routeIterator import NavigationListener
+from motionController import MotionController
+from model import *
 
-class DetectionListener():
+
+class DetectionListener:
     def setNextDetector(self, d, v, description):
         pass
 
@@ -7,19 +11,14 @@ class DetectionListener():
         pass
 
 
-class DirectionController():
+class DirectionController:
     def set(self, portId, direction):
         pass
 
 
-class PointsController():
+class PointsController:
     def set(self, pId, s):
         pass
-
-
-from routeIterator import NavigationListener
-from speed import MotionController
-from model import *
 
 
 class RouteNavigator(NavigationListener):
