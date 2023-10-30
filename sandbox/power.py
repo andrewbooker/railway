@@ -27,7 +27,7 @@ def set_msg(monitor, shouldStop):
 
 
 def nothing(monitor):
-    return lambda: monitor.setMessage("reams and reams and reams")
+    return lambda k: monitor.setMessage(f"Keystroke '{k}' does nothing")
 
 
 if __name__ == '__main__':
