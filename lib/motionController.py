@@ -11,13 +11,13 @@ class MotionController:
         self.isStopping = False
         self.isForwards = True
         self.commandsBlocked = False
-        self.statusComponent.setValue("set to %s" % ("forwards" if self.isForwards else "reverse"))
         self.currentSection = startingSection
+        self.statusComponent.setValue("set %s to %s" % (self.currentSection, "forwards" if self.isForwards else "reverse"))
         self.changeDirectionCallback = None
 
     def _start(self):
         d = "forwards" if self.isForwards else "reverse"
-        self.statusComponent.setValue("ramping up %s %s" % (self.currentSection, d))
+        self.statusComponent.setValue("ramping %s up to %s" % (self.currentSection, d))
         self.directionOf[self.currentSection].set(self.isForwards)
         self.isRunning = True
         self.speed.rampTo(self.maxSpeed, lambda: self.statusComponent.setValue("holding steady"))
@@ -48,7 +48,7 @@ class MotionController:
             self._stop()
 
         self.isForwards = not self.isForwards
-        self.statusComponent.setValue("changing to %s" % ("forwards" if self.isForwards else "reverse"))
+        self.statusComponent.setValue("changing %s to %s" % (self.currentSection, "forwards" if self.isForwards else "reverse"))
         if self.changeDirectionCallback is not None:
             self.changeDirectionCallback({"id": self.currentSection})
 
