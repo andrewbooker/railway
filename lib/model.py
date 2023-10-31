@@ -26,7 +26,8 @@ class Points(Section):
         self.outgoing: Stage = None
         self.incoming: Stage = None
 
-class Model():
+
+class Model:
     @staticmethod
     def portFrom(p):
         return (p["bank"], p["port"])
@@ -63,6 +64,7 @@ class Model():
     def __init__(self, m):
         js = json.loads(m)
 
+        self.detection_ports = {}
         self.sections = {}
         for s in js:
             isPoints = "type" in s and s["type"] == "points"
@@ -79,9 +81,13 @@ class Model():
             if "until" in s:
                 u = s["until"]
                 if "forward" in u:
-                    section.forwardUntil = Model.portFrom(u["forward"])
+                    forward_until = u["forward"]
+                    section.forwardUntil = Model.portFrom(forward_until)
+                    self.detection_ports.setdefault(forward_until["bank"], set()).add(forward_until["port"])
                 if "reverse" in u:
-                    section.reverseUntil = Model.portFrom(u["reverse"])
+                    reverse_until = u["reverse"]
+                    section.reverseUntil = Model.portFrom(reverse_until)
+                    self.detection_ports.setdefault(reverse_until["bank"], set()).add(reverse_until["port"])
 
             if "outgoing" in s:
                 section.outgoing = Model._pointsStageFrom(s, "outgoing")
@@ -92,3 +98,5 @@ class Model():
 
             self.sections[s["id"]] = section
 
+    def detectionPorts(self):
+        return self.detection_ports

@@ -2,7 +2,6 @@
 from model import *
 
 
-
 def openLayout(fileName):
     with open(fileName, "r") as layoutSpec:
         return layoutSpec.read()
@@ -18,6 +17,9 @@ def test_single_section():
     assert section.direction == ("RPi", 23)
     assert section.forwardUntil == ("arduino", 52)
     assert section.reverseUntil == ("arduino", 53)
+
+    assert m.detectionPorts()["arduino"] == {52, 53}
+
 
 loop = """
 [
