@@ -1,11 +1,13 @@
 import json
 
-class Course():
+
+class Course:
     def __init__(self):
         self.next = None
         self.previous = None
         self.forwardUntil = None
         self.reverseUntil = None
+
 
 class Section(Course):
     def __init__(self, name):
@@ -13,12 +15,14 @@ class Section(Course):
         self.name = name
         self.direction = None
 
+
 class Stage():
     def __init__(self, left: Course, right: Course, selector, detector):
         self.left = left
         self.right = right
         self.selector = selector
         self.detector = detector
+
 
 class Points(Section):
     def __init__(self, name):
@@ -55,10 +59,16 @@ class Model:
             return (sd["id"], direction, stage, sd["params"][1])
         return (sd["id"], direction)
 
-    @staticmethod
-    def _pointsStageFrom(points, stage):
+    def _points_course_detection(self, termination):
+        if termination is not None:
+            self._register_detector({"bank": termination[0], "port": termination[1]})
+
+    def _pointsStageFrom(self, points, stage):
         left = Model._courseFrom(points, stage, "left")
         right = Model._courseFrom(points, stage, "right")
+        self._register_detector(points[stage]["detector"])
+        self._points_course_detection(left.forwardUntil)  # not sure reverseUntil is needed in points
+        self._points_course_detection(right.forwardUntil)
         return Stage(left, right, Model.portFrom(points[stage]["selector"]), Model.portFrom(points[stage]["detector"]))
 
     def __init__(self, m):
@@ -83,20 +93,23 @@ class Model:
                 if "forward" in u:
                     forward_until = u["forward"]
                     section.forwardUntil = Model.portFrom(forward_until)
-                    self.detection_ports.setdefault(forward_until["bank"], set()).add(forward_until["port"])
+                    self._register_detector(forward_until)
                 if "reverse" in u:
                     reverse_until = u["reverse"]
                     section.reverseUntil = Model.portFrom(reverse_until)
-                    self.detection_ports.setdefault(reverse_until["bank"], set()).add(reverse_until["port"])
+                    self._register_detector(reverse_until)
 
             if "outgoing" in s:
-                section.outgoing = Model._pointsStageFrom(s, "outgoing")
+                section.outgoing = self._pointsStageFrom(s, "outgoing")
                 section.next = section.outgoing
             if "incoming" in s:
-                section.incoming = Model._pointsStageFrom(s, "incoming")
+                section.incoming = self._pointsStageFrom(s, "incoming")
                 section.previous = section.incoming
 
             self.sections[s["id"]] = section
+
+    def _register_detector(self, detector):
+        self.detection_ports.setdefault(detector["bank"], set()).add(detector["port"])
 
     def detectionPorts(self):
         return self.detection_ports

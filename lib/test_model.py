@@ -35,6 +35,7 @@ loop = """
 ]
 """
 
+
 def test_loop_has_self_referencing_next_and_previous_with_required_directions():
     m = Model(loop)
 
@@ -45,6 +46,7 @@ def test_loop_has_self_referencing_next_and_previous_with_required_directions():
     assert section.direction == ("RPi", 16)
     assert section.forwardUntil is None
     assert section.reverseUntil is None
+    assert m.detectionPorts() == dict()
 
 
 def test_outgoing_points_as_complete_section():
@@ -70,6 +72,9 @@ def test_outgoing_points_as_complete_section():
     assert points.outgoing.right.reverseUntil is None
     assert points.outgoing.right.next is None
     assert points.outgoing.right.previous is None
+
+    assert m.detectionPorts()["RPi"] == {14, 15, 16, 17}
+
 
 outgoingPointsWithSidingLeft = """
 [
