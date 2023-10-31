@@ -27,8 +27,8 @@ class Stage():
 class Points(Section):
     def __init__(self, name):
         super().__init__(name)
-        self.outgoing: Stage = None
-        self.incoming: Stage = None
+        self.outgoing: Stage | None = None
+        self.incoming: Stage | None = None
 
 
 class Model:
@@ -75,11 +75,13 @@ class Model:
         js = json.loads(m)
 
         self.detection_ports = {}
+        self.relay_ports = {}
         self.sections = {}
         for s in js:
             isPoints = "type" in s and s["type"] == "points"
             section = Points(s["name"]) if isPoints else Section(s["name"])
             section.direction = Model.portFrom(s["direction"])
+            self._register_relay(s["direction"])
 
             if "next" in s and len(s["next"]) > 0:
                 n = s["next"]
@@ -111,5 +113,11 @@ class Model:
     def _register_detector(self, detector):
         self.detection_ports.setdefault(detector["bank"], set()).add(detector["port"])
 
+    def _register_relay(self, relay):
+        self.relay_ports.setdefault(relay["bank"], set()).add(relay["port"])
+
     def detectionPorts(self):
         return self.detection_ports
+
+    def relayPorts(self):
+        return self.relay_ports
