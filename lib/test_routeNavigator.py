@@ -39,7 +39,7 @@ class LocalPointsController(PointsController):
         self.last3.append((pId, s))
 
 
-class LocalMotionController:
+class LocalMotionController(MotionController):
     def __init__(self):
         self.changeDirectionCallback = None
 

@@ -1,5 +1,4 @@
 from routeIterator import NavigationListener
-from motionController import MotionController
 from model import *
 
 
@@ -29,6 +28,14 @@ class DirectionController:
 
 class PointsController:
     def set(self, pId, s):
+        pass
+
+
+class MotionController:
+    def withChangeDirectionCallback(self, cb):
+        return self
+
+    def onCheckpoint(self):
         pass
 
 

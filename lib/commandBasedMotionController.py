@@ -1,7 +1,9 @@
 import time
 
+from lib.routeNavigator import MotionController
 
-class MotionController:
+
+class CommandBasedMotionController(MotionController):
     def __init__(self, speed, sectionDirections, statusComponent, maxSpeed, startingSection):
         self.maxSpeed = maxSpeed
         self.speed = speed

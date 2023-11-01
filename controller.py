@@ -3,7 +3,7 @@
 import os
 from lib.monitor import PowerMonitor
 from lib.speed import Speed
-from lib.motionController import MotionController
+from lib.commandBasedMotionController import CommandBasedMotionController
 from lib.distribution import Direction
 from lib.detectors import Detector
 from lib.rpiPorts import UsingRPi
@@ -46,7 +46,7 @@ def onPass(a, b):
     monitor.setMessage("points %s %s" % (a, b))
 
 
-controller = MotionController(speed, {"any": direction}, monitor.msg, 70, "any")
+controller = CommandBasedMotionController(speed, {"any": direction}, monitor.msg, 70, "any")
 detectorA = Detector(rpi.input(14), "A", onPass)
 detectorB = Detector(rpi.input(15), "B", onPass)
 
