@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 import os
+
+from application.directionRelays import DirectionRelays
 from lib.monitor import PowerMonitor
 from lib.speed import Speed
 from application.commandBasedMotionController import CommandBasedMotionController
@@ -46,7 +48,8 @@ def onPass(a, b):
     monitor.setMessage("points %s %s" % (a, b))
 
 
-controller = CommandBasedMotionController(speed, {"any": direction}, monitor.msg, 70, "any")
+directionController = DirectionRelays(ard, monitor.msg)
+controller = CommandBasedMotionController(speed, monitor.msg, 70, directionController)
 detectorA = Detector(rpi.input(14), "A", onPass)
 detectorB = Detector(rpi.input(15), "B", onPass)
 

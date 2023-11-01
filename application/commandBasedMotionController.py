@@ -1,20 +1,18 @@
 import time
 
-from lib.routeNavigator import MotionController
+from lib.routeNavigator import MotionController, DirectionController
 
 
 class CommandBasedMotionController(MotionController):
-    def __init__(self, speed, sectionDirections, statusComponent, maxSpeed, startingSection):
+    def __init__(self, speed, statusComponent, maxSpeed, directionController: DirectionController):
         self.maxSpeed = maxSpeed
         self.speed = speed
-        self.directionOf = sectionDirections
+        self.directionController = directionController
         self.statusComponent = statusComponent
         self.isRunning = False
         self.isStopping = False
         self.isForwards = True
         self.commandsBlocked = False
-        self.currentSection = startingSection
-        self.statusComponent.setValue("set %s to %s" % (self.currentSection, "forwards" if self.isForwards else "reverse"))
         self.changeDirectionCallback = None
 
     def withChangeDirectionCallback(self, cb):
@@ -23,9 +21,9 @@ class CommandBasedMotionController(MotionController):
 
     def _start(self):
         d = "forwards" if self.isForwards else "reverse"
-        self.statusComponent.setValue("ramping %s up to %s" % (self.currentSection, d))
-        self.directionOf[self.currentSection].set(self.isForwards)
+        self.directionController.set(self.directionController.currentPortId(), d)
         self.isRunning = True
+        self.statusComponent.setValue("ramping %s up to %d" % (self.directionController.currentPortId(), self.maxSpeed))
         self.speed.rampTo(self.maxSpeed, lambda: self.statusComponent.setValue("holding steady"))
 
     def _setStopped(self):
@@ -54,15 +52,12 @@ class CommandBasedMotionController(MotionController):
             self._stop()
 
         self.isForwards = not self.isForwards
-        self.statusComponent.setValue("changing %s to %s" % (self.currentSection, "forwards" if self.isForwards else "reverse"))
+        self.statusComponent.setValue("changing %s to %s" % (self.directionController.currentPortId(), "forwards" if self.isForwards else "reverse"))
         if self.changeDirectionCallback is not None:
-            self.changeDirectionCallback({"id": self.currentSection})
+            self.changeDirectionCallback({"id": self.directionController.currentPortId()})
 
         if wasRunning:
             self._start()
-
-    def setCurrentSection(self, s):
-        self.currentSection = s
 
     def onCheckpoint(self):
         if self.isStopping or self.commandsBlocked:
