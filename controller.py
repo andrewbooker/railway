@@ -3,7 +3,7 @@
 import os
 from lib.monitor import PowerMonitor
 from lib.speed import Speed
-from lib.commandBasedMotionController import CommandBasedMotionController
+from application.commandBasedMotionController import CommandBasedMotionController
 from lib.distribution import Direction
 from lib.detectors import Detector
 from lib.rpiPorts import UsingRPi
