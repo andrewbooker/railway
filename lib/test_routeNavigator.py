@@ -23,7 +23,7 @@ class LocalDirectionController(DirectionController):
         self.last3 = []
 
     def set(self, portId, direction):
-        self.direction = direction
+        super().set(portId, direction)
         if len(self.last3) == 3:
             self.last3.pop(0)
         self.last3.append((portId, direction))
@@ -70,6 +70,7 @@ def test_shuttle():
     (detectionListener, directionController) = startFrom("example-layouts/shuttle.json")[:2]
 
     assert directionController.currentDirection() == "forward"
+    assert directionController.currentPortId() == "RPi_23"
     assert directionController.last3 == [("RPi_23", "forward")]
 
     detectionListener.receiveUpdate("arduino_52", 1)

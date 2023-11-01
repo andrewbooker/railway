@@ -14,12 +14,17 @@ class DetectionListener:
 class DirectionController:
     def __init__(self):
         self.direction = None
+        self.portId = None
 
     def set(self, portId, direction):
-        pass
+        self.direction = direction
+        self.portId = portId
 
     def currentDirection(self) -> str | None:
         return self.direction
+
+    def currentPortId(self) -> str | None:
+        return self.portId
 
 
 class PointsController:
