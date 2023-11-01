@@ -21,7 +21,9 @@ class DetectionRouter(DetectionListener):
         self.awaiting = {}
 
     def setCallback(self, c):
-        self.callback = c
+        cb = AndThen()
+        cb.then(c)
+        self.callback = cb
 
     def receiveUpdate(self, portId, value):
         k = (portId, value)
@@ -30,11 +32,11 @@ class DetectionRouter(DetectionListener):
 
         (description, cb) = self.awaiting[k]
         del self.awaiting[k]
-        if cb.canExec():
+        if cb is not None and cb.canExec():
             cb.exec()
             return
         if self.callback is not None:
-            self.callback()
+            self.callback.exec()
 
     def setNextDetector(self, p, v, description):
         self.awaiting[(p, v)] = (description, self.callback)

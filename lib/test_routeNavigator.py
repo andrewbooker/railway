@@ -59,9 +59,7 @@ def startFrom(fileName):
     pointsController = LocalPointsController()
     navigator = RouteNavigator(m, directionController, detectionListener, pointsController, LocalMotionController())
     iterator = RouteIterator(m, navigator, LeftPointsSelector())
-    cb = AndThen()
-    cb.then(iterator.next)
-    detectionListener.setCallback(cb)
+    detectionListener.setCallback(iterator.next)
     iterator.next()
     return (detectionListener, directionController, pointsController)
 
