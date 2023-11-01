@@ -28,13 +28,18 @@ class PointsController:
 
 
 class RouteNavigator(NavigationListener):
-    def __init__(self, model: Model, directionController: DirectionController, detectionListener: DetectionListener, pointsController: PointsController, motionController: MotionController):
+    def __init__(
+            self, model: Model,
+            directionController: DirectionController,
+            detectionListener: DetectionListener,
+            pointsController: PointsController,
+            motionController: MotionController
+    ):
         self.model = model
         self.detectionListener = detectionListener
         self.directionController = directionController
         self.pointsController = pointsController
-        self.motionController = motionController
-        self.motionController.changeDirectionCallback = self.toggleDirection
+        self.motionController = motionController.withChangeDirectionCallback(self.toggleDirection)
 
     @staticmethod
     def portId(p):
@@ -50,9 +55,6 @@ class RouteNavigator(NavigationListener):
         if direction == "reverse":
             return points.outgoing if points.outgoing is not None else points.incoming
 
-    def _changeDirection(self):
-        self.motionController.onCheckpoint()
-
     def toggleDirection(self, sId):
         self.connect(sId, "reverse" if self.directionController.currentDirection() == "forward" else "forward")
 
@@ -60,9 +62,13 @@ class RouteNavigator(NavigationListener):
         section = self.model.sections[sId["id"]]
         self.directionController.set(RouteNavigator.portId(section.direction), direction)
         if direction == "forward" and section.forwardUntil is not None:
-            self.detectionListener.waitFor(RouteNavigator.portId(section.forwardUntil), 1, "forwardUntil").then(lambda: self._changeDirection())
+            self.detectionListener.waitFor(
+                RouteNavigator.portId(section.forwardUntil), 1, "forwardUntil"
+            ).then(self.motionController.onCheckpoint)
         if direction == "reverse" and section.reverseUntil is not None:
-            self.detectionListener.waitFor(RouteNavigator.portId(section.reverseUntil), 1, "reverseUntil").then(lambda: self._changeDirection())
+            self.detectionListener.waitFor(
+                RouteNavigator.portId(section.reverseUntil), 1, "reverseUntil"
+            ).then(self.motionController.onCheckpoint)
 
         if direction == "forward" and section.next is not None and section.next.__class__.__name__ != "Stage":
             nextSection = self.model.sections[section.next[0]]

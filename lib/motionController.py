@@ -15,6 +15,10 @@ class MotionController:
         self.statusComponent.setValue("set %s to %s" % (self.currentSection, "forwards" if self.isForwards else "reverse"))
         self.changeDirectionCallback = None
 
+    def withChangeDirectionCallback(self, cb):
+        self.changeDirectionCallback = cb
+        return self
+
     def _start(self):
         d = "forwards" if self.isForwards else "reverse"
         self.statusComponent.setValue("ramping %s up to %s" % (self.currentSection, d))

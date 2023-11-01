@@ -40,6 +40,13 @@ class LocalPointsController(PointsController):
 
 
 class LocalMotionController:
+    def __init__(self):
+        self.changeDirectionCallback = None
+
+    def withChangeDirectionCallback(self, cb):
+        self.changeDirectionCallback = cb
+        return self
+
     def onCheckpoint(self):
         self.changeDirectionCallback({"id": "s01"})
 
