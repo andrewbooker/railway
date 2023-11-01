@@ -1,15 +1,19 @@
-class AndThen():
+from routeNavigator import DetectionListener
+
+
+class AndThen:
     def __init__(self):
         self.m = None
 
     def then(self, m):
         self.m = m
 
+    def canExec(self):
+        return self.m is not None
+
     def exec(self):
         self.m()
 
-
-from routeNavigator import DetectionListener
 
 class DetectionRouter(DetectionListener):
     def __init__(self):
@@ -25,11 +29,12 @@ class DetectionRouter(DetectionListener):
             return
 
         (description, cb) = self.awaiting[k]
-        del(self.awaiting[k])
-        if cb is not None:
+        del self.awaiting[k]
+        if cb.canExec():
             cb.exec()
             return
-        self.callback()
+        if self.callback is not None:
+            self.callback()
 
     def setNextDetector(self, p, v, description):
         self.awaiting[(p, v)] = (description, self.callback)
