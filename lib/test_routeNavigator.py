@@ -16,12 +16,14 @@ class LeftPointsSelector(PointsSelector):
 
 class LocalDirectionController(DirectionController):
     def __init__(self):
-        self.clear()
+        DirectionController.__init__(self)
+        self.last3 = []
 
     def clear(self):
         self.last3 = []
 
     def set(self, portId, direction):
+        self.direction = direction
         if len(self.last3) == 3:
             self.last3.pop(0)
         self.last3.append((portId, direction))
@@ -37,7 +39,7 @@ class LocalPointsController(PointsController):
         self.last3.append((pId, s))
 
 
-class LocalMotionController():
+class LocalMotionController:
     def onCheckpoint(self):
         self.changeDirectionCallback({"id": "s01"})
 
@@ -60,9 +62,11 @@ def startFrom(fileName):
 def test_shuttle():
     (detectionListener, directionController) = startFrom("example-layouts/shuttle.json")[:2]
 
+    assert directionController.currentDirection() == "forward"
     assert directionController.last3 == [("RPi_23", "forward")]
 
     detectionListener.receiveUpdate("arduino_52", 1)
+    assert directionController.currentDirection() == "reverse"
     assert directionController.last3 == [("RPi_23", "forward"), ("RPi_23", "reverse")]
 
     detectionListener.receiveUpdate("arduino_53", 1)
