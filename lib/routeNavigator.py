@@ -1,13 +1,6 @@
+from detectionRouter import DetectionListener
 from routeIterator import NavigationListener
 from model import *
-
-
-class DetectionListener:
-    def setNextDetector(self, d, v, description):
-        pass
-
-    def waitFor(self, d, state, description):
-        pass
 
 
 class DirectionController:

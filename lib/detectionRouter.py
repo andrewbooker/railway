@@ -1,5 +1,3 @@
-from routeNavigator import DetectionListener
-
 
 class AndThen:
     def __init__(self):
@@ -13,6 +11,14 @@ class AndThen:
 
     def exec(self):
         self.m()
+
+
+class DetectionListener:
+    def setNextDetector(self, d, v, description):
+        pass
+
+    def waitFor(self, d, state, description):
+        pass
 
 
 class DetectionRouter(DetectionListener):
