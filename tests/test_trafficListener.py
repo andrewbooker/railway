@@ -47,3 +47,22 @@ def test_polling_sends_value_read_from_port_to_receiver():
 
     assert router.last_call == ("inputbox_66", 8)
 
+
+def test_polling_only_sends_value_if_it_changes():
+    router = DetectionRouterSpy()
+    listener = TrafficListener(router)
+    device = DeviceWithConstInput(ConstInput(8))
+
+    listener.registerInputDevices("inputbox", device)
+    listener.registerPorts("inputbox", [66])
+
+    assert router.last_call is None
+    listener.poll()
+    assert router.last_call == ("inputbox_66", 8)
+    router.last_call = None
+    listener.poll()
+    assert router.last_call is None
+
+    device.i.v = 7
+    listener.poll()
+    assert router.last_call == ("inputbox_66", 7)
