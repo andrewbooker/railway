@@ -7,7 +7,6 @@ class TrafficListener:
         self.detectionRouter = detectionRouter
         self.detectorInputs = dict()
         self.detectorPorts = dict()
-        self.lastRead = dict()
 
     def registerInputDevices(self, bankName: str, ports: Ports):
         self.detectorInputs[bankName] = ports
@@ -18,8 +17,4 @@ class TrafficListener:
 
     def poll(self):
         for portId, inp in self.detectorPorts.items():
-            last_val = self.lastRead.get(portId)
-            val = inp.get()
-            if val != last_val:
-                self.detectionRouter.receiveUpdate(portId, val)
-                self.lastRead[portId] = val
+            self.detectionRouter.receiveUpdate(portId, inp.get())
