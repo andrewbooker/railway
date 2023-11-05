@@ -16,4 +16,4 @@ class DirectionRelays(DirectionController):
             self.status.setValue(f"finding output {i} in {bank}")
             self.ports[portId] = self.device.output(int(i))
         self.status.setValue(f"setting {portId} relay to {direction}")
-        self.ports[portId].set(0 if direction == "forward" else 1)
+        self.ports[portId].set(0 if direction == "forwards" else 1)
