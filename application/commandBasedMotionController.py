@@ -23,7 +23,7 @@ class CommandBasedMotionController(MotionController):
         d = "forwards" if self.isForwards else "reverse"
         self.directionController.set(self.directionController.currentPortId(), d)
         self.isRunning = True
-        self.statusComponent.setValue("ramping %s up to %d" % (self.directionController.currentPortId(), self.maxSpeed))
+        self.statusComponent.setValue(f"ramping up to {self.maxSpeed}")
         self.speed.rampTo(self.maxSpeed, lambda: self.statusComponent.setValue("holding steady"))
 
     def _setStopped(self):
