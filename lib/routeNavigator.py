@@ -1,3 +1,4 @@
+
 from detectionRouter import DetectionListener
 from routeIterator import NavigationListener
 from model import *
@@ -12,10 +13,10 @@ class DirectionController:
         self.direction = direction
         self.portId = portId
 
-    def currentDirection(self) -> str | None:
+    def currentDirection(self):
         return self.direction
 
-    def currentPortId(self) -> str | None:
+    def currentPortId(self):
         return self.portId
 
 

@@ -13,7 +13,7 @@ class StatusComponent:
     def setValue(self, v):
         pass
 
-    def strValue(self) -> list[str]:
+    def strValue(self):
         pass
 
 
@@ -74,7 +74,7 @@ class PowerStatusComponent(StatusComponent):
     def setValue(self, v):
         self.v = v
 
-    def strValue(self) -> list[str]:
+    def strValue(self):
         r = []
         for i in range(3):
             s = [
