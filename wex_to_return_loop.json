@@ -1,0 +1,87 @@
+[
+    {
+        "id": "WEX",
+        "name": "western expressway",
+        "until": {
+            "reverse": {
+                "bank": "RPi",
+                "port": 14
+            }
+        },
+        "direction": {
+            "bank": "arduino",
+            "port": 41
+        },
+        "next": {
+            "forward": {
+                "id": "NR"
+            }
+        }
+    },
+    {
+        "id": "NR",
+        "name": "north ramp",
+        "direction": {
+            "bank": "arduino",
+            "port": 43
+        },
+        "next": {
+            "forward": {
+                "id": "NRLP",
+                "params": ["outgoing"]
+            },
+            "reverse": {
+                "id": "WEX"
+            }
+        }
+    },
+    {
+        "id": "NRL",
+        "name": "north return loop",
+            "direction": {
+                "bank": "arduino",
+                "port": 47
+            },
+        "next": {
+            "forward": {
+                "id": "NRLP",
+                "params": ["outgoing", "right"]
+            },
+            "reverse": {
+                "id": "NRLP",
+                "params": ["outgoing", "left"]
+            }
+        }
+    },
+    {
+        "id": "NRLP",
+        "name": "north return loop points",
+        "type": "points",
+        "direction": {
+		    "bank": "RPi",
+		    "port": 45
+	    },
+        "outgoing": {
+            "left": {
+                "id": "NRL"
+            },
+            "right": {
+                "id": "NRL",
+                "direction": "reverse"
+            },
+            "selector": {
+                "bank": "RPi",
+                "port": 23
+            },
+		    "detector": {
+			    "bank": "RPi",
+			    "port": 24
+		    }
+        },
+        "next": {
+            "reverse": {
+                "id": "NR"
+            }
+        }
+    }
+]
