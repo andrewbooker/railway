@@ -12,6 +12,8 @@ class DirectionRelays(DirectionController):
 
     def set(self, portId, direction):
         if portId not in self.ports:
-            self.ports[portId] = self.device.output(int(portId.split("_")[1]))
+            bank, i = tuple(portId.split("_"))
+            self.status.setValue(f"finding output {i} in {bank}")
+            self.ports[portId] = self.device.output(int(i))
         self.status.setValue(f"setting {portId} relay to {direction}")
         self.ports[portId].set(0 if direction == "forward" else 1)
