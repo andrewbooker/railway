@@ -1,15 +1,25 @@
-class AndThen():
+
+class AndThen:
     def __init__(self):
         self.m = None
 
     def then(self, m):
         self.m = m
 
+    def canExec(self):
+        return self.m is not None
+
     def exec(self):
         self.m()
 
 
-from routeNavigator import DetectionListener
+class DetectionListener:
+    def setNextDetector(self, d, v, description):
+        pass
+
+    def waitFor(self, d, state, description):
+        pass
+
 
 class DetectionRouter(DetectionListener):
     def __init__(self):
@@ -17,7 +27,9 @@ class DetectionRouter(DetectionListener):
         self.awaiting = {}
 
     def setCallback(self, c):
-        self.callback = c
+        cb = AndThen()
+        cb.then(c)
+        self.callback = cb
 
     def receiveUpdate(self, portId, value):
         k = (portId, value)
@@ -25,11 +37,12 @@ class DetectionRouter(DetectionListener):
             return
 
         (description, cb) = self.awaiting[k]
-        del(self.awaiting[k])
-        if cb is not None:
+        del self.awaiting[k]
+        if cb is not None and cb.canExec():
             cb.exec()
             return
-        self.callback()
+        if self.callback is not None:
+            self.callback.exec()
 
     def setNextDetector(self, p, v, description):
         self.awaiting[(p, v)] = (description, self.callback)

@@ -5,7 +5,18 @@ def openLayout(fileName):
         return layoutSpec.read()
 
 from model import *
-from routeIterator import RouteIterator, NavigationListener
+from routeIterator import RouteIterator, NavigationListener, PointsSelector
+
+
+class LeftPointsSelector(PointsSelector):
+    def select(self):
+        return "left"
+
+
+class RightPointsSelector(PointsSelector):
+    def select(self):
+        return "right"
+
 
 class ReportingListener(NavigationListener):
     def __init__(self):
@@ -27,7 +38,7 @@ class ReportingListener(NavigationListener):
 def test_shuttle():
     m = Model(openLayout("example-layouts/shuttle.json"))
     listener = ReportingListener()
-    nm = RouteIterator(m, listener)
+    nm = RouteIterator(m, listener, None)
 
     assert listener.history == []
     nm.next()
@@ -44,7 +55,7 @@ def test_shuttle():
 def test_single_loop():
     m = Model(openLayout("example-layouts/single-loop.json"))
     listener = ReportingListener()
-    nm = RouteIterator(m, listener)
+    nm = RouteIterator(m, listener, None)
 
     nm.next()
     assert listener.history == [("s01", "forward")]
@@ -54,7 +65,7 @@ def test_single_loop():
 def test_single_loop_reverse():
     m = Model(openLayout("example-layouts/single-loop.json"))
     listener = ReportingListener()
-    nm = RouteIterator(m, listener)
+    nm = RouteIterator(m, listener, None)
     nm.initialDirection("reverse")
 
     nm.next()
@@ -65,7 +76,7 @@ def test_single_loop_reverse():
 def test_two_stage_loop():
     m = Model(openLayout("example-layouts/two-stage-loop.json"))
     listener = ReportingListener()
-    nm = RouteIterator(m, listener)
+    nm = RouteIterator(m, listener, None)
 
     nm.next()
     assert listener.history == [("s01", "forward")]
@@ -79,7 +90,7 @@ def test_two_stage_loop():
 def test_two_stage_loop_reverse():
     m = Model(openLayout("example-layouts/two-stage-loop.json"))
     listener = ReportingListener()
-    nm = RouteIterator(m, listener)
+    nm = RouteIterator(m, listener, None)
     nm.initialDirection("reverse")
 
     nm.next()
@@ -93,8 +104,7 @@ def test_two_stage_loop_reverse():
 def test_self_contained_points_forward_left():
     m = Model(openLayout("example-layouts/points-as-large-y.json"))
     listener = ReportingListener()
-    nm = RouteIterator(m, listener)
-    nm.pointsSelection = lambda: "left"
+    nm = RouteIterator(m, listener, LeftPointsSelector())
 
     nm.next()
     assert listener.lastPoints == "p01"
@@ -123,9 +133,8 @@ def test_self_contained_points_forward_left():
 def test_self_contained_points_reverse_right():
     m = Model(openLayout("example-layouts/points-as-large-y.json"))
     listener = ReportingListener()
-    nm = RouteIterator(m, listener)
+    nm = RouteIterator(m, listener, RightPointsSelector())
     nm.initialDirection("reverse")
-    nm.pointsSelection = lambda: "right"
 
     nm.next()
     assert listener.history == [
@@ -160,8 +169,7 @@ def test_self_contained_points_reverse_right():
 def test_simple_fork_points_left():
     m = Model(openLayout("example-layouts/simple-fork.json"))
     listener = ReportingListener()
-    nm = RouteIterator(m, listener)
-    nm.pointsSelection = lambda: "left"
+    nm = RouteIterator(m, listener, LeftPointsSelector())
 
     nm.next()
     assert listener.history == [
@@ -203,8 +211,7 @@ def test_simple_fork_points_left():
 def test_simple_fork_incoming_points_left():
     m = Model(openLayout("example-layouts/simple-fork-incoming.json"))
     listener = ReportingListener()
-    nm = RouteIterator(m, listener)
-    nm.pointsSelection = lambda: "left"
+    nm = RouteIterator(m, listener, LeftPointsSelector())
 
     nm.next()
     assert listener.history == [
@@ -255,8 +262,7 @@ def test_simple_fork_incoming_points_left():
 def test_return_loops_back_to_back_points_left():
     m = Model(openLayout("example-layouts/return-loops-back-to-back.json"))
     listener = ReportingListener()
-    nm = RouteIterator(m, listener)
-    nm.pointsSelection = lambda: "left"
+    nm = RouteIterator(m, listener, LeftPointsSelector())
 
     nm.next()
     assert listener.history == [
@@ -305,8 +311,7 @@ def test_return_loops_back_to_back_points_left():
 def test_return_loops_back_to_back_points_right():
     m = Model(openLayout("example-layouts/return-loops-back-to-back.json"))
     listener = ReportingListener()
-    nm = RouteIterator(m, listener)
-    nm.pointsSelection = lambda: "right"
+    nm = RouteIterator(m, listener, RightPointsSelector())
 
     nm.next()
     assert listener.history == [

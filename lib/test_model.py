@@ -2,7 +2,6 @@
 from model import *
 
 
-
 def openLayout(fileName):
     with open(fileName, "r") as layoutSpec:
         return layoutSpec.read()
@@ -19,6 +18,10 @@ def test_single_section():
     assert section.forwardUntil == ("arduino", 52)
     assert section.reverseUntil == ("arduino", 53)
 
+    assert m.detectionPorts()["arduino"] == {52, 53}
+    assert m.relayPorts()["RPi"] == {23}
+
+
 loop = """
 [
     {
@@ -33,6 +36,7 @@ loop = """
 ]
 """
 
+
 def test_loop_has_self_referencing_next_and_previous_with_required_directions():
     m = Model(loop)
 
@@ -43,6 +47,8 @@ def test_loop_has_self_referencing_next_and_previous_with_required_directions():
     assert section.direction == ("RPi", 16)
     assert section.forwardUntil is None
     assert section.reverseUntil is None
+    assert m.detectionPorts() == dict()
+    assert m.relayPorts()["RPi"] == {16}
 
 
 def test_outgoing_points_as_complete_section():
@@ -68,6 +74,10 @@ def test_outgoing_points_as_complete_section():
     assert points.outgoing.right.reverseUntil is None
     assert points.outgoing.right.next is None
     assert points.outgoing.right.previous is None
+
+    assert m.detectionPorts()["RPi"] == {14, 15, 16, 17}
+    assert m.relayPorts()["RPi"] == {26}
+
 
 outgoingPointsWithSidingLeft = """
 [
@@ -129,6 +139,7 @@ outgoingPointsWithSidingLeft = """
 ]
 """
 
+
 def test_outgoing_points_with_siding_left():
     m = Model(outgoingPointsWithSidingLeft)
 
@@ -159,6 +170,9 @@ def test_outgoing_points_with_siding_left():
     assert points.outgoing.right.reverseUntil is None
     assert points.outgoing.detector == ("RPi", 15)
     assert points.outgoing.selector == ("RPi", 25)
+
+    assert m.relayPorts()["RPi"] == {26, 27}
+
 
 def test_simple_fork():
     m = Model(openLayout("example-layouts/simple-fork.json"))
@@ -206,6 +220,10 @@ def test_simple_fork():
     assert points.outgoing.right.reverseUntil is None
     assert points.outgoing.detector == ("RPi", 17)
     assert points.outgoing.selector == ("RPi", 27)
+
+    assert m.detectionPorts()["RPi"] == {14, 15, 16, 17}
+    assert m.relayPorts()["RPi"] == {23, 24, 25, 26}
+
 
 incomingPointsWithSidingRight = """
 [
@@ -267,6 +285,7 @@ incomingPointsWithSidingRight = """
 ]
 """
 
+
 def test_incoming_points_with_siding_right():
     m = Model(incomingPointsWithSidingRight)
 
@@ -297,6 +316,8 @@ def test_incoming_points_with_siding_right():
     assert points.incoming.right.reverseUntil is None
     assert points.incoming.detector == ("RPi", 15)
     assert points.incoming.selector == ("RPi", 25)
+
+    assert m.relayPorts()["RPi"] == {26, 27}
 
 
 def test_return_loops_back_to_back():
@@ -332,6 +353,8 @@ def test_return_loops_back_to_back():
     assert points.incoming.right.previous == ("r02", "reverse")
     assert points.incoming.right.next is None
 
+    assert m.relayPorts()["RPi"] == {23, 24, 26}
+
 
 def test_return_loop():
     m = Model(openLayout("example-layouts/return-loop.json"))
@@ -364,6 +387,7 @@ def test_return_loop():
     assert points.outgoing.detector == ("RPi", 15)
     assert points.outgoing.selector == ("RPi", 25)
     assert points.incoming is None
+
 
 def test_opposing_points_loop():
     m = Model(openLayout("example-layouts/opposing-points-loop.json"))
