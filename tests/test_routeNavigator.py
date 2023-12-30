@@ -47,7 +47,7 @@ class LocalMotionController(MotionController):
         return self
 
     def onCheckpoint(self):
-        self.changeDirectionCallback({"id": "s01"})
+        self.changeDirectionCallback("RPi_23")
 
 
 def startFrom(fileName):
