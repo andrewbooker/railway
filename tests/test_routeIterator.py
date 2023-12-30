@@ -1,11 +1,10 @@
+from lib.model import *
+from lib.routeIterator import RouteIterator, NavigationListener, PointsSelector
 
 
 def openLayout(fileName):
     with open(fileName, "r") as layoutSpec:
         return layoutSpec.read()
-
-from model import *
-from routeIterator import RouteIterator, NavigationListener, PointsSelector
 
 
 class LeftPointsSelector(PointsSelector):

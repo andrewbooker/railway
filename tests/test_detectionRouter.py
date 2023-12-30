@@ -1,4 +1,4 @@
-from detectionRouter import DetectionRouter
+from lib.detectionRouter import DetectionRouter
 
 
 class Callback:

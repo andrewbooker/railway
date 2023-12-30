@@ -1,5 +1,5 @@
 
-from model import *
+from lib.model import *
 
 
 def openLayout(fileName):

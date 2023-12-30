@@ -1,12 +1,11 @@
+from lib.routeIterator import *
+from lib.routeNavigator import *
+from lib.detectionRouter import *
+
 
 def openLayout(fileName):
     with open(fileName, "r") as layoutSpec:
         return layoutSpec.read()
-
-
-from routeIterator import *
-from routeNavigator import *
-from detectionRouter import *
 
 
 class LeftPointsSelector(PointsSelector):
