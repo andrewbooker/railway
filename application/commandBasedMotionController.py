@@ -54,7 +54,7 @@ class CommandBasedMotionController(MotionController):
         self.isForwards = not self.isForwards
         self.statusComponent.setValue("changing %s to %s" % (self.directionController.currentPortId(), "forwards" if self.isForwards else "reverse"))
         if self.changeDirectionCallback is not None:
-            self.changeDirectionCallback({"id": self.directionController.currentPortId()})
+            self.changeDirectionCallback(self.directionController.currentPortId())
 
         if wasRunning:
             self._start()

@@ -1,7 +1,7 @@
 
-from detectionRouter import DetectionListener
-from routeIterator import NavigationListener
-from model import *
+from lib.detectionRouter import DetectionListener
+from lib.routeIterator import NavigationListener
+from lib.model import *
 
 
 class DirectionController:
@@ -61,7 +61,8 @@ class RouteNavigator(NavigationListener):
         if direction == "reverse":
             return points.outgoing if points.outgoing is not None else points.incoming
 
-    def toggleDirection(self, sId):
+    def toggleDirection(self, portId):
+        sId = {"id": self.model.sectionFrom(portId)["sId"]}
         self.connect(sId, "reverse" if self.directionController.currentDirection() == "forward" else "forward")
 
     def connect(self, sId, direction):

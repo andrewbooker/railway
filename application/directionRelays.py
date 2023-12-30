@@ -11,6 +11,7 @@ class DirectionRelays(DirectionController):
         self.ports = {}
 
     def set(self, portId, direction):
+        DirectionController.set(self, portId, direction)
         if portId not in self.ports:
             bank, i = tuple(portId.split("_"))
             self.status.setValue(f"finding output {i} in {bank}")
