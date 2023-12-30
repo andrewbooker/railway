@@ -121,3 +121,10 @@ class Model:
 
     def relayPorts(self):
         return self.relay_ports
+
+    def sectionFrom(self, portId):
+        bank, i = tuple(portId.split("_"))
+        for sId, s in self.sections.items():
+            if type(s) == Section and s.direction == (bank, int(i)):
+                return {"sId": sId, "section": s}
+        return None

@@ -20,7 +20,12 @@ with open(sys.argv[1], "r") as layoutSpec:
 
 model = Model(layoutStr)
 
-print(model.relayPorts())   
-print(model.detectionPorts())
+print("Relay ports", model.relayPorts())
+print("Detection ports", model.detectionPorts())
+print("Sections:")
+for s in model.sections:
+    print(s)
+    section = model.sections[s]
+    print(type(section), section.name, section.direction)
 
-
+print(model.sectionFrom("arduino_41"))
