@@ -37,7 +37,7 @@ cmd = Cmd(controller.onCmd)
 
 targets = [
     speed,
-    Detector(rpi.input(14), "A", onPass),
+    Detector(rpi.input(14), "A", onPass),  # optional because they happen to be on the layout. are not in layout.json
     Detector(rpi.input(15), "B", onPass),
     cmd
 ]
