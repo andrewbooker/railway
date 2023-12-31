@@ -3,6 +3,7 @@
 from _imports import *
 import threading
 import readchar
+import random
 from lib.model import Model
 from lib.routeIterator import RouteIterator, NavigationListener, PointsSelector
 
