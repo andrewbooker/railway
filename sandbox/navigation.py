@@ -1,15 +1,8 @@
 #!/usr/bin/env python3
 
+from _imports import *
 import threading
 import readchar
-import sys
-import os
-import random
-parentDir = os.path.dirname(os.getcwd())
-if "railway" not in parentDir:
-    print("needs to run in sandbox")
-    exit()
-sys.path.append(parentDir)
 from lib.model import Model
 from lib.routeIterator import RouteIterator, NavigationListener, PointsSelector
 

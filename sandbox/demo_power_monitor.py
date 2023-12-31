@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 
-import os
-import sys
-parentDir = os.path.dirname(os.getcwd())
-sys.path.append(parentDir)
+from _imports import *
 from lib.monitor import PowerMonitor
 from lib.cmd import Cmd
 import time
