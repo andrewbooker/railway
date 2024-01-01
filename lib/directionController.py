@@ -12,6 +12,9 @@ class Direction(Enum):
                 return d
         return Direction.Forward
 
+    def opposite(self):
+        return Direction.Reverse if self == Direction.Forward else Direction.Forward
+
 
 class DirectionController:
     def __init__(self):
