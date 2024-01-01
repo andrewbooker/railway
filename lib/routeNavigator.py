@@ -48,7 +48,7 @@ class RouteNavigator(NavigationListener):
 
     def toggleDirection(self, portId):
         sId = {"id": self.model.sectionFrom(portId)["sId"]}
-        self.connect(sId, Direction.Reverse if self.directionController.currentDirection() == Direction.Forward else Direction.Forward)
+        self.connect(sId, self.directionController.currentDirection().opposite())
 
     def connect(self, sId, direction):
         section = self.model.sections[sId["id"]]

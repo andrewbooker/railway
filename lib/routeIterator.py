@@ -29,19 +29,15 @@ class RouteIterator:
         self.initialDir = d
 
     @staticmethod
-    def opposite(d):
-        return Direction.Reverse if d == Direction.Forward else Direction.Forward
-
-    @staticmethod
     def possibleNextSection(direction, section, sectionId, isPoints):
         if direction == Direction.Forward and section.next is not None:
             return section.next
         if direction == Direction.Reverse and section.previous is not None:
             return section.previous
         if not isPoints and ((direction == Direction.Forward and section.next is None) or (direction == Direction.Reverse and section.previous is None)):
-            return sectionId, RouteIterator.opposite(direction)
+            return sectionId, direction.opposite()
         if (direction == Direction.Forward and section.forwardUntil is not None) or (direction == Direction.Reverse and section.reverseUntil is not None):
-            return sectionId, RouteIterator.opposite(direction)
+            return sectionId, direction.opposite()
         return None
 
     @staticmethod
@@ -91,12 +87,12 @@ class RouteIterator:
             if course.next is not None:
                 self._proceedTo(course.next)
             elif course.forwardUntil is not None:
-                self._proceedTo((sectionId, RouteIterator.opposite(direction), stage, selection))
+                self._proceedTo((sectionId, direction.opposite(), stage, selection))
         else:
             if course.previous is not None:
                 self._proceedTo(course.previous)
             elif course.reverseUntil is not None:
-                self._proceedTo((sectionId, RouteIterator.opposite(direction), stage, selection))
+                self._proceedTo((sectionId, direction.opposite(), stage, selection))
 
     def _proceedTo(self, to):
         self.current = to
