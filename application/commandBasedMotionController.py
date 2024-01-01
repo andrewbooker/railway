@@ -52,7 +52,7 @@ class CommandBasedMotionController(MotionController):
             self._stop()
 
         self.direction = self.direction.opposite()
-        self.statusComponent.setValue("changing %s to %s" % (self.directionController.currentPortId(), self.direction.value))
+        self.statusComponent.setValue(f"changing to {self.direction.value}")
         if self.changeDirectionCallback is not None:
             self.changeDirectionCallback(self.directionController.currentPortId())
 
