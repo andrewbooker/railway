@@ -23,7 +23,7 @@ def onPass(a, b):
 class UniversalDirectionController(DirectionController):
     def __init__(self, device: UsingArduino):
         DirectionController.__init__(self)
-        self.ports = {p: device.output(p) for p in [41, 48, 50, 51]}  # can read these direct out of Model from layout.json
+        self.ports = {p: device.output(p) for p in [41, 43, 45, 47]}  # [41, 48, 50, 51] can read these direct out of Model from layout.json
 
     def set(self, portId, direction: Direction):
         DirectionController.set(self, portId, direction)
@@ -35,7 +35,6 @@ directionController = UniversalDirectionController(ard)
 controller = CommandBasedMotionController(speed, monitor.msg, 90, directionController)
 
 cmd = Cmd(controller.onCmd)
-8, 14, 15, 23, 24, 25
 
 
 targets = [
