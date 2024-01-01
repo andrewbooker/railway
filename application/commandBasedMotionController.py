@@ -1,7 +1,7 @@
 import time
 
 from lib.routeNavigator import MotionController
-from lib.directionController import DirectionController
+from lib.directionController import DirectionController, Direction
 
 
 class CommandBasedMotionController(MotionController):
@@ -21,7 +21,7 @@ class CommandBasedMotionController(MotionController):
         return self
 
     def _start(self):
-        d = "forwards" if self.isForwards else "reverse"
+        d = Direction.Forward if self.isForwards else Direction.Reverse
         self.directionController.set(self.directionController.currentPortId(), d)
         self.isRunning = True
         self.statusComponent.setValue(f"ramping up to {self.maxSpeed}")
