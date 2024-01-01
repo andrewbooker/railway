@@ -58,7 +58,7 @@
         "name": "north return loop points",
         "type": "points",
         "direction": {
-		    "bank": "RPi",
+		    "bank": "arduino",
 		    "port": 45
 	    },
         "outgoing": {
@@ -75,7 +75,7 @@
             },
 		    "detector": {
 			    "bank": "RPi",
-			    "port": 24
+			    "port": 8
 		    }
         },
         "next": {
