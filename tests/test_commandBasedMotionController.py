@@ -32,7 +32,7 @@ def test_is_initially_at_standstill():
 
     assert controller.isRunning is False
     assert controller.isStopping is False
-    assert controller.isForwards is True
+    assert controller.direction == Direction.Forward
     assert controller.commandsBlocked is False
 
 
@@ -48,7 +48,7 @@ def test_starts_motion_from_standstill():
     assert status.status == ["ramping up to 87", "holding steady"]
     assert direction_controller.direction == Direction.Forward
     assert controller.isStopping is False
-    assert controller.isForwards is True
+    assert controller.direction == Direction.Forward
     assert controller.commandsBlocked is False
 
 
@@ -61,7 +61,7 @@ def test_can_set_motion_in_reverse_before_starting():
     controller = CommandBasedMotionController(speed, status, 99, direction_controller).withChangeDirectionCallback(callback.cb)
 
     controller.onCmd('d')
-    assert controller.isForwards is False
+    assert controller.direction == Direction.Reverse
     assert callback.with_id == "thing_0"
     assert status.status == ["changing thing_0 to reverse"]
 

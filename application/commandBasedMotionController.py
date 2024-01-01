@@ -12,7 +12,7 @@ class CommandBasedMotionController(MotionController):
         self.statusComponent = statusComponent
         self.isRunning = False
         self.isStopping = False
-        self.isForwards = True
+        self.direction = Direction.Forward
         self.commandsBlocked = False
         self.changeDirectionCallback = None
 
@@ -21,8 +21,7 @@ class CommandBasedMotionController(MotionController):
         return self
 
     def _start(self):
-        d = Direction.Forward if self.isForwards else Direction.Reverse
-        self.directionController.set(self.directionController.currentPortId(), d)
+        self.directionController.set(self.directionController.currentPortId(), self.direction)
         self.isRunning = True
         self.statusComponent.setValue(f"ramping up to {self.maxSpeed}")
         self.speed.rampTo(self.maxSpeed, lambda: self.statusComponent.setValue("holding steady"))
@@ -52,8 +51,8 @@ class CommandBasedMotionController(MotionController):
         if self.isRunning and not self.isStopping:
             self._stop()
 
-        self.isForwards = not self.isForwards
-        self.statusComponent.setValue("changing %s to %s" % (self.directionController.currentPortId(), "forwards" if self.isForwards else "reverse"))
+        self.direction = self.direction.opposite()
+        self.statusComponent.setValue("changing %s to %s" % (self.directionController.currentPortId(), self.direction.value))
         if self.changeDirectionCallback is not None:
             self.changeDirectionCallback(self.directionController.currentPortId())
 
@@ -82,7 +81,7 @@ class CommandBasedMotionController(MotionController):
             else:
                 self._stop()
 
-        if c == 'd' or (c == 'r' and self.isForwards) or (c == 'f' and not self.isForwards):
+        if c == 'd' or (c == 'r' and self.direction == Direction.Forward) or (c == 'f' and self.direction == Direction.Reverse):
             self._changeDirection()
 
         if c == '+':
