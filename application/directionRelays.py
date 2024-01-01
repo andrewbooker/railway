@@ -1,6 +1,6 @@
 from lib.monitor import StatusComponent
 from lib.ports import Ports
-from lib.routeNavigator import DirectionController
+from lib.directionController import DirectionController
 
 
 class DirectionRelays(DirectionController):

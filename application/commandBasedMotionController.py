@@ -1,6 +1,7 @@
 import time
 
-from lib.routeNavigator import MotionController, DirectionController
+from lib.routeNavigator import MotionController
+from lib.directionController import DirectionController
 
 
 class CommandBasedMotionController(MotionController):

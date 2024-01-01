@@ -1,5 +1,5 @@
 from application.commandBasedMotionController import CommandBasedMotionController
-from lib.routeNavigator import DirectionController
+from lib.directionController import DirectionController
 
 
 class Callback:

@@ -4,7 +4,7 @@ from lib.monitor import PowerMonitor
 from lib.speed import Speed
 from application.commandBasedMotionController import CommandBasedMotionController
 from lib.detectors import Detector
-from lib.routeNavigator import DirectionController
+from lib.directionController import DirectionController
 from lib.rpiPorts import UsingRPi
 from lib.arduinoPorts import UsingArduino
 from lib.cmd import *
