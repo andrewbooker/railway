@@ -1,6 +1,6 @@
 
 from lib.detectionRouter import DetectionListener
-from lib.directionController import DirectionController
+from lib.directionController import DirectionController, Direction
 from lib.routeIterator import NavigationListener
 from lib.model import *
 
@@ -37,32 +37,32 @@ class RouteNavigator(NavigationListener):
         return "%s_%s" % (p[0], p[1])
 
     @staticmethod
-    def _nextPointsStage(direction, points, stageSpec):
+    def _nextPointsStage(direction: Direction, points, stageSpec):
         expectedStage = stageSpec[2] if len(stageSpec) > 2 else None
         if expectedStage is not None:
             return getattr(points, expectedStage)
-        if direction == "forward":
+        if direction == Direction.Forward:
             return points.incoming if points.incoming is not None else points.outgoing
-        if direction == "reverse":
+        if direction == Direction.Reverse:
             return points.outgoing if points.outgoing is not None else points.incoming
 
     def toggleDirection(self, portId):
         sId = {"id": self.model.sectionFrom(portId)["sId"]}
-        self.connect(sId, "reverse" if self.directionController.currentDirection() == "forward" else "forward")
+        self.connect(sId, Direction.Reverse if self.directionController.currentDirection() == Direction.Forward else Direction.Forward)
 
     def connect(self, sId, direction):
         section = self.model.sections[sId["id"]]
         self.directionController.set(RouteNavigator.portId(section.direction), direction)
-        if direction == "forward" and section.forwardUntil is not None:
+        if direction == Direction.Forward and section.forwardUntil is not None:
             self.detectionListener.waitFor(
                 RouteNavigator.portId(section.forwardUntil), 1, "forwardUntil"
             ).then(self.motionController.onCheckpoint)
-        if direction == "reverse" and section.reverseUntil is not None:
+        if direction == Direction.Reverse and section.reverseUntil is not None:
             self.detectionListener.waitFor(
                 RouteNavigator.portId(section.reverseUntil), 1, "reverseUntil"
             ).then(self.motionController.onCheckpoint)
 
-        if direction == "forward" and section.next is not None and section.next.__class__.__name__ != "Stage":
+        if direction == Direction.Forward and section.next is not None and section.next.__class__.__name__ != "Stage":
             nextSection = self.model.sections[section.next[0]]
             if nextSection.__class__.__name__ == "Points":
                 pointsStage = RouteNavigator._nextPointsStage(direction, nextSection, section.next)
@@ -70,7 +70,7 @@ class RouteNavigator(NavigationListener):
             elif section.__class__.__name__ == "Points" and section.outgoing is not None: # and section.incoming is None:
                 self.detectionListener.setNextDetector(RouteNavigator.portId(section.outgoing.detector), 1, "from points to next section")
             return
-        if direction == "reverse" and section.previous is not None and section.previous.__class__.__name__ != "Stage":
+        if direction == Direction.Reverse and section.previous is not None and section.previous.__class__.__name__ != "Stage":
             previousSection = self.model.sections[section.previous[0]]
             if previousSection.__class__.__name__ == "Points":
                 pointsStage = RouteNavigator._nextPointsStage(direction, previousSection, section.previous)
@@ -82,9 +82,9 @@ class RouteNavigator(NavigationListener):
         self.pointsController.set(RouteNavigator.portId(stage.selector), selection)
         if (stage == points.incoming and points.outgoing is None) or (stage == points.outgoing and points.incoming is None):
             self.detectionListener.setNextDetector(RouteNavigator.portId(stage.detector), 1, "traversing points to next section")
-        if stage == points.incoming and self.directionController.currentDirection() == "forward":
+        if stage == points.incoming and self.directionController.currentDirection() == Direction.Forward:
             self.detectionListener.setNextDetector(RouteNavigator.portId(stage.detector), 1, "traversing incoming points to next section")
-        if stage == points.outgoing and self.directionController.currentDirection() == "reverse":
+        if stage == points.outgoing and self.directionController.currentDirection() == Direction.Reverse:
             self.detectionListener.setNextDetector(RouteNavigator.portId(stage.detector), 1, "traversing outgoing points to next section")
 
     def setPointsTo(self, s, st, p):

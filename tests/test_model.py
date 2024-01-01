@@ -1,4 +1,4 @@
-
+from lib.directionController import Direction
 from lib.model import *
 
 
@@ -42,8 +42,8 @@ def test_loop_has_self_referencing_next_and_previous_with_required_directions():
 
     section = m.sections["s01"]
     assert section.name == "loop"
-    assert section.next == ("s01", "forward")
-    assert section.previous == ("s01", "reverse")
+    assert section.next == ("s01", Direction.Forward)
+    assert section.previous == ("s01", Direction.Reverse)
     assert section.direction == ("RPi", 16)
     assert section.forwardUntil is None
     assert section.reverseUntil is None
@@ -146,7 +146,7 @@ def test_outgoing_points_with_siding_left():
     siding = m.sections["s01"]
     assert siding.name == "siding"
     assert siding.next is None
-    assert siding.previous == ("p01", "reverse", "outgoing", "left")
+    assert siding.previous == ("p01", Direction.Reverse, "outgoing", "left")
     assert siding.direction == ("RPi", 27)
     assert siding.forwardUntil == ("RPi", 14)
     assert siding.reverseUntil is None
@@ -160,7 +160,7 @@ def test_outgoing_points_with_siding_left():
     assert points.forwardUntil is None
     assert points.reverseUntil == ("RPi", 17)
     assert points.incoming is None
-    assert points.outgoing.left.next == ("s01", "forward")
+    assert points.outgoing.left.next == ("s01", Direction.Forward)
     assert points.outgoing.left.previous is None
     assert points.outgoing.left.reverseUntil is None
     assert points.outgoing.left.forwardUntil is None
@@ -180,7 +180,7 @@ def test_simple_fork():
     approach = m.sections["s01"]
     assert approach.name == "main branch"
     assert approach.direction == ("RPi", 23)
-    assert approach.next == ("p01", "forward")
+    assert approach.next == ("p01", Direction.Forward)
     assert approach.previous is None
     assert approach.forwardUntil is None
     assert approach.reverseUntil == ("RPi", 14)
@@ -189,7 +189,7 @@ def test_simple_fork():
     assert left.name == "branch left"
     assert left.direction == ("RPi", 24)
     assert left.next is None
-    assert left.previous == ("p01", "reverse", "outgoing", "left")
+    assert left.previous == ("p01", Direction.Reverse, "outgoing", "left")
     assert left.forwardUntil == ("RPi", 15)
     assert left.reverseUntil is None
 
@@ -197,7 +197,7 @@ def test_simple_fork():
     assert right.name == "branch right"
     assert right.direction == ("RPi", 25)
     assert right.next is None
-    assert right.previous == ("p01", "reverse", "outgoing", "right")
+    assert right.previous == ("p01", Direction.Reverse, "outgoing", "right")
     assert right.forwardUntil == ("RPi", 16)
     assert right.reverseUntil is None
 
@@ -206,15 +206,15 @@ def test_simple_fork():
     assert points.name == "branching points"
     assert points.direction == ("RPi", 26)
     assert points.next == points.outgoing
-    assert points.previous == ("s01", "reverse")
+    assert points.previous == ("s01", Direction.Reverse)
     assert points.forwardUntil is None
     assert points.forwardUntil is None
     assert points.incoming is None
-    assert points.outgoing.left.next == ("s02", "forward")
+    assert points.outgoing.left.next == ("s02", Direction.Forward)
     assert points.outgoing.left.previous is None
     assert points.outgoing.left.reverseUntil is None
     assert points.outgoing.left.forwardUntil is None
-    assert points.outgoing.right.next == ("s03", "forward")
+    assert points.outgoing.right.next == ("s03", Direction.Forward)
     assert points.outgoing.right.previous is None
     assert points.outgoing.right.forwardUntil is None
     assert points.outgoing.right.reverseUntil is None
@@ -291,7 +291,7 @@ def test_incoming_points_with_siding_right():
 
     siding = m.sections["s01"]
     assert siding.name == "siding"
-    assert siding.next == ("p01", "forward", "incoming", "right")
+    assert siding.next == ("p01", Direction.Forward, "incoming", "right")
     assert siding.previous is None
     assert siding.direction == ("RPi", 27)
     assert siding.forwardUntil is None
@@ -310,7 +310,7 @@ def test_incoming_points_with_siding_right():
     assert points.incoming.left.previous is None
     assert points.incoming.left.reverseUntil is None
     assert points.incoming.left.forwardUntil == ("RPi", 18)
-    assert points.incoming.right.previous == ("s01", "reverse")
+    assert points.incoming.right.previous == ("s01", Direction.Reverse)
     assert points.incoming.right.next is None
     assert points.incoming.right.forwardUntil is None
     assert points.incoming.right.reverseUntil is None
@@ -324,14 +324,14 @@ def test_return_loops_back_to_back():
     m = Model(openLayout("example-layouts/return-loops-back-to-back.json"))
 
     loop1 = m.sections["r01"]
-    assert loop1.next == ("p01", "reverse", "outgoing", "right")
-    assert loop1.previous == ("p01", "reverse", "outgoing", "left")
+    assert loop1.next == ("p01", Direction.Reverse, "outgoing", "right")
+    assert loop1.previous == ("p01", Direction.Reverse, "outgoing", "left")
     assert loop1.forwardUntil is None
     assert loop1.reverseUntil is None
 
     loop2 = m.sections["r02"]
-    assert loop2.next == ("p01", "forward", "incoming", "right")
-    assert loop2.previous == ("p01", "forward", "incoming", "left")
+    assert loop2.next == ("p01", Direction.Forward, "incoming", "right")
+    assert loop2.previous == ("p01", Direction.Forward, "incoming", "left")
     assert loop2.forwardUntil is None
     assert loop2.reverseUntil is None
 
@@ -341,16 +341,16 @@ def test_return_loops_back_to_back():
     assert points.next == points.outgoing
     assert points.previous == points.incoming
     assert points.outgoing.left.previous is None
-    assert points.outgoing.left.next == ("r01", "forward")
+    assert points.outgoing.left.next == ("r01", Direction.Forward)
     assert points.outgoing.right.previous is None
-    assert points.outgoing.right.next == ("r01", "reverse")
+    assert points.outgoing.right.next == ("r01", Direction.Reverse)
     assert points.outgoing.detector == ("RPi", 15)
     assert points.outgoing.selector == ("RPi", 25)
     assert points.incoming.detector == ("RPi", 16)
     assert points.incoming.selector == ("RPi", 27)
-    assert points.incoming.left.previous == ("r02", "forward")
+    assert points.incoming.left.previous == ("r02", Direction.Forward)
     assert points.incoming.left.next is None
-    assert points.incoming.right.previous == ("r02", "reverse")
+    assert points.incoming.right.previous == ("r02", Direction.Reverse)
     assert points.incoming.right.next is None
 
     assert m.relayPorts()["RPi"] == {23, 24, 26}
@@ -362,15 +362,15 @@ def test_return_loop():
     s = m.sections["s01"]
     assert s.name == "main branch"
     assert s.direction == ("RPi", 23)
-    assert s.next == ("p01", "forward")
+    assert s.next == ("p01", Direction.Forward)
     assert s.previous is None
     assert s.forwardUntil is None
     assert s.reverseUntil == ("RPi", 14)
 
     loop = m.sections["r01"]
     assert loop.direction == ("RPi", 24)
-    assert loop.next == ("p01", "reverse", "outgoing", "right")
-    assert loop.previous == ("p01", "reverse", "outgoing", "left")
+    assert loop.next == ("p01", Direction.Reverse, "outgoing", "right")
+    assert loop.previous == ("p01", Direction.Reverse, "outgoing", "left")
     assert loop.forwardUntil is None
     assert loop.reverseUntil is None
 
@@ -379,11 +379,11 @@ def test_return_loop():
     assert points.forwardUntil is None
     assert points.reverseUntil is None
     assert points.next == points.outgoing
-    assert points.previous == ("s01", "reverse")
+    assert points.previous == ("s01", Direction.Reverse)
     assert points.outgoing.left.previous is None
-    assert points.outgoing.left.next == ("r01", "forward")
+    assert points.outgoing.left.next == ("r01", Direction.Forward)
     assert points.outgoing.right.previous is None
-    assert points.outgoing.right.next == ("r01", "reverse")
+    assert points.outgoing.right.next == ("r01", Direction.Reverse)
     assert points.outgoing.detector == ("RPi", 15)
     assert points.outgoing.selector == ("RPi", 25)
     assert points.incoming is None
@@ -394,8 +394,8 @@ def test_opposing_points_loop():
 
     out = m.sections["p01"]
     assert out.next == out.outgoing
-    assert out.previous == ("p02", "forward", "incoming", "left")
+    assert out.previous == ("p02", Direction.Forward, "incoming", "left")
 
     inc = m.sections["p02"]
     assert inc.previous == inc.incoming
-    assert inc.next == ("p01", "reverse", "outgoing", "left")
+    assert inc.next == ("p01", Direction.Reverse, "outgoing", "left")

@@ -1,5 +1,7 @@
 import json
 
+from lib.directionController import Direction
+
 
 class Course:
     def __init__(self):
@@ -34,7 +36,7 @@ class Points(Section):
 class Model:
     @staticmethod
     def portFrom(p):
-        return (p["bank"], p["port"])
+        return p["bank"], p["port"]
 
     @staticmethod
     def _courseFrom(points, stage, selection):
@@ -43,7 +45,7 @@ class Model:
         if "until" in spec:
             c.forwardUntil = Model.portFrom(spec["until"])
         if "id" in spec:
-            direction = spec["direction"] if "direction" in spec else "forward"
+            direction = Direction.value_of(spec["direction"]) if "direction" in spec else Direction.Forward
             if stage == "outgoing":
                 c.next = (spec["id"], direction)
             else:
@@ -51,13 +53,13 @@ class Model:
         return c
 
     @staticmethod
-    def _nextSectionDirectionFrom(spec, direction):
-        sd = spec[direction]
+    def _nextSectionDirectionFrom(spec, direction: Direction):
+        sd = spec[direction.value]
         if "params" in sd and len(sd["params"]) > 1:
             stage = sd["params"][0]
-            direction = "reverse" if stage == "outgoing" else "forward"
-            return (sd["id"], direction, stage, sd["params"][1])
-        return (sd["id"], direction)
+            direction = Direction.Reverse if stage == "outgoing" else Direction.Forward
+            return sd["id"], direction, stage, sd["params"][1]
+        return sd["id"], direction
 
     def _points_course_detection(self, termination):
         if termination is not None:
@@ -86,9 +88,9 @@ class Model:
             if "next" in s and len(s["next"]) > 0:
                 n = s["next"]
                 if "forward" in n:
-                    section.next = Model._nextSectionDirectionFrom(n, "forward")
+                    section.next = Model._nextSectionDirectionFrom(n, Direction.Forward)
                 if "reverse" in n:
-                    section.previous = Model._nextSectionDirectionFrom(n, "reverse")
+                    section.previous = Model._nextSectionDirectionFrom(n, Direction.Reverse)
 
             if "until" in s:
                 u = s["until"]
@@ -125,6 +127,6 @@ class Model:
     def sectionFrom(self, portId):
         bank, i = tuple(portId.split("_"))
         for sId, s in self.sections.items():
-            if type(s) == Section and s.direction == (bank, int(i)):
+            if type(s) is Section and s.direction == (bank, int(i)):
                 return {"sId": sId, "section": s}
         return None

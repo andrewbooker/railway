@@ -1,5 +1,6 @@
 from lib.model import *
 from lib.routeIterator import RouteIterator, NavigationListener, PointsSelector
+from lib.directionController import Direction
 
 
 def openLayout(fileName):
@@ -41,15 +42,16 @@ def test_shuttle():
 
     assert listener.history == []
     nm.next()
-    assert listener.history == [("s01", "forward")]
+    assert listener.history == [("s01", Direction.Forward)]
     nm.next()
-    assert listener.history == [("s01", "forward"), ("s01", "reverse")]
+    assert listener.history == [("s01", Direction.Forward), ("s01", Direction.Reverse)]
     nm.next()
-    assert listener.history == [("s01", "forward"), ("s01", "reverse"), ("s01", "forward")]
+    assert listener.history == [("s01", Direction.Forward), ("s01", Direction.Reverse), ("s01", Direction.Forward)]
     nm.next()
-    assert listener.history == [("s01", "forward"), ("s01", "reverse"), ("s01", "forward"), ("s01", "reverse")]
+    assert listener.history == [("s01", Direction.Forward), ("s01", Direction.Reverse), ("s01", Direction.Forward), ("s01", Direction.Reverse)]
     nm.next()
-    assert listener.history == [("s01", "forward"), ("s01", "reverse"), ("s01", "forward"), ("s01", "reverse"), ("s01", "forward")]
+    assert listener.history == [("s01", Direction.Forward), ("s01", Direction.Reverse), ("s01", Direction.Forward), ("s01", Direction.Reverse), ("s01", Direction.Forward)]
+
 
 def test_single_loop():
     m = Model(openLayout("example-layouts/single-loop.json"))
@@ -57,20 +59,22 @@ def test_single_loop():
     nm = RouteIterator(m, listener, None)
 
     nm.next()
-    assert listener.history == [("s01", "forward")]
+    assert listener.history == [("s01", Direction.Forward)]
     nm.next()
-    assert listener.history == [("s01", "forward"), ("s01", "forward")]
+    assert listener.history == [("s01", Direction.Forward), ("s01", Direction.Forward)]
+
 
 def test_single_loop_reverse():
     m = Model(openLayout("example-layouts/single-loop.json"))
     listener = ReportingListener()
     nm = RouteIterator(m, listener, None)
-    nm.initialDirection("reverse")
+    nm.initialDirection(Direction.Reverse)
 
     nm.next()
-    assert listener.history == [("s01", "reverse")]
+    assert listener.history == [("s01", Direction.Reverse)]
     nm.next()
-    assert listener.history == [("s01", "reverse"), ("s01", "reverse")]
+    assert listener.history == [("s01", Direction.Reverse), ("s01", Direction.Reverse)]
+
 
 def test_two_stage_loop():
     m = Model(openLayout("example-layouts/two-stage-loop.json"))
@@ -78,26 +82,27 @@ def test_two_stage_loop():
     nm = RouteIterator(m, listener, None)
 
     nm.next()
-    assert listener.history == [("s01", "forward")]
+    assert listener.history == [("s01", Direction.Forward)]
     nm.next()
-    assert listener.history == [("s01", "forward"), ("s02", "forward")]
+    assert listener.history == [("s01", Direction.Forward), ("s02", Direction.Forward)]
     nm.next()
-    assert listener.history == [("s01", "forward"), ("s02", "forward"), ("s01", "forward")]
+    assert listener.history == [("s01", Direction.Forward), ("s02", Direction.Forward), ("s01", Direction.Forward)]
     nm.next()
-    assert listener.history == [("s01", "forward"), ("s02", "forward"), ("s01", "forward"), ("s02", "forward")]
+    assert listener.history == [("s01", Direction.Forward), ("s02", Direction.Forward), ("s01", Direction.Forward), ("s02", Direction.Forward)]
+
 
 def test_two_stage_loop_reverse():
     m = Model(openLayout("example-layouts/two-stage-loop.json"))
     listener = ReportingListener()
     nm = RouteIterator(m, listener, None)
-    nm.initialDirection("reverse")
+    nm.initialDirection(Direction.Reverse)
 
     nm.next()
-    assert listener.history == [("s01", "reverse")]
+    assert listener.history == [("s01", Direction.Reverse)]
     nm.next()
-    assert listener.history == [("s01", "reverse"), ("s02", "reverse")]
+    assert listener.history == [("s01", Direction.Reverse), ("s02", Direction.Reverse)]
     nm.next()
-    assert listener.history == [("s01", "reverse"), ("s02", "reverse"), ("s01", "reverse")]
+    assert listener.history == [("s01", Direction.Reverse), ("s02", Direction.Reverse), ("s01", Direction.Reverse)]
 
 
 def test_self_contained_points_forward_left():
@@ -108,23 +113,23 @@ def test_self_contained_points_forward_left():
     nm.next()
     assert listener.lastPoints == "p01"
     assert listener.history == [
-        ("p01", "forward"),
+        ("p01", Direction.Forward),
         ("outgoing points selection", "left")
     ]
     nm.next()
     assert listener.history == [
-        ("p01", "forward"),
+        ("p01", Direction.Forward),
         ("outgoing points selection", "left"),
         ("outgoing points condition", "left"),
-        ("p01", "reverse")
+        ("p01", Direction.Reverse)
     ]
     nm.next()
     assert listener.history == [
-        ("p01", "forward"),
+        ("p01", Direction.Forward),
         ("outgoing points selection", "left"),
         ("outgoing points condition", "left"),
-        ("p01", "reverse"),
-        ("p01", "forward"),
+        ("p01", Direction.Reverse),
+        ("p01", Direction.Forward),
         ("outgoing points selection", "left")
     ]
 
@@ -133,34 +138,34 @@ def test_self_contained_points_reverse_right():
     m = Model(openLayout("example-layouts/points-as-large-y.json"))
     listener = ReportingListener()
     nm = RouteIterator(m, listener, RightPointsSelector())
-    nm.initialDirection("reverse")
+    nm.initialDirection(Direction.Reverse)
 
     nm.next()
     assert listener.history == [
-        ("p01", "reverse")
+        ("p01", Direction.Reverse)
     ]
     nm.next()
     assert listener.history == [
-        ("p01", "reverse"),
-        ("p01", "forward"),
+        ("p01", Direction.Reverse),
+        ("p01", Direction.Forward),
         ("outgoing points selection", "right")
     ]
     nm.next()
     assert listener.history == [
-        ("p01", "reverse"),
-        ("p01", "forward"),
+        ("p01", Direction.Reverse),
+        ("p01", Direction.Forward),
         ("outgoing points selection", "right"),
         ("outgoing points condition", "right"),
-        ("p01", "reverse")
+        ("p01", Direction.Reverse)
     ]
     nm.next()
     assert listener.history == [
-        ("p01", "reverse"),
-        ("p01", "forward"),
+        ("p01", Direction.Reverse),
+        ("p01", Direction.Forward),
         ("outgoing points selection", "right"),
         ("outgoing points condition", "right"),
-        ("p01", "reverse"),
-        ("p01", "forward"),
+        ("p01", Direction.Reverse),
+        ("p01", Direction.Forward),
         ("outgoing points selection", "right")
     ]
 
@@ -172,38 +177,38 @@ def test_simple_fork_points_left():
 
     nm.next()
     assert listener.history == [
-        ("s01", "forward")
+        ("s01", Direction.Forward)
     ]
     nm.next()
     assert listener.history == [
-        ("s01", "forward"),
-        ("p01", "forward"),
+        ("s01", Direction.Forward),
+        ("p01", Direction.Forward),
         ("outgoing points selection", "left")
     ]
     nm.next()
     assert listener.history == [
-        ("s01", "forward"),
-        ("p01", "forward"),
+        ("s01", Direction.Forward),
+        ("p01", Direction.Forward),
         ("outgoing points selection", "left"),
-        ("s02", "forward")
+        ("s02", Direction.Forward)
     ]
     nm.next()
     assert listener.history == [
-        ("s01", "forward"),
-        ("p01", "forward"),
+        ("s01", Direction.Forward),
+        ("p01", Direction.Forward),
         ("outgoing points selection", "left"),
-        ("s02", "forward"),
-        ("s02", "reverse")
+        ("s02", Direction.Forward),
+        ("s02", Direction.Reverse)
     ]
     nm.next()
     assert listener.history == [
-        ("s01", "forward"),
-        ("p01", "forward"),
+        ("s01", Direction.Forward),
+        ("p01", Direction.Forward),
         ("outgoing points selection", "left"),
-        ("s02", "forward"),
-        ("s02", "reverse"),
+        ("s02", Direction.Forward),
+        ("s02", Direction.Reverse),
         ("outgoing points condition", "left"),
-        ("p01", "reverse")
+        ("p01", Direction.Reverse)
     ]
 
 
@@ -214,47 +219,47 @@ def test_simple_fork_incoming_points_left():
 
     nm.next()
     assert listener.history == [
-        ("s01", "forward")
+        ("s01", Direction.Forward)
     ]
     nm.next()
     assert listener.history == [
-        ("s01", "forward"),
-        ("s01", "reverse")
+        ("s01", Direction.Forward),
+        ("s01", Direction.Reverse)
     ]
     nm.next()
     assert listener.history == [
-        ("s01", "forward"),
-        ("s01", "reverse"),
-        ("p01", "reverse"),
+        ("s01", Direction.Forward),
+        ("s01", Direction.Reverse),
+        ("p01", Direction.Reverse),
         ("incoming points selection", "left")
     ]
     nm.next()
     assert listener.history == [
-        ("s01", "forward"),
-        ("s01", "reverse"),
-        ("p01", "reverse"),
+        ("s01", Direction.Forward),
+        ("s01", Direction.Reverse),
+        ("p01", Direction.Reverse),
         ("incoming points selection", "left"),
-        ("s02", "reverse")
+        ("s02", Direction.Reverse)
     ]
     nm.next()
     assert listener.history == [
-        ("s01", "forward"),
-        ("s01", "reverse"),
-        ("p01", "reverse"),
+        ("s01", Direction.Forward),
+        ("s01", Direction.Reverse),
+        ("p01", Direction.Reverse),
         ("incoming points selection", "left"),
-        ("s02", "reverse"),
-        ("s02", "forward")
+        ("s02", Direction.Reverse),
+        ("s02", Direction.Forward)
     ]
     nm.next()
     assert listener.history == [
-        ("s01", "forward"),
-        ("s01", "reverse"),
-        ("p01", "reverse"),
+        ("s01", Direction.Forward),
+        ("s01", Direction.Reverse),
+        ("p01", Direction.Reverse),
         ("incoming points selection", "left"),
-        ("s02", "reverse"),
-        ("s02", "forward"),
+        ("s02", Direction.Reverse),
+        ("s02", Direction.Forward),
         ("incoming points condition", "left"),
-        ("p01", "forward")
+        ("p01", Direction.Forward)
     ]
 
 
@@ -265,45 +270,45 @@ def test_return_loops_back_to_back_points_left():
 
     nm.next()
     assert listener.history == [
-        ("r01", "forward")
+        ("r01", Direction.Forward)
     ]
     nm.next()
     assert listener.history == [
-        ("r01", "forward"),
+        ("r01", Direction.Forward),
         ("outgoing points condition", "right"),
-        ("p01", "reverse"),
+        ("p01", Direction.Reverse),
         ("incoming points selection", "left")
     ]
     nm.next()
     assert listener.history == [
-        ("r01", "forward"),
+        ("r01", Direction.Forward),
         ("outgoing points condition", "right"),
-        ("p01", "reverse"),
+        ("p01", Direction.Reverse),
         ("incoming points selection", "left"),
-        ("r02", "forward")
+        ("r02", Direction.Forward)
     ]
     nm.next()
     assert listener.history == [
-        ("r01", "forward"),
+        ("r01", Direction.Forward),
         ("outgoing points condition", "right"),
-        ("p01", "reverse"),
+        ("p01", Direction.Reverse),
         ("incoming points selection", "left"),
-        ("r02", "forward"),
+        ("r02", Direction.Forward),
         ("incoming points condition", "right"),
-        ("p01", "forward"),
+        ("p01", Direction.Forward),
         ("outgoing points selection", "left")
     ]
     nm.next()
     assert listener.history == [
-        ("r01", "forward"),
+        ("r01", Direction.Forward),
         ("outgoing points condition", "right"),
-        ("p01", "reverse"),
+        ("p01", Direction.Reverse),
         ("incoming points selection", "left"),
-        ("r02", "forward"),
+        ("r02", Direction.Forward),
         ("incoming points condition", "right"),
-        ("p01", "forward"),
+        ("p01", Direction.Forward),
         ("outgoing points selection", "left"),
-        ("r01", "forward")
+        ("r01", Direction.Forward)
     ]
 
 
@@ -314,58 +319,58 @@ def test_return_loops_back_to_back_points_right():
 
     nm.next()
     assert listener.history == [
-        ("r01", "forward")
+        ("r01", Direction.Forward)
     ]
     nm.next()
     assert listener.history == [
-        ("r01", "forward"),
+        ("r01", Direction.Forward),
         ("outgoing points condition", "right"),
-        ("p01", "reverse"),
+        ("p01", Direction.Reverse),
         ("incoming points selection", "right")
     ]
     nm.next()
     assert listener.history == [
-        ("r01", "forward"),
+        ("r01", Direction.Forward),
         ("outgoing points condition", "right"),
-        ("p01", "reverse"),
+        ("p01", Direction.Reverse),
         ("incoming points selection", "right"),
-        ("r02", "reverse")
+        ("r02", Direction.Reverse)
     ]
     nm.next()
     assert listener.history == [
-        ("r01", "forward"),
+        ("r01", Direction.Forward),
         ("outgoing points condition", "right"),
-        ("p01", "reverse"),
+        ("p01", Direction.Reverse),
         ("incoming points selection", "right"),
-        ("r02", "reverse"),
+        ("r02", Direction.Reverse),
         ("incoming points condition", "left"),
-        ("p01", "forward"),
+        ("p01", Direction.Forward),
         ("outgoing points selection", "right"),
     ]
     nm.next()
     assert listener.history == [
-        ("r01", "forward"),
+        ("r01", Direction.Forward),
         ("outgoing points condition", "right"),
-        ("p01", "reverse"),
+        ("p01", Direction.Reverse),
         ("incoming points selection", "right"),
-        ("r02", "reverse"),
+        ("r02", Direction.Reverse),
         ("incoming points condition", "left"),
-        ("p01", "forward"),
+        ("p01", Direction.Forward),
         ("outgoing points selection", "right"),
-        ("r01", "reverse")
+        ("r01", Direction.Reverse)
     ]
     nm.next()
     assert listener.history == [
-        ("r01", "forward"),
+        ("r01", Direction.Forward),
         ("outgoing points condition", "right"),
-        ("p01", "reverse"),
+        ("p01", Direction.Reverse),
         ("incoming points selection", "right"),
-        ("r02", "reverse"),
+        ("r02", Direction.Reverse),
         ("incoming points condition", "left"),
-        ("p01", "forward"),
+        ("p01", Direction.Forward),
         ("outgoing points selection", "right"),
-        ("r01", "reverse"),
+        ("r01", Direction.Reverse),
         ("outgoing points condition", "left"),
-        ("p01", "reverse"),
+        ("p01", Direction.Reverse),
         ("incoming points selection", "right")
     ]

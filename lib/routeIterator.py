@@ -1,3 +1,5 @@
+from lib.directionController import Direction
+
 
 class NavigationListener:
     def connect(self, section, direction):
@@ -20,7 +22,7 @@ class RouteIterator:
         self.model = model
         self.listener = listener
         self.pointsSelector = pointsSelector
-        self.initialDir = "forward"
+        self.initialDir = Direction.Forward
         self.current = None
 
     def initialDirection(self, d):
@@ -28,18 +30,18 @@ class RouteIterator:
 
     @staticmethod
     def opposite(d):
-        return "reverse" if d == "forward" else "forward"
+        return Direction.Reverse if d == Direction.Forward else Direction.Forward
 
     @staticmethod
     def possibleNextSection(direction, section, sectionId, isPoints):
-        if direction == "forward" and section.next is not None:
+        if direction == Direction.Forward and section.next is not None:
             return section.next
-        if direction == "reverse" and section.previous is not None:
+        if direction == Direction.Reverse and section.previous is not None:
             return section.previous
-        if not isPoints and ((direction == "forward" and section.next is None) or (direction == "reverse" and section.previous is None)):
-            return (sectionId, RouteIterator.opposite(direction))
-        if (direction == "forward" and section.forwardUntil is not None) or (direction == "reverse" and section.reverseUntil is not None):
-            return (sectionId, RouteIterator.opposite(direction))
+        if not isPoints and ((direction == Direction.Forward and section.next is None) or (direction == Direction.Reverse and section.previous is None)):
+            return sectionId, RouteIterator.opposite(direction)
+        if (direction == Direction.Forward and section.forwardUntil is not None) or (direction == Direction.Reverse and section.reverseUntil is not None):
+            return sectionId, RouteIterator.opposite(direction)
         return None
 
     @staticmethod
