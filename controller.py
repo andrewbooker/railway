@@ -15,10 +15,6 @@ monitor = PowerMonitor()
 speed = Speed(rpi.pwmPort(12), monitor)
 
 
-def onPass(a, b):
-    monitor.setMessage("points %s %s" % (a, b))
-
-
 class UniversalDirectionController(DirectionController):
     def __init__(self, device: UsingArduino):
         DirectionController.__init__(self)
@@ -60,7 +56,10 @@ all_detectors = {
 }
 
 targets = [speed, Cmd(controller.onCmd)]
-targets.extend(Detector(rpi.input(p), d if d is not None else str(p), onPass) for p, d in all_detectors.items())
+targets.extend(
+    Detector(rpi.input(p), d if d is not None else str(p), lambda a, b: monitor.setMessage("%s %s" % (a, b)))
+    for p, d in all_detectors.items()
+)
 threads = [threading.Thread(target=t.start, args=(shouldStop,), daemon=True) for t in targets]
 [thread.start() for thread in threads]
 [thread.join() for thread in threads]
