@@ -3,7 +3,6 @@ import os
 from lib.monitor import PowerMonitor
 from lib.speed import Speed
 from application.commandBasedMotionController import CommandBasedMotionController
-from lib.detectors import Detector
 from lib.directionController import DirectionController, Direction
 from lib.rpiPorts import UsingRPi
 from lib.arduinoPorts import UsingArduino
@@ -31,22 +30,39 @@ class UniversalDirectionController(DirectionController):
             self.ports[p].set(0 if direction == Direction.Forward else 1)
 
 
+class Detector:
+    def __init__(self, port, pos, callback):
+        self.callback = callback
+        self.pos = pos
+        self.port = port
+        self.state = 0
+
+    def start(self):
+        while not shouldStop.is_set():
+            v = self.port.get()
+            if v != self.state:
+                self.callback(v, self.pos)
+                self.state = v
+            time.sleep(0.05)
+
+
 directionController = UniversalDirectionController(ard)
 controller = CommandBasedMotionController(speed, monitor.msg, 90, directionController)
 
-cmd = Cmd(controller.onCmd)
+all_detectors = {
+    14: "WEX incoming (South)",
+    15: "WEX outgoing (North)",
+    8: "North return loop",
+    21: None,
+    22: None,
+    23: None,
+    24: None,
+}
 
-
-targets = [
-    speed,
-    Detector(rpi.input(14), "WEX incoming (South)", onPass),  # optional because they happen to be on the layout. are not in layout.json
-    Detector(rpi.input(15), "WEX outgoing (North)", onPass),
-    cmd
-]
+targets = [speed, Cmd(controller.onCmd)]
+targets.extend(Detector(rpi.input(p), d if d is not None else str(p), onPass) for p, d in all_detectors.items())
 threads = [threading.Thread(target=t.start, args=(shouldStop,), daemon=True) for t in targets]
-
 [thread.start() for thread in threads]
 [thread.join() for thread in threads]
-
 del rpi
 del ard
