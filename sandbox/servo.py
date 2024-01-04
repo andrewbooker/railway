@@ -1,21 +1,14 @@
 #!/usr/bin/env python
 
-import sys
-import os
-parentDir = os.path.dirname(os.getcwd())
-if "railway" not in parentDir:
-    print("needs to run in sandbox")
-    exit()
-sys.path.append(parentDir)
+from _imports import *
 from lib.hardwarePoints import HardwarePoints
-from lib.rpiPorts import UsingRPi, ServoPwmPort
+from lib.rpiPorts import UsingRPi
 import time
 import random
 
 port = int(sys.argv[1])
-
 rpi = UsingRPi()
-points = HardwarePoints(rpi.servoPwmPort(port, HardwarePoints.LEFT))
+points = HardwarePoints(rpi, port)
 try:
     while True:
         time.sleep(3)

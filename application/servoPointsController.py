@@ -8,10 +8,11 @@ class ServoPointsController(PointsController):
     def __init__(self, ports: Ports, status: StatusComponent):
         self.ports = ports
         self.status = status
+        self.points = {}
 
     def set(self, port, s):
         self.status.setValue(f"setting points {port} to {s}")
-        points = HardwarePoints(self.ports.servoPwmPort(port, HardwarePoints.LEFT))
+        points = self.points.setdefault(port, HardwarePoints(self.ports, port))
         if s == "left":
             points.left()
         if s == "right":
