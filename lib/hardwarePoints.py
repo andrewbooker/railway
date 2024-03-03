@@ -2,8 +2,10 @@ from lib.ports import Ports
 
 
 class HardwarePoints:
-    LEFT = 9
-    RIGHT = 6
+    LEFT = 4
+    RIGHT = 7
+    #LEFT = 9
+    #RIGHT = 6 2
 
     def __init__(self, device: Ports, number: int):
         self.device = device.servoPwmPort(number, HardwarePoints.RIGHT)

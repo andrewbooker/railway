@@ -9,10 +9,18 @@ import random
 port = int(sys.argv[1])
 rpi = UsingRPi()
 points = HardwarePoints(rpi, port)
+
+lr = False
 try:
     while True:
-        time.sleep(3)
-        points.left() if random.random() > 0.5 else points.right()
+        time.sleep(2)
+        if not lr:
+            print("left")
+            points.left()
+        else:
+            print("right")
+            points.right()
+        lr = not lr
 
 except KeyboardInterrupt:
     del rpi
