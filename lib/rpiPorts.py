@@ -23,7 +23,7 @@ class ServoPwmPort(PwmPort):
 class Input:
     def __init__(self, port):
         self.port = port
-        GPIO.setup(self.port, GPIO.IN)
+        GPIO.setup(self.port, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
     def get(self):
         return GPIO.input(self.port)
