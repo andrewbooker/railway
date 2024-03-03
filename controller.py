@@ -33,7 +33,7 @@ class Detector:
         self.port = port
         self.state = 0
 
-    def start(self):
+    def start(self, shouldStop):
         while not shouldStop.is_set():
             v = self.port.get()
             if v != self.state:
@@ -50,8 +50,6 @@ all_detectors = {
     15: "WEX outgoing (North)",
     8: "North return loop",
     21: None,
-    22: None,
-    23: None,
     24: None,
 }
 

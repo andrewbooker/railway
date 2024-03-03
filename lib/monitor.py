@@ -89,7 +89,7 @@ class PowerStatusComponent(StatusComponent):
 class PowerMonitor:
     def __init__(self):
         self.renderer = StatusRenderer()
-        self.msg = TextStatusComponent(10)
+        self.msg = TextStatusComponent(48)
         self.status = TextStatusComponent(1)
         self.power = PowerStatusComponent()
         self.renderer.add(self.status).add(self.power).add(self.msg)
