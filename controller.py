@@ -55,6 +55,7 @@ all_detectors = {
     24: None,
 }
 
+
 targets = [speed, Cmd(controller.onCmd)]
 targets.extend(
     Detector(rpi.input(p), d if d is not None else str(p), lambda a, b: monitor.setMessage("%s %s" % (a, b)))
