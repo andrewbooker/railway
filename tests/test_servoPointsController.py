@@ -1,6 +1,7 @@
 from application.servoPointsController import ServoPointsController
 from lib.monitor import StatusComponent
 from lib.ports import Ports
+from lib.hardwarePoints import HardwarePoints
 
 
 class LocalPort:
@@ -30,11 +31,11 @@ def test_can_set_points_left():
     status = LocalStatus()
     ctrl = ServoPointsController(device, status)
 
-    ctrl.set(8, "left")
+    ctrl.set("device_8", "left")
 
-    assert status.msgs == ["setting points 8 to left"]
-    assert ctrl.points[8].val == 9
-    assert ctrl.points[8].device.value == 9
+    assert status.msgs == ["setting points device_8 to left", "registering points at device_8"]
+    assert ctrl.points["device_8"].val == HardwarePoints.LEFT
+    assert ctrl.points["device_8"].device.value == HardwarePoints.LEFT
 
 
 def test_can_set_points_right():
@@ -42,8 +43,8 @@ def test_can_set_points_right():
     status = LocalStatus()
     ctrl = ServoPointsController(device, status)
 
-    ctrl.set(8, "right")
+    ctrl.set("device_8", "right")
 
-    assert status.msgs == ["setting points 8 to right"]
-    assert ctrl.points[8].val == 6
-    assert ctrl.points[8].device.value == 6
+    assert status.msgs == ["setting points device_8 to right", "registering points at device_8"]
+    assert ctrl.points["device_8"].val == HardwarePoints.RIGHT
+    assert ctrl.points["device_8"].device.value == HardwarePoints.RIGHT

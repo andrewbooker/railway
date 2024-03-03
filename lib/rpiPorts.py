@@ -3,7 +3,7 @@ from lib.ports import Ports
 
 
 class PwmPort:
-    def __init__(self, port, f, initVal):
+    def __init__(self, port, f=100, initVal=0):
         GPIO.setup(port, GPIO.OUT, initial=GPIO.LOW)
         self.pwm = GPIO.PWM(port, f)
         self.pwm.start(initVal)
