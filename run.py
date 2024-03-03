@@ -2,6 +2,7 @@
 
 import sys
 import os
+import random
 from lib.routeIterator import RouteIterator, PointsSelector
 from lib.routeNavigator import *
 from lib.detectionRouter import DetectionRouter
