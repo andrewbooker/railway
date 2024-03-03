@@ -2,10 +2,14 @@ from application.trafficListener import TrafficListener
 from lib.detectionRouter import DetectionRouter
 from lib.ports import Ports
 
+class IgnoreStatus:
+    def setValue(self, ignore):
+        pass
+
 
 class DetectionRouterSpy(DetectionRouter):
     def __init__(self):
-        DetectionRouter.__init__(self)
+        DetectionRouter.__init__(self, IgnoreStatus())
         self.last_call = None
 
     def receiveUpdate(self, portId, value):

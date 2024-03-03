@@ -1,6 +1,11 @@
 from lib.detectionRouter import DetectionRouter
 
 
+class IgnoreStatus:
+    def setValue(self, ignore):
+        pass
+
+
 class Callback:
     def __init__(self):
         self.was_called = False
@@ -10,7 +15,7 @@ class Callback:
 
 
 def test_does_nothing_on_receipt_of_update_if_nothing_is_awaiting_that_port():
-    router = DetectionRouter()
+    router = DetectionRouter(IgnoreStatus())
     router.waitFor("dev_0", 9, "nothing")
     assert router.awaiting.keys() == {("dev_0", 9)}
 
@@ -21,7 +26,7 @@ def test_does_nothing_on_receipt_of_update_if_nothing_is_awaiting_that_port():
 
 
 def test_does_nothing_on_receipt_of_update_if_nothing_is_awaiting_that_value():
-    router = DetectionRouter()
+    router = DetectionRouter(IgnoreStatus())
     router.waitFor("dev_0", 9, "nothing")
 
     router.receiveUpdate("dev_0", 1)
@@ -31,7 +36,7 @@ def test_does_nothing_on_receipt_of_update_if_nothing_is_awaiting_that_value():
 
 
 def test_does_nothing_on_receipt_of_expected_update_if_no_callback_is_defined():
-    router = DetectionRouter()
+    router = DetectionRouter(IgnoreStatus())
     router.waitFor("dev_0", 2, "something")
 
     router.receiveUpdate("dev_0", 2)
@@ -41,7 +46,7 @@ def test_does_nothing_on_receipt_of_expected_update_if_no_callback_is_defined():
 def test_invokes_built_in_callback_on_receipt_of_update_it_is_waiting_for():
     callback = Callback()
 
-    router = DetectionRouter()
+    router = DetectionRouter(IgnoreStatus())
     router.setCallback(callback.cb)
     router.waitFor("dev_0", 2, "something")
 
@@ -54,7 +59,7 @@ def test_invokes_built_in_callback_on_receipt_of_update_it_is_waiting_for():
 def test_invokes_generated_callback_on_receipt_of_update_it_is_waiting_for():
     callback = Callback()
 
-    router = DetectionRouter()
+    router = DetectionRouter(IgnoreStatus())
     cb = router.waitFor("dev_0", 2, "something")
     cb.then(callback.cb)
 
@@ -65,7 +70,7 @@ def test_invokes_generated_callback_on_receipt_of_update_it_is_waiting_for():
 
 
 def test_does_nothing_if_internal_callback_is_expected_but_not_defined():
-    router = DetectionRouter()
+    router = DetectionRouter(IgnoreStatus())
 
     router.setNextDetector("dev_0", 2, "something")
     router.receiveUpdate("dev_0", 2)
@@ -75,7 +80,7 @@ def test_does_nothing_if_internal_callback_is_expected_but_not_defined():
 def test_invokes_internal_callback_on_receipt_of_update():
     callback = Callback()
 
-    router = DetectionRouter()
+    router = DetectionRouter(IgnoreStatus())
     router.setCallback(callback.cb)
     router.setNextDetector("dev_0", 2, "something")
 

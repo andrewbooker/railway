@@ -28,7 +28,7 @@ rpi = UsingRPi()
 ard = UsingArduino()
 monitor = PowerMonitor()
 pointsController = ServoPointsController(rpi, monitor.msg)
-detectionRouter = DetectionRouter()
+detectionRouter = DetectionRouter(monitor.msg)
 detectionListener = TrafficListener(detectionRouter)
 
 class RandomPointsSelector(PointsSelector):

@@ -51,11 +51,16 @@ class LocalMotionController(MotionController):
         self.changeDirectionCallback("RPi_23")
 
 
+class IgnoreStatus:
+    def setValue(self, ignore):
+        pass
+
+
 def startFrom(fileName):
     m = Model(openLayout(fileName))
 
     directionController = LocalDirectionController()
-    detectionListener = DetectionRouter()
+    detectionListener = DetectionRouter(IgnoreStatus())
     pointsController = LocalPointsController()
     navigator = RouteNavigator(m, directionController, detectionListener, pointsController, LocalMotionController())
     iterator = RouteIterator(m, navigator, LeftPointsSelector())

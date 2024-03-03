@@ -22,9 +22,10 @@ class DetectionListener:
 
 
 class DetectionRouter(DetectionListener):
-    def __init__(self):
+    def __init__(self, status):
         self.callback = None
         self.awaiting = {}
+        self.status = status
 
     def setCallback(self, c):
         cb = AndThen()
@@ -45,9 +46,11 @@ class DetectionRouter(DetectionListener):
             self.callback.exec()
 
     def setNextDetector(self, p, v, description):
+        self.status.setValue(f"awaiting {p} {v} ({description}) - not yet seen this called")
         self.awaiting[(p, v)] = (description, self.callback)
 
     def waitFor(self, p, v, description):
         cb = AndThen()
         self.awaiting[(p, v)] = (description, cb)
+        self.status.setValue(f"{description} {p} has value {v}")
         return cb
