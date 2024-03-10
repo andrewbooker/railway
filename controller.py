@@ -18,7 +18,7 @@ speed = Speed(rpi.pwmPort(12), monitor)
 class UniversalDirectionController(DirectionController):
     def __init__(self, device: UsingArduino):
         DirectionController.__init__(self)
-        self.ports = {p: device.output(p) for p in [41, 43, 45, 47]}  # [41, 48, 50, 51] can read these direct out of Model from layout.json
+        self.ports = {p: device.output(p) for p in [41, 43, 45, 47, 48, 50, 51]}  # [41, 48, 50, 51] can read these direct out of Model from layout.json
 
     def set(self, portId, direction: Direction):
         DirectionController.set(self, portId, direction)
@@ -49,8 +49,8 @@ all_detectors = {
     14: "WEX incoming (South)",
     15: "WEX outgoing (North)",
     8: "North return loop",
-    21: None,
-    24: None,
+    21: "Northern upper curve end",
+    24: "Southern upper curve end"
 }
 
 
