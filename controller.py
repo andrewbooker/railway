@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+import sys
 from lib.monitor import PowerMonitor
 from lib.speed import Speed
 from application.commandBasedMotionController import CommandBasedMotionController
@@ -41,9 +42,9 @@ class Detector:
                 self.state = v
             time.sleep(0.05)
 
-
+topSpeed = int(sys.argv[1]) if len(sys.argv) > 1 else 65
 directionController = UniversalDirectionController(ard)
-controller = CommandBasedMotionController(speed, monitor.msg, 90, directionController)
+controller = CommandBasedMotionController(speed, monitor.msg, topSpeed, directionController)
 
 all_detectors = {
     14: "WEX incoming (South)",
