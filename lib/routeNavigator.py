@@ -66,9 +66,9 @@ class RouteNavigator(NavigationListener):
             nextSection = self.model.sections[section.next[0]]
             if nextSection.__class__.__name__ == "Points":
                 pointsStage = RouteNavigator._nextPointsStage(direction, nextSection, section.next)
-                self.detectionListener.setNextDetector(RouteNavigator.portId(pointsStage.detector), 0, "from section to points")
+                self.detectionListener.setNextDetector(RouteNavigator.portId(pointsStage.detector), 1, "from section to points")
             elif section.__class__.__name__ == "Points" and section.outgoing is not None: # and section.incoming is None:
-                self.detectionListener.setNextDetector(RouteNavigator.portId(section.outgoing.detector), 1, "from points to next section")
+                self.detectionListener.setNextDetector(RouteNavigator.portId(section.outgoing.detector), 0, "from points to next section")
             return
         if direction == Direction.Reverse and section.previous is not None and section.previous.__class__.__name__ != "Stage":
             previousSection = self.model.sections[section.previous[0]]
