@@ -40,6 +40,10 @@ while not shouldStop.is_set():
     c = readchar.readchar()
     if c == "n":
         route_iterator.next()
+        section = model.sections[route_iterator.current[0]]
+        print("Current:", section.name)
+        print("Forward until:", section.forwardUntil)
+        print("Reverse until:", section.reverseUntil)
     if c == "q":
         shouldStop.set()
         exit()
