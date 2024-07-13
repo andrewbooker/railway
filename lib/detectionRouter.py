@@ -37,6 +37,7 @@ class DetectionRouter(DetectionListener):
         if k not in self.awaiting:
             return
 
+        self.status.setValue(f"{portId} has value {value}")
         (description, cb) = self.awaiting[k]
         del self.awaiting[k]
         if cb is not None and cb.canExec():
