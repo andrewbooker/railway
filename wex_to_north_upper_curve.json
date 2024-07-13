@@ -1,0 +1,40 @@
+[
+    {
+        "id": "WEX",
+        "name": "western expressway",
+        "until": {
+            "reverse": {
+                "bank": "RPi",
+                "port": 14
+            }
+        },
+        "direction": {
+            "bank": "arduino",
+            "port": 41
+        },
+        "next": {
+            "forward": {
+                "id": "NUC"
+            }
+        }
+    },
+    {
+        "id": "NUC",
+        "name": "north upper curve",
+        "direction": {
+            "bank": "arduino",
+            "port": 50
+        },
+        "next": {
+            "reverse": {
+                "id": "WEX"
+            }
+        },
+        "until": {
+            "forward": {
+                "bank": "RPi",
+                "port": 21
+            }
+        }
+    }
+]
