@@ -48,6 +48,9 @@ class RouteIterator:
             return "outgoing" if nextSection == section.outgoing else "incoming"
         return None
 
+    def startAtSection(self, sectionId):
+        self._proceedTo((sectionId, self.initialDir))
+
     def next(self):
         if self.current is None:
             for s in self.model.sections:

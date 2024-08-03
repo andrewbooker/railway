@@ -24,6 +24,8 @@ if len(sys.argv) < 2:
 with open(sys.argv[1], "r") as layoutSpec:
     layoutStr = layoutSpec.read()
 
+startingSectionId = sys.argv[2] if len(sys.argv) > 2 else None
+
 os.system("clear")
 rpi = UsingRPi()
 ard = UsingArduino()
@@ -41,8 +43,6 @@ class RandomPointsSelector(PointsSelector):
         self.status.setValue(f"selecting {s}")
         return s
 
-
-
 model = Model(layoutStr)
 detectionListener.registerInputDevices("arduino", ard)
 detectionListener.registerInputDevices("RPi", rpi)
@@ -59,7 +59,12 @@ navigator = RouteNavigator(model, directionRelays, detectionRouter, pointsContro
 iterator = RouteIterator(model, navigator, RandomPointsSelector(monitor.msg))
 detectionRouter.setCallback(iterator.next)
 
-monitor.msg.setValue("starting")
+if startingSectionId is not None:
+    iterator.startAtSection(startingSectionId)
+    monitor.msg.setValue(f"starting at {iterator.current[0]}")
+else:
+    monitor.msg.setValue("starting")
+
 iterator.next()
 cmd = Cmd(controller.onCmd)
 threadables = [
