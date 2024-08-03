@@ -1,6 +1,7 @@
 
 import threading
 import sys
+from datetime import datetime
 
 
 class StatusComponent:
@@ -56,7 +57,8 @@ class TextStatusComponent(StatusComponent):
         self.v = []
 
     def setValue(self, v):
-        self.v.append(v)
+        t = datetime.now().strftime("%H%M%S.%f")
+        self.v.append(f"{t} {v}")
         if len(self.v) > self.height():
             self.v.pop(0)
 
