@@ -23,7 +23,7 @@
         "name": "north ramp",
         "direction": {
             "bank": "arduino",
-            "port": 43
+            "port": 45
         },
         "next": {
             "reverse": {
