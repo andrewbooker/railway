@@ -20,3 +20,7 @@ for s in model.sections:
     print(type(section), section.name, section.direction)
 
 print(model.sectionFrom("arduino_41"))
+
+startingSectionId = sys.argv[2] if len(sys.argv) > 2 else None
+if startingSectionId:
+    print(model.sections[startingSectionId].name)
