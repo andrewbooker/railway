@@ -15,19 +15,30 @@ class LocalPointsController(PointsController):
 
 
 class LocalMotionController(MotionController):
+    def __init__(self):
+        self.direction_cb = None
+
     def withChangeDirectionCallback(self, cb):
-        print("executing direction change callback")
+        self.direction_cb = cb
+        print("callback captured")
 
     def onCheckpoint(self):
         print("reached checkpoint")
 
 
-class LocalDetectionListener(DetectionListener):
+class LocalDetection(DetectionListener):
+    def __init__(self):
+        self.waiting_for = dict()
+
     def setNextDetector(self, d, v, description):
-        print("setting next detector", d, v, description)
+        print("setting next detector", d, "waiting for state", v, f"navigating '{description}'")
+        self.waiting_for[d] = v
 
     def waitFor(self, d, state, description):
         print("waiting for", d, state, description)
+
+    def simulateAwaited(self):
+        pass
 
 
 layoutStr = None
@@ -36,7 +47,7 @@ with open(sys.argv[1], "r") as layoutSpec:
 
 model = Model(layoutStr)
 direction = DirectionController()
-detection = LocalDetectionListener()
+detection = LocalDetection()
 points = LocalPointsController()
 motion = LocalMotionController()
 
@@ -54,6 +65,9 @@ while not shouldStop.is_set():
     c = readchar.readchar()
     if c == "c":
         navigator.connect({"id": start_section}, Direction.Forward)
+
+    if c == "d":
+        detection.simulateAwaited()
 
     print("current direction:", direction.currentDirection(), "on", direction.currentPortId())
     if c == "q":
