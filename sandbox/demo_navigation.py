@@ -4,7 +4,7 @@ from _imports import *
 import threading
 import readchar
 from lib.model import Model
-from lib.detectionRouter import DetectionListener
+from lib.detectionRouter import DetectionRouter
 from lib.routeNavigator import RouteNavigator, MotionController, PointsController
 from lib.directionController import DirectionController, Direction
 
@@ -21,24 +21,16 @@ class LocalMotionController(MotionController):
     def withChangeDirectionCallback(self, cb):
         self.direction_cb = cb
         print("callback captured")
+        return self
 
     def onCheckpoint(self):
         print("reached checkpoint")
 
 
-class LocalDetection(DetectionListener):
-    def __init__(self):
-        self.waiting_for = dict()
+class StatusPrinter:
+    def setValue(self, v):
+        print(v)
 
-    def setNextDetector(self, d, v, description):
-        print("setting next detector", d, "waiting for state", v, f"navigating '{description}'")
-        self.waiting_for[d] = v
-
-    def waitFor(self, d, state, description):
-        print("waiting for", d, state, description)
-
-    def simulateAwaited(self):
-        pass
 
 
 layoutStr = None
@@ -47,7 +39,7 @@ with open(sys.argv[1], "r") as layoutSpec:
 
 model = Model(layoutStr)
 direction = DirectionController()
-detection = LocalDetection()
+detection = DetectionRouter(StatusPrinter())
 points = LocalPointsController()
 motion = LocalMotionController()
 
