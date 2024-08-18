@@ -63,10 +63,6 @@ class RouteIterator:
         nextSection = RouteIterator.possibleNextSection(direction, section, sectionId, isPoints)
         if nextSection is not None and nextSection.__class__.__name__ != "Stage":
             self._proceedTo(nextSection)
-            if direction == Direction.Forward and section.forwardUntil is None:
-                self.next()
-            if direction == Direction.Reverse and section.reverseUntil is None:
-                self.next()
 
         approachingConvergence = len(current) > 2
         currentStage = RouteIterator.currentStage(approachingConvergence, current, nextSection, section)
