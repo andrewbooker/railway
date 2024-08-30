@@ -66,7 +66,13 @@ else:
     monitor.msg.setValue("starting")
 
 iterator.next()
-cmd = Cmd(controller.onCmd)
+
+def localCommandHandler(c):
+    if c == 'c':
+        iterator.next()
+    controller.onCmd(c)
+
+cmd = Cmd(localCommandHandler)
 threadables = [
     speed,
     cmd,
