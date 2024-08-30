@@ -32,6 +32,14 @@ class StatusPrinter:
         print(v)
 
 
+def simulateReceivingAwaited(d):
+    for k in d.awaiting:
+        portId, val = k
+        d.receiveUpdate(portId, val)
+        return
+
+def callback():
+    print("Callback called upon detection")
 
 layoutStr = None
 with open(sys.argv[1], "r") as layoutSpec:
@@ -40,6 +48,7 @@ with open(sys.argv[1], "r") as layoutSpec:
 model = Model(layoutStr)
 direction = DirectionController()
 detection = DetectionRouter(StatusPrinter())
+detection.setCallback(callback)
 points = LocalPointsController()
 motion = LocalMotionController()
 
@@ -59,9 +68,10 @@ while not shouldStop.is_set():
         navigator.connect({"id": start_section}, Direction.Forward)
 
     if c == "d":
-        detection.simulateAwaited()
+        simulateReceivingAwaited(detection)
 
     print("current direction:", direction.currentDirection(), "on", direction.currentPortId())
+    print("current detection awaited:", detection.awaiting)
     if c == "q":
         shouldStop.set()
         exit()
