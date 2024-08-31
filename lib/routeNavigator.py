@@ -1,6 +1,6 @@
 
 from lib.detectionRouter import DetectionListener
-from lib.directionController import DirectionController, Direction
+from lib.directionController import DirectionController
 from lib.routeIterator import NavigationListener
 from lib.model import *
 
