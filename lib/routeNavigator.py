@@ -87,14 +87,14 @@ class RouteNavigator(NavigationListener):
         if stage == points.outgoing and self.directionController.currentDirection() == Direction.Reverse:
             self.detectionListener.setNextDetector(RouteNavigator.portId(stage.detector), 1, "traversing outgoing points to next section")
 
-    def setPointsTo(self, s, st, p):
+    def _setPoints(self, s, st, p, orientation):
         points = self.model.sections[p["id"]]
         stage = getattr(points, st)
         setPoints = lambda: self._traversePoints(points, stage, s)
-        self.detectionListener.waitFor(RouteNavigator.portId(stage.detector), 0, "selection (divergence)").then(setPoints)
+        self.detectionListener.waitFor(RouteNavigator.portId(stage.detector), 0, orientation).then(setPoints)
+
+    def setPointsTo(self, s, st, p):
+        self._setPoints(s, st, p, "selection (divergence)")
 
     def waitToSetPointsTo(self, s, st, p):
-        points = self.model.sections[p["id"]]
-        stage = getattr(points, st)
-        setPoints = lambda: self._traversePoints(points, stage, s)
-        self.detectionListener.waitFor(RouteNavigator.portId(stage.detector), 0, "condition (convergence)").then(setPoints)
+        self._setPoints(s, st, p, "condition (convergence)")
