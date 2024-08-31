@@ -9,13 +9,13 @@ def openLayout(fileName):
 
 
 class LeftPointsSelector(PointsSelector):
-    def select(self):
-        return "left"
+    def select(self) -> PointsSelection:
+        return PointsSelection.Left
 
 
 class RightPointsSelector(PointsSelector):
-    def select(self):
-        return "right"
+    def select(self) -> PointsSelection:
+        return PointsSelection.Right
 
 
 class ReportingListener(NavigationListener):
@@ -28,7 +28,7 @@ class ReportingListener(NavigationListener):
 
     def waitToSetPointsTo(self, s: PointsSelection, st, p, orientation: JunctionOrientation):
         action = orientation.value.split(" ")[0]
-        self.history.append((f"{st} points {action}", s))
+        self.history.append((f"{st} points {action}", s.value))
         self.lastPoints = p["id"]
 
 

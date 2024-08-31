@@ -6,6 +6,10 @@ class PointsSelection(Enum):
     Left = "left"
     Right = "right"
 
+    @staticmethod
+    def valueOf(s):
+        return PointsSelection.Left if s == PointsSelection.Left.value else PointsSelection.Right
+
 
 class JunctionOrientation(Enum):
     Convergence = "condition (convergence)"
@@ -21,7 +25,7 @@ class NavigationListener:
 
 
 class PointsSelector:
-    def select(self):
+    def select(self) -> PointsSelection:
         pass
 
 
@@ -93,7 +97,7 @@ class RouteIterator:
     def _approachDivergence(self, stage, direction, nextSection, sectionId):
         selection = self.pointsSelector.select()
         self.listener.waitToSetPointsTo(selection, stage, {"id": sectionId}, JunctionOrientation.Divergence)
-        course = getattr(nextSection, selection)
+        course = getattr(nextSection, selection.value)
         if stage == "outgoing":
             if course.next is not None:
                 self._proceedTo(course.next)

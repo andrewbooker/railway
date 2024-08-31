@@ -1,5 +1,5 @@
 import json
-
+from lib.routeIterator import PointsSelection
 from lib.directionController import Direction
 
 
@@ -58,7 +58,7 @@ class Model:
         if "params" in sd and len(sd["params"]) > 1:
             stage = sd["params"][0]
             direction = Direction.Reverse if stage == "outgoing" else Direction.Forward
-            return sd["id"], direction, stage, sd["params"][1]
+            return sd["id"], direction, stage, PointsSelection.valueOf(sd["params"][1])
         return sd["id"], direction
 
     def _points_course_detection(self, termination):

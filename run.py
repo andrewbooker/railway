@@ -3,7 +3,7 @@
 import sys
 import os
 import random
-from lib.routeIterator import RouteIterator, PointsSelector
+from lib.routeIterator import RouteIterator, PointsSelector, PointsSelection
 from lib.routeNavigator import *
 from lib.detectionRouter import DetectionRouter
 from lib.speed import Speed
@@ -15,7 +15,7 @@ from application.servoPointsController import ServoPointsController
 from application.commandBasedMotionController import CommandBasedMotionController
 from lib.arduinoPorts import UsingArduino
 from lib.model import Model
-from lib.rpiPorts import UsingRPi, ServoPwmPort
+from lib.rpiPorts import UsingRPi
 
 layoutStr = None
 if len(sys.argv) < 2:
@@ -34,14 +34,16 @@ pointsController = ServoPointsController(rpi, monitor.msg)
 detectionRouter = DetectionRouter(monitor.msg)
 detectionListener = TrafficListener(detectionRouter)
 
+
 class RandomPointsSelector(PointsSelector):
     def __init__(self, status):
         self.status = status
 
-    def select(self):
-        s = "left" if 0 != (int(random.random() * 10) % 2) else "right"
+    def select(self) -> PointsSelection:
+        s = PointsSelection.Left if 0 != (int(random.random() * 10) % 2) else PointsSelection.Right
         self.status.setValue(f"selecting {s}")
         return s
+
 
 model = Model(layoutStr)
 detectionListener.registerInputDevices("arduino", ard)
@@ -67,10 +69,12 @@ else:
 
 iterator.next()
 
+
 def localCommandHandler(c):
     if c == 'c':
         iterator.next()
     controller.onCmd(c)
+
 
 cmd = Cmd(localCommandHandler)
 threadables = [

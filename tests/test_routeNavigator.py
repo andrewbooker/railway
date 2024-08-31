@@ -10,8 +10,8 @@ def openLayout(fileName):
 
 
 class LeftPointsSelector(PointsSelector):
-    def select(self):
-        return "left"
+    def select(self) -> PointsSelection:
+        return PointsSelection.Left
 
 
 class LocalDirectionController(DirectionController):
@@ -33,10 +33,10 @@ class LocalPointsController(PointsController):
     def __init__(self):
         self.last3 = []
 
-    def set(self, pId, s):
+    def set(self, pId, s: PointsSelection):
         if len(self.last3) == 3:
             self.last3.pop(0)
-        self.last3.append((pId, s))
+        self.last3.append((pId, s.value))
 
 
 class LocalMotionController(MotionController):

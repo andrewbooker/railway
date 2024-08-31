@@ -5,23 +5,20 @@ import threading
 import readchar
 import random
 from lib.model import Model
-from lib.routeIterator import RouteIterator, NavigationListener, PointsSelector
+from lib.routeIterator import *
 
 
 class DescriptiveNavigationListener(NavigationListener):
-    def connect(self, section, direction):
-        print("connecting", section, direction)
+    def connect(self, sn, direction):
+        print("connecting", sn, direction)
 
-    def setPointsTo(self, s, st, p):
-        print("setting points", s, st, p)
-
-    def waitToSetPointsTo(self, s, st, p):
-        print("waiting to set points", s, st, p)
+    def waitToSetPointsTo(self, s: PointsSelection, st, p, o: JunctionOrientation):
+        print("waiting to set points", s, st, p, o)
 
 
 class RandomPointsSelector(PointsSelector):
     def select(self):
-        s = "left" if 0 != (int(random.random() * 10) % 2) else "right"
+        s = PointsSelection.Left if 0 != (int(random.random() * 10) % 2) else PointsSelection.Right
         print("selection required:", s)
         return s
 

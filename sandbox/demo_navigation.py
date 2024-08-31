@@ -10,8 +10,8 @@ from lib.directionController import DirectionController, Direction
 
 
 class LocalPointsController(PointsController):
-    def set(self, pId, s):
-        print(f"setting points {pId} to {s}")
+    def set(self, pId, selection):
+        print(f"setting points {pId} to {selection}")
 
 
 class LocalMotionController(MotionController):

@@ -1,4 +1,4 @@
-from lib.directionController import Direction
+from lib.routeIterator import PointsSelection
 from lib.model import *
 
 
@@ -146,7 +146,7 @@ def test_outgoing_points_with_siding_left():
     siding = m.sections["s01"]
     assert siding.name == "siding"
     assert siding.next is None
-    assert siding.previous == ("p01", Direction.Reverse, "outgoing", "left")
+    assert siding.previous == ("p01", Direction.Reverse, "outgoing", PointsSelection.Left)
     assert siding.direction == ("RPi", 27)
     assert siding.forwardUntil == ("RPi", 14)
     assert siding.reverseUntil is None
@@ -189,7 +189,7 @@ def test_simple_fork():
     assert left.name == "branch left"
     assert left.direction == ("RPi", 24)
     assert left.next is None
-    assert left.previous == ("p01", Direction.Reverse, "outgoing", "left")
+    assert left.previous == ("p01", Direction.Reverse, "outgoing", PointsSelection.Left)
     assert left.forwardUntil == ("RPi", 15)
     assert left.reverseUntil is None
 
@@ -197,7 +197,7 @@ def test_simple_fork():
     assert right.name == "branch right"
     assert right.direction == ("RPi", 25)
     assert right.next is None
-    assert right.previous == ("p01", Direction.Reverse, "outgoing", "right")
+    assert right.previous == ("p01", Direction.Reverse, "outgoing", PointsSelection.Right)
     assert right.forwardUntil == ("RPi", 16)
     assert right.reverseUntil is None
 
@@ -291,7 +291,7 @@ def test_incoming_points_with_siding_right():
 
     siding = m.sections["s01"]
     assert siding.name == "siding"
-    assert siding.next == ("p01", Direction.Forward, "incoming", "right")
+    assert siding.next == ("p01", Direction.Forward, "incoming", PointsSelection.Right)
     assert siding.previous is None
     assert siding.direction == ("RPi", 27)
     assert siding.forwardUntil is None
@@ -324,14 +324,14 @@ def test_return_loops_back_to_back():
     m = Model(openLayout("example-layouts/return-loops-back-to-back.json"))
 
     loop1 = m.sections["r01"]
-    assert loop1.next == ("p01", Direction.Reverse, "outgoing", "right")
-    assert loop1.previous == ("p01", Direction.Reverse, "outgoing", "left")
+    assert loop1.next == ("p01", Direction.Reverse, "outgoing", PointsSelection.Right)
+    assert loop1.previous == ("p01", Direction.Reverse, "outgoing", PointsSelection.Left)
     assert loop1.forwardUntil is None
     assert loop1.reverseUntil is None
 
     loop2 = m.sections["r02"]
-    assert loop2.next == ("p01", Direction.Forward, "incoming", "right")
-    assert loop2.previous == ("p01", Direction.Forward, "incoming", "left")
+    assert loop2.next == ("p01", Direction.Forward, "incoming", PointsSelection.Right)
+    assert loop2.previous == ("p01", Direction.Forward, "incoming", PointsSelection.Left)
     assert loop2.forwardUntil is None
     assert loop2.reverseUntil is None
 
@@ -369,8 +369,8 @@ def test_return_loop():
 
     loop = m.sections["r01"]
     assert loop.direction == ("RPi", 24)
-    assert loop.next == ("p01", Direction.Reverse, "outgoing", "right")
-    assert loop.previous == ("p01", Direction.Reverse, "outgoing", "left")
+    assert loop.next == ("p01", Direction.Reverse, "outgoing", PointsSelection.Right)
+    assert loop.previous == ("p01", Direction.Reverse, "outgoing", PointsSelection.Left)
     assert loop.forwardUntil is None
     assert loop.reverseUntil is None
 
@@ -394,8 +394,8 @@ def test_opposing_points_loop():
 
     out = m.sections["p01"]
     assert out.next == out.outgoing
-    assert out.previous == ("p02", Direction.Forward, "incoming", "left")
+    assert out.previous == ("p02", Direction.Forward, "incoming", PointsSelection.Left)
 
     inc = m.sections["p02"]
     assert inc.previous == inc.incoming
-    assert inc.next == ("p01", Direction.Reverse, "outgoing", "left")
+    assert inc.next == ("p01", Direction.Reverse, "outgoing", PointsSelection.Left)
