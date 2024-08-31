@@ -7,14 +7,16 @@ class PointsSelection(Enum):
     Right = "right"
 
 
+class JunctionOrientation(Enum):
+    Convergence = "condition (convergence)"
+    Divergence = "selection (divergence)"
+
+
 class NavigationListener:
     def connect(self, section, direction):
         pass
 
-    def setPointsTo(self, selection: PointsSelection, st, p):
-        pass
-
-    def waitToSetPointsTo(self, selection: PointsSelection, st, p):
+    def waitToSetPointsTo(self, selection: PointsSelection, st, p, orientation: JunctionOrientation):
         pass
 
 
@@ -78,7 +80,7 @@ class RouteIterator:
             return
 
         if approachingConvergence:
-            self.listener.waitToSetPointsTo(current[3], currentStage, {"id": sectionId})
+            self.listener.waitToSetPointsTo(current[3], currentStage, {"id": sectionId}, JunctionOrientation.Convergence)
             self.listener.connect({"id": sectionId}, direction)
             if nextSection.__class__.__name__ == "Stage":
                 nextStage = "incoming" if nextSection == section.incoming else "outgoing"
@@ -90,7 +92,7 @@ class RouteIterator:
 
     def _approachDivergence(self, stage, direction, nextSection, sectionId):
         selection = self.pointsSelector.select()
-        self.listener.setPointsTo(selection, stage, {"id": sectionId})
+        self.listener.waitToSetPointsTo(selection, stage, {"id": sectionId}, JunctionOrientation.Divergence)
         course = getattr(nextSection, selection)
         if stage == "outgoing":
             if course.next is not None:

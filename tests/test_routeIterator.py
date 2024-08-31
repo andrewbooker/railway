@@ -1,5 +1,5 @@
 from lib.model import *
-from lib.routeIterator import RouteIterator, NavigationListener, PointsSelector
+from lib.routeIterator import *
 from lib.directionController import Direction
 
 
@@ -26,12 +26,9 @@ class ReportingListener(NavigationListener):
     def connect(self, section, direction):
         self.history.append((section["id"], direction))
 
-    def setPointsTo(self, s, st, p):
-        self.history.append(("%s points selection" % st, s))
-        self.lastPoints = (p["id"])
-
-    def waitToSetPointsTo(self, s, st, p):
-        self.history.append(("%s points condition" % st, s))
+    def waitToSetPointsTo(self, s: PointsSelection, st, p, orientation: JunctionOrientation):
+        action = orientation.value.split(" ")[0]
+        self.history.append((f"{st} points {action}", s))
         self.lastPoints = p["id"]
 
 
