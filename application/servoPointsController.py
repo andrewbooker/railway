@@ -2,6 +2,7 @@ from lib.hardwarePoints import HardwarePoints
 from lib.monitor import StatusComponent
 from lib.ports import Ports
 from lib.routeNavigator import PointsController
+from lib.routeIterator import PointsSelection
 
 
 class ServoPointsController(PointsController):
@@ -10,15 +11,15 @@ class ServoPointsController(PointsController):
         self.status = status
         self.points = dict()
 
-    def set(self, port, s):
-        self.status.setValue(f"setting points {port} to {s}")
+    def set(self, port, s: PointsSelection):
+        self.status.setValue(f"setting points {port} to {s.name}")
         if port not in self.points:
             self.status.setValue(f"registering points at {port}")
             port_number = int(port.split("_")[1])
             self.points[port] = HardwarePoints(self.ports, port_number)
 
         points = self.points[port]
-        if s == "left":
+        if s == PointsSelection.Left:
             points.left()
-        if s == "right":
+        if s == PointsSelection.Right:
             points.right()

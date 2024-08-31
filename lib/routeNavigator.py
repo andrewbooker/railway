@@ -1,12 +1,12 @@
 
 from lib.detectionRouter import DetectionListener
 from lib.directionController import DirectionController
-from lib.routeIterator import NavigationListener
+from lib.routeIterator import NavigationListener, PointsSelection
 from lib.model import *
 
 
 class PointsController:
-    def set(self, pId, s):
+    def set(self, pId, s: PointsSelection):
         pass
 
 
@@ -78,7 +78,7 @@ class RouteNavigator(NavigationListener):
             elif section.__class__.__name__ == "Points" and section.incoming is not None:  #and section.outgoing is None:
                 self.detectionListener.setNextDetector(RouteNavigator.portId(getattr(section, "incoming").detector), 1, "from points to next section")
 
-    def _setPoints(self, selection, st, p, orientation):
+    def _setPoints(self, selection: PointsSelection, st, p, orientation):
         points = self.model.sections[p["id"]]
         stage = getattr(points, st)
 
@@ -92,8 +92,8 @@ class RouteNavigator(NavigationListener):
                 self.detectionListener.setNextDetector(RouteNavigator.portId(stage.detector), 1, "traversing outgoing points to next section")
         self.detectionListener.waitFor(RouteNavigator.portId(stage.detector), 0, orientation).then(setPoints)
 
-    def setPointsTo(self, selection, st, p):
+    def setPointsTo(self, selection: PointsSelection, st, p):
         self._setPoints(selection, st, p, "selection (divergence)")
 
-    def waitToSetPointsTo(self, selection, st, p):
+    def waitToSetPointsTo(self, selection: PointsSelection, st, p):
         self._setPoints(selection, st, p, "condition (convergence)")

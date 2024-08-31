@@ -1,14 +1,20 @@
 from lib.directionController import Direction
+from enum import Enum
+
+
+class PointsSelection(Enum):
+    Left = "left"
+    Right = "right"
 
 
 class NavigationListener:
     def connect(self, section, direction):
         pass
 
-    def setPointsTo(self, s, st, p):
+    def setPointsTo(self, selection: PointsSelection, st, p):
         pass
 
-    def waitToSetPointsTo(self, s, st, p):
+    def waitToSetPointsTo(self, selection: PointsSelection, st, p):
         pass
 
 
