@@ -1,7 +1,7 @@
 
 from lib.detectionRouter import DetectionListener
 from lib.directionController import DirectionController
-from lib.routeIterator import NavigationListener, PointsSelection, JunctionOrientation
+from lib.navigation import NavigationListener, PointsSelection, JunctionOrientation
 from lib.model import *
 
 

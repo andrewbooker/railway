@@ -3,7 +3,8 @@
 import sys
 import os
 import random
-from lib.routeIterator import RouteIterator, PointsSelector, PointsSelection
+from lib.routeIterator import RouteIterator
+from lib.navigation import *
 from lib.routeNavigator import *
 from lib.detectionRouter import DetectionRouter
 from lib.speed import Speed

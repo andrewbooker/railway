@@ -1,5 +1,6 @@
-from lib.model import *
-from lib.routeIterator import *
+from lib.routeIterator import RouteIterator
+from lib.navigation import *
+from lib.model import Model
 from lib.directionController import Direction
 
 

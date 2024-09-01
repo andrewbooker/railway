@@ -1,4 +1,3 @@
-from lib.routeIterator import PointsSelection
 from lib.model import *
 
 

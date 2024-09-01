@@ -5,7 +5,8 @@ import threading
 import readchar
 import random
 from lib.model import Model
-from lib.routeIterator import *
+from lib.routeIterator import RouteIterator
+from lib.navigation import *
 
 
 class DescriptiveNavigationListener(NavigationListener):

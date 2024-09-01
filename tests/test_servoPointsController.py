@@ -2,7 +2,7 @@ from application.servoPointsController import ServoPointsController
 from lib.monitor import StatusComponent
 from lib.ports import Ports
 from lib.hardwarePoints import HardwarePoints
-from lib.routeIterator import PointsSelection
+from lib.navigation import PointsSelection
 
 
 class LocalPort:

@@ -1,4 +1,5 @@
-from lib.routeIterator import *
+from lib.routeIterator import RouteIterator
+from lib.navigation import *
 from lib.routeNavigator import *
 from lib.detectionRouter import *
 from lib.directionController import Direction
