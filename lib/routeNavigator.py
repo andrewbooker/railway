@@ -68,7 +68,7 @@ class RouteNavigator(NavigationListener):
             if nextSection.__class__.__name__ == "Points":
                 pointsStage = RouteNavigator._nextPointsStage(direction, nextSection, section.next)
                 self.detectionListener.setNextDetector(RouteNavigator.portId(pointsStage.detector), 0, "from section to points")
-            elif section.__class__.__name__ == "Points" and section.outgoing is not None: # and section.incoming is None:
+            elif section.__class__.__name__ == "Points" and section.outgoing is not None:  # and section.incoming is None:
                 self.detectionListener.setNextDetector(RouteNavigator.portId(section.outgoing.detector), 1, "from points to next section")
             return
         if direction == Direction.Reverse and section.previous is not None and section.previous.__class__.__name__ != "Stage":
@@ -76,7 +76,7 @@ class RouteNavigator(NavigationListener):
             if previousSection.__class__.__name__ == "Points":
                 pointsStage = RouteNavigator._nextPointsStage(direction, previousSection, section.previous)
                 self.detectionListener.setNextDetector(RouteNavigator.portId(pointsStage.detector), 0, "from section to points")
-            elif section.__class__.__name__ == "Points" and section.incoming is not None:  #and section.outgoing is None:
+            elif section.__class__.__name__ == "Points" and section.incoming is not None:  # and section.outgoing is None:
                 self.detectionListener.setNextDetector(RouteNavigator.portId(section.incoming.detector), 1, "from points to next section")
 
     def waitToSetPointsTo(self, selection: PointsSelection, st, p, orientation: JunctionOrientation):

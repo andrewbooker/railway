@@ -79,10 +79,11 @@ def test_forwards_on_basic_section():
     assert directionController.last3 == [("RPi_23", Direction.Forward)]
     assert {k for k in detectionListener.awaiting} == {expected_forward_until}
     assert detectionListener.awaiting[expected_forward_until][0] == "forwardUntil"
+    assert detectionListener.awaiting[expected_forward_until][1].m == motionController.onCheckpoint
 
 
 def test_reverse_on_basic_section():
-    navigator, detectionListener, directionController, motionContoller, _ = startFrom("example-layouts/shuttle.json")
+    navigator, detectionListener, directionController, _, _ = startFrom("example-layouts/shuttle.json")
 
     expected_reverse_until = ("arduino_53", 1)
     navigator.connect({"id": "s01"}, Direction.Reverse)
@@ -95,9 +96,10 @@ def test_reverse_on_basic_section():
     assert detectionListener.awaiting[expected_reverse_until][0] == "reverseUntil"
 
 
-def test_changing_direction_on_basic_section():
+def test_changing_direction_on_basic_section_leaves_both_detectors_active():
     navigator, detectionListener, directionController, _, _ = startFrom("example-layouts/shuttle.json")
 
+    expected_forward_until = ("arduino_52", 1)
     expected_reverse_until = ("arduino_53", 1)
     navigator.connect({"id": "s01"}, Direction.Forward)
     navigator.toggleDirection("RPi_23")
@@ -105,5 +107,17 @@ def test_changing_direction_on_basic_section():
     assert directionController.currentDirection() == Direction.Reverse
     assert directionController.currentPortId() == "RPi_23"
     assert directionController.last3 == [("RPi_23", Direction.Forward), ("RPi_23", Direction.Reverse)]
-    assert expected_reverse_until in {k for k in detectionListener.awaiting}
+    assert {expected_forward_until, expected_reverse_until} == {k for k in detectionListener.awaiting}
+    assert detectionListener.awaiting[expected_forward_until][0] == "forwardUntil"
     assert detectionListener.awaiting[expected_reverse_until][0] == "reverseUntil"
+
+
+def test_left_arm_of_a_set_of_points():
+    navigator, detectionListener, directionController, motionController, pointsController = startFrom("example-layouts/simple-fork.json")
+    assert len(detectionListener.awaiting) == 0
+
+    navigator.connect({"id": "s01"}, Direction.Forward)
+    assert directionController.last3 == [("RPi_23", Direction.Forward)]
+    assert {a for a in detectionListener.awaiting} == {("RPi_17", 0)}
+    assert detectionListener.awaiting[("RPi_17", 0)][0] == "from section to points"
+
