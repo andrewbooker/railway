@@ -2,7 +2,8 @@
 from lib.detectionRouter import DetectionListener
 from lib.directionController import DirectionController
 from lib.navigation import NavigationListener, PointsSelection, JunctionOrientation
-from lib.model import *
+from lib.model import Model
+from lib.directionController import Direction
 
 
 class PointsController:
@@ -76,7 +77,7 @@ class RouteNavigator(NavigationListener):
                 pointsStage = RouteNavigator._nextPointsStage(direction, previousSection, section.previous)
                 self.detectionListener.setNextDetector(RouteNavigator.portId(pointsStage.detector), 0, "from section to points")
             elif section.__class__.__name__ == "Points" and section.incoming is not None:  #and section.outgoing is None:
-                self.detectionListener.setNextDetector(RouteNavigator.portId(getattr(section, "incoming").detector), 1, "from points to next section")
+                self.detectionListener.setNextDetector(RouteNavigator.portId(section.incoming.detector), 1, "from points to next section")
 
     def waitToSetPointsTo(self, selection: PointsSelection, st, p, orientation: JunctionOrientation):
         points = self.model.sections[p["id"]]
