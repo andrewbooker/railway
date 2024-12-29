@@ -63,7 +63,7 @@ def startFrom(fileName):
     return navigator, detectionListener, directionController, motionController, pointsController
 
 
-def test_forwards_on_basic_section():
+def test_forwards_on_standalone_section():
     navigator, detectionListener, directionController, motionController, pointsController = startFrom("example-layouts/shuttle.json")
     assert directionController.last3 == []
     assert detectionListener.awaiting == {}
@@ -117,7 +117,17 @@ def test_left_arm_of_a_set_of_points():
     assert len(detectionListener.awaiting) == 0
 
     navigator.connect({"id": "s01"}, Direction.Forward)
+
     assert directionController.last3 == [("RPi_23", Direction.Forward)]
     assert {a for a in detectionListener.awaiting} == {("RPi_17", 0)}
     assert detectionListener.awaiting[("RPi_17", 0)][0] == "from section to points"
 
+
+def test_reversing_from_set_of_points():
+    navigator, detectionListener, directionController, motionController, pointsController = startFrom("example-layouts/simple-fork.json")
+    assert len(detectionListener.awaiting) == 0
+
+    navigator.connect({"id": "s01"}, Direction.Reverse)
+
+    assert directionController.last3 == [("RPi_23", Direction.Reverse)]
+    assert {a for a in detectionListener.awaiting} == {("RPi_14", 1)}
